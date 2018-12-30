@@ -1,0 +1,4 @@
+name: MXBukkitLib
+anthor: [GYHHY]
+version: 0.1
+main: cn.mcres.gyhhy.MXLib.bukkit.Plugin
