@@ -40,7 +40,7 @@ public class Executer implements org.bukkit.command.CommandExecutor, org.bukkit.
         return true;
     }
     Map<String, SubCommandEX> mmp;
-
+    public Map<String,SubCommandEX> getSubs(){return mmp;}
     public void reg(String a, SubCommandEX b) {
         mmp.put(a.toLowerCase(), b);
     }
