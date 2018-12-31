@@ -13,9 +13,19 @@ import java.util.List;
  * @author 32798
  */
 public class CommandHelper {
+
     private static final CommandHelper helper = new CommandHelper();
-    public String get(String[] args,int index){return getArg(args,index);}
+
+    public String get(String[] args, int index) {
+        return getArg(args, index);
+    }
+
     public List<String> format(List<String> list, String last) {
+        return format(list, last, false);
+    }
+
+    public List<String> format(List<String> list, String last, boolean cast) {
+        String llx = last;
         last = last.toLowerCase();// 转为小写
         for (int i = 0; i < list.size(); i++) { //最好时候原始的 int 循环
             String val = list.get(i);
@@ -24,15 +34,26 @@ public class CommandHelper {
                 i--;
             }
         }
-        if(!list.contains(last)){
-            list.add(last);
+        if (cast) {
+            if (!list.contains(last)) {
+                list.add(last);
+            }
+            last = last.toUpperCase();
+            if (!list.contains(last)) {
+                list.add(last);
+            }
+        }
+        if (!list.contains(llx)) {
+            list.add(llx);
         }
         java.util.Collections.sort(list); // 排序
         return list;
     }
-    public String getArg(String[] args,int index){
+
+    public String getArg(String[] args, int index) {
         return StringHelper.get(args, index);
     }
+
     public static CommandHelper getHelper() {
         return helper;
     }
