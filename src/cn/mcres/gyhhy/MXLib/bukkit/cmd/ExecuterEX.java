@@ -14,6 +14,23 @@ import org.bukkit.command.CommandSender;
  */
 public class ExecuterEX extends Executer {
 
+    private SubCommandEX $defexec;
+    private SubCommandEX $nosub;
+
+    public void reg(String a, SubCommandEX b) {
+        switch (a) {
+            case Variable.COMMAND_CMD_DEF: {
+                $defexec = b;
+                return;
+            }
+            case Variable.COMMAND_NOSUB: {
+                $nosub = b;
+                return;
+            }
+        }
+        super.reg(a, b);
+    }
+
     private String per;
 
     public ExecuterEX(Class cx) {
@@ -26,7 +43,7 @@ public class ExecuterEX extends Executer {
         }
         Command ec = (Command) anc;
         setPermission(ec.permission());
-
+        reg("help",new SubCommandHelp());
     }
 
     public String getPermission() {
@@ -38,8 +55,12 @@ public class ExecuterEX extends Executer {
     }
 
     @Override
-    protected boolean nosub(CommandSender sender, String ali, String[] argc) {
-        defexec(sender, ali);
+    protected boolean nosub(CommandSender sender, org.bukkit.command.Command cmd, String ali, String[] argc) {
+        if (this.$nosub != null) {
+            return this.$nosub.exec(sender, cmd, ali, argc, this);
+        } else {
+            defexec(sender, cmd, ali, argc);
+        }
         return true; //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -56,8 +77,12 @@ public class ExecuterEX extends Executer {
     }
 
     @Override
-    protected boolean defexec(CommandSender sender, String ali) {
-        sender.sendMessage("\u00a7cPlease use \"/" + ali + " help\" to get help.");
+    protected boolean defexec(CommandSender sender, org.bukkit.command.Command cmd, String ali, String[] argc) {
+        if (this.$defexec != null) {
+            return this.$defexec.exec(sender, cmd, ali, argc, this);
+        } else {
+            sender.sendMessage("\u00a7cPlease use \"/" + ali + " help\" to get help.");
+        }
         return true; //To change body of generated methods, choose Tools | Templates.
     }
 

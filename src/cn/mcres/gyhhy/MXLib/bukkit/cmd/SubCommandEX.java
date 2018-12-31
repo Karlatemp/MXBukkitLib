@@ -20,22 +20,30 @@ import org.bukkit.entity.Player;
  * @author 32798
  */
 public class SubCommandEX {
-
+    SubCommandEX(){}
+    
     private boolean empc = false;
     private boolean puexec = false;
     private boolean req = false;
     private boolean reqx = false;
+    private boolean norem = false;
 
     private int ali = -1;
     private int send = -1;
     private int argc = -1;
 
     private Class<? extends CommandSender> st;
-    private SubCommand sc;
+    SubCommand sc;
     private Object thiz;
     private Method exec;
-    private void setup(Method met){
+
+    public SubCommand getSC() {
+        return sc;
+    }
+
+    private void setup(Method met) {
 //        this.thiz = thiz;
+        this.norem = sc.noRemoveFirstArg();
         puexec = Modifier.isPublic(met.getModifiers());
         if (!Modifier.isStatic(met.getModifiers()) && thiz == null) {
             throw new java.lang.NullPointerException("No \"this\" object and method isnot static method.");
@@ -95,28 +103,31 @@ public class SubCommandEX {
             }
         }
     }
-    public SubCommandEX(Method met,Object thiz){
-        if(met == null)
+
+    public SubCommandEX(Method met, Object thiz) {
+        if (met == null) {
             throw new java.lang.NullPointerException("Method cannot be null.");
+        }
         Annotation sx = met.getAnnotation(SubCommand.class);
-        if(sx == null){
+        if (sx == null) {
             sx = met.getDeclaringClass().getAnnotation(SubCommand.class);
         }
         if (sx == null) {
-            throw new java.lang.NullPointerException(met+" No SubCommand Annotation.");
+            throw new java.lang.NullPointerException(met + " No SubCommand Annotation.");
         }
         SubCommand sb = (SubCommand) sx;
         this.sc = sb;
         this.thiz = thiz;
         setup(met);
     }
+
     public SubCommandEX(Class cl, Method met, Object thiz) {
         if (cl == null || met == null) {
             throw new java.lang.NullPointerException("Class or Method cannot be null.");
         }
         Annotation sx = cl.getAnnotation(SubCommand.class);
         if (sx == null) {
-            throw new java.lang.NullPointerException(cl+" No SubCommand Annotation.");
+            throw new java.lang.NullPointerException(cl + " No SubCommand Annotation.");
         }
         SubCommand sb = (SubCommand) sx;
         this.sc = sb;
@@ -128,7 +139,15 @@ public class SubCommandEX {
         if (check(sender, exev)) {
             if (empc) {
                 try {
-                    Object rq = exec.invoke(thiz);
+                    Object rq;
+                    if (puexec) {
+                        rq = exec.invoke(thiz);
+                    } else {
+                        boolean od = exec.isAccessible();
+                        exec.setAccessible(true);
+                        rq = exec.invoke(thiz);
+                        exec.setAccessible(od);
+                    }
                     if (reqx) {
                         return (boolean) rq;
                     }
@@ -144,8 +163,13 @@ public class SubCommandEX {
                     argv[this.ali] = ali;
                 }
                 if (this.argc != -1) {
-                    String[] temp = new String[argc.length - 1];
-                    System.arraycopy(argc, 1, temp, 0, temp.length);
+                    String[] temp;
+                    if (norem || argc.length == 0) {
+                        temp = argc;
+                    } else {
+                        temp = new String[argc.length - 1];
+                        System.arraycopy(argc, 1, temp, 0, temp.length);
+                    }
                     argv[this.argc] = temp;
                 }
                 if (this.send != -1) {
@@ -153,7 +177,15 @@ public class SubCommandEX {
                 }
 
                 try {
-                    Object rq = exec.invoke(thiz, argv);
+                    Object rq;
+                    if (puexec) {
+                        rq = exec.invoke(thiz, argv);
+                    } else {
+                        boolean od = exec.isAccessible();
+                        exec.setAccessible(true);
+                        rq = exec.invoke(thiz, argv);
+                        exec.setAccessible(od);
+                    }
                     if (reqx) {
                         return (boolean) rq;
                     }
@@ -169,7 +201,7 @@ public class SubCommandEX {
         return true;
     }
 
-    private boolean check(CommandSender sender, Executer exev) {
+    protected boolean check(CommandSender sender, Executer exev) {
         if (sc.checkSupPer()) {
             if (!exev.check(sender)) {
                 return false;

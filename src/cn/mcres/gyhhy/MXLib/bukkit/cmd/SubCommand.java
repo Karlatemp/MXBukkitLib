@@ -19,4 +19,5 @@ public @interface SubCommand {
     String desc() default "";
     boolean console() default true;
     boolean checkSupPer() default true;
+    boolean noRemoveFirstArg() default false;
 }
