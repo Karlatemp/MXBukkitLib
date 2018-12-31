@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  * @author 32798
  */
 public class MXAPI {
-    public static final String version = "0.3";
+    public static final String version = "0.3.1";
     public static CommandHelper getCommandHelper(){return CommandHelper.getHelper();}
     public static String getVersion(){return version;}
     public static Info getInfo(){return Info.getInfo();}

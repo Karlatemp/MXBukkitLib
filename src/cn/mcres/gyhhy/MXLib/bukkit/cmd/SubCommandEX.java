@@ -200,7 +200,9 @@ public class SubCommandEX {
 
         return true;
     }
-
+    public String msg$console_deny = "\u00a7cOnly player can use this command.",
+            msg$permission_deny = "\u00a7cYou don't have the permission to do that.",
+            msg$no_type_sender = "\u00a7cYou cannot execute this command.";
     protected boolean check(CommandSender sender, Executer exev) {
         if (sc.checkSupPer()) {
             if (!exev.check(sender)) {
@@ -209,7 +211,7 @@ public class SubCommandEX {
         }
         if (!sc.console()) {
             if (!(sc instanceof Player)) {
-                sender.sendMessage("\u00a7cOnly player can use this command.");
+                sender.sendMessage(msg$console_deny);
                 return false;
             }
         }
@@ -217,13 +219,13 @@ public class SubCommandEX {
         if (perm == null || perm.isEmpty()) {
         } else {
             if (!sender.hasPermission(perm)) {
-                sender.sendMessage("\u00a7cYou don't have the permission to do that.");
+                sender.sendMessage(msg$permission_deny);
                 return false;
             }
         }
         if (st != null && sender != null) {
             if (!st.isInstance(sender)) {
-                sender.sendMessage("\u00a7cYou cannot execute this command.");
+                sender.sendMessage(msg$no_type_sender);
                 return false;
             }
         }

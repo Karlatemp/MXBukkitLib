@@ -63,7 +63,7 @@ public class ExecuterEX extends Executer {
         }
         return true; //To change body of generated methods, choose Tools | Templates.
     }
-
+    public String msg$noper = "\u00a7cYou don't have the permission to do that.";
     @Override
     protected boolean check(CommandSender sender) {
         if (per == null || per.isEmpty()) {
@@ -72,7 +72,7 @@ public class ExecuterEX extends Executer {
         if (sender.hasPermission(per)) {
             return true;
         }
-        sender.sendMessage("\u00a7cYou don't have the permission to do that.");
+        sender.sendMessage(msg$noper);
         return false;
     }
 
