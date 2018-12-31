@@ -144,7 +144,9 @@ public class SubCommandEX {
                     argv[this.ali] = ali;
                 }
                 if (this.argc != -1) {
-                    argv[this.argc] = argc;
+                    String[] temp = new String[argc.length - 1];
+                    System.arraycopy(argc, 1, temp, 0, temp.length);
+                    argv[this.argc] = temp;
                 }
                 if (this.send != -1) {
                     argv[this.send] = sender;

@@ -28,7 +28,7 @@ public class MXAPI {
                 Class<? extends TitleAPI> cx = Class.forName(cname).asSubclass(TitleAPI.class);
                 titleAPI = cx.newInstance();
             } catch (Exception ex) {
-                Logger.getLogger(MXAPI.class.getName()).log(Level.SEVERE, null, ex);
+                titleAPI = new DefaultTitleAPI();
             }
         }
     }

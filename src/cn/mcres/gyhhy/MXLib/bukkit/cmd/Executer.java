@@ -5,7 +5,6 @@
  */
 package cn.mcres.gyhhy.MXLib.bukkit.cmd;
 
-import cn.mcres.gyhhy.MXLib.StringHelper;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.command.Command;
@@ -16,7 +15,22 @@ import org.bukkit.command.CommandSender;
  * @author 32798
  */
 public class Executer implements org.bukkit.command.CommandExecutor {
-
+    public static String get(String[] a,int b){
+        if (b < 0){
+            b = 0;
+        }
+        String ret = null;
+        if (a == null){
+            return "";
+        }
+        if (b < a.length){
+            ret = a[b];
+        }
+        if (ret == null){
+            ret = "";
+        }
+        return ret;
+    }
     protected boolean check(CommandSender sender) {
         return true;
     }
@@ -32,7 +46,7 @@ public class Executer implements org.bukkit.command.CommandExecutor {
 
     public boolean onCommand(CommandSender sender, Command cmd, String ali, String[] argc) {
 
-        String exe = StringHelper.get(argc, 0);
+        String exe = get(argc, 0);
 //        if (check(sender)) {
         if (exe == null) {
             if (check(sender)) {
