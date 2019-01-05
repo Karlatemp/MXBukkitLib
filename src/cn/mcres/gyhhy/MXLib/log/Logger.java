@@ -461,6 +461,7 @@ public final class Logger {
                 : "\u00a72" + stack.getFileName())),
                 zip == null ? "?" : zip,
                 version == null ? "?" : version);
+
     }
 
     public Logger printStackTrace(Throwable thr) {
@@ -474,6 +475,27 @@ public final class Logger {
             errorformat("\u00a7c%s\u00a7b: \u00a7e%s", clazz, msg);
             for (StackTraceElement el : stackTrace) {
                 printStackTraceElement(el);
+            }
+            Throwable cause = thr.getCause();
+            if (cause != null) {
+                StackTraceElement[] trace = getOurStackTrace(cause);
+                int m = trace.length - 1;
+                int n = stackTrace.length - 1;
+                while (m >= 0 && n >= 0 && trace[m].equals(stackTrace[n])) {
+                    m--;
+                    n--;
+                }
+                int framesInCommon = trace.length - 1 - m;
+                clazz = cause.getClass().getName();
+                msg = cause.getMessage();
+                errorformat("\u00a73Cause by: \u00a7c%s\u00a7b: \u00a7e%s", clazz, msg);
+                for (int i = 0; i <= m; i++) {
+                    this.printStackTraceElement(trace[i]);
+                }
+                if (framesInCommon != 0) {
+                    errorformat("\u00a73\t...\u00a76%s\u00a7bmore", framesInCommon);
+                }
+
             }
         }
         return this;
@@ -498,6 +520,6 @@ public final class Logger {
 
     public static void main(String[] args) {
         Logger logger = new Logger((String) null, null, "Test");
-        logger.printStackTrace(new Error());
+        logger.printStackTrace(new Error("Test test and more test",new Error("And deep dark more")));
     }
 }
