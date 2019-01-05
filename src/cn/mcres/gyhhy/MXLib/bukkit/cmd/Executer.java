@@ -19,6 +19,8 @@ import org.bukkit.command.CommandSender;
  */
 public class Executer implements org.bukkit.command.CommandExecutor, org.bukkit.command.TabCompleter {
 
+    public boolean tab_case = true;
+
     public static String get(String[] a, int b) {
         if (b < 0) {
             b = 0;
@@ -40,7 +42,11 @@ public class Executer implements org.bukkit.command.CommandExecutor, org.bukkit.
         return true;
     }
     Map<String, SubCommandEX> mmp;
-    public Map<String,SubCommandEX> getSubs(){return mmp;}
+
+    public Map<String, SubCommandEX> getSubs() {
+        return mmp;
+    }
+
     public void reg(String a, SubCommandEX b) {
         mmp.put(a.toLowerCase(), b);
     }
@@ -55,13 +61,13 @@ public class Executer implements org.bukkit.command.CommandExecutor, org.bukkit.
 //        if (check(sender)) {
         if (exe == null || exe.isEmpty()) {
             if (check(sender)) {
-                return defexec(sender,cmd, ali,argc);
+                return defexec(sender, cmd, ali, argc);
             }
         } else {
             SubCommandEX sub = mmp.get(exe.toLowerCase());
             if (sub == null) {
                 if (check(sender)) {
-                    return nosub(sender, cmd,ali,argc);
+                    return nosub(sender, cmd, ali, argc);
                 }
             } else {
                 return sub.exec(sender, cmd, ali, argc, this);
@@ -88,7 +94,7 @@ public class Executer implements org.bukkit.command.CommandExecutor, org.bukkit.
         if (args.length > 0) {
             last = args[args.length - 1];
         }
-        return CommandHelper.getHelper().format(str, last);
+        return CommandHelper.getHelper().format(str, last, tab_case);
     }
 
     public SubCommandEX getSub(String vl) {
