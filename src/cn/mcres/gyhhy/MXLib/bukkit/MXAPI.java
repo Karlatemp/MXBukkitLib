@@ -13,13 +13,20 @@ import java.util.logging.Logger;
  * @author 32798
  */
 public class MXAPI {
-    public static final String version = "0.4.1";
+    public static final String version = "0.5";
     public static CommandHelper getCommandHelper(){return CommandHelper.getHelper();}
     public static String getVersion(){return version;}
     public static Info getInfo(){return Info.getInfo();}
     static TitleAPI titleAPI;
     public static TitleAPI getTitleAPI(){return titleAPI;}
+    public static final boolean gson;
     static{
+        boolean gson$ = false;
+        try{
+            Class.forName("com.google.gson.Gson");
+            gson$=true;
+        }catch(Exception ex){}
+        gson = gson$;
         Info info = getInfo();
         if(info != null){
             String pag = MXAPI.class.getPackage().getName() + "." + info.getServerNMSVersion();

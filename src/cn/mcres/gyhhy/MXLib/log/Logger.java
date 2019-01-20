@@ -413,8 +413,7 @@ public final class Logger {
             throw new RuntimeException(thr);
         }
     }
-
-    private void printStackTraceElement(StackTraceElement stack) {
+    public static String getStackTraceElementMessage(StackTraceElement stack){
         String zip = null;
         String version = null;
         String clazz = stack.getClassName();
@@ -451,7 +450,7 @@ public final class Logger {
         } catch (Throwable thr) {
             thr.printStackTrace();
         }
-        errorformat("\t\u00a76at \u00a7c%s\u00a7f.\u00a7e%s\u00a7f(%s\u00a7f) [\u00a7b%s\u00a76:\u00a7d%s\u00a7f]",
+        return String.format("\t\u00a76at \u00a7c%s\u00a7f.\u00a7e%s\u00a7f(%s\u00a7f) [\u00a7b%s\u00a76:\u00a7d%s\u00a7f]",
                 clazz, stack.getMethodName(),
                 stack.isNativeMethod() ? "\u00a7dNative Method"
                 : (stack.getFileName() == null
@@ -461,7 +460,9 @@ public final class Logger {
                 : "\u00a72" + stack.getFileName())),
                 zip == null ? "?" : zip,
                 version == null ? "?" : version);
-
+    }
+    private void printStackTraceElement(StackTraceElement stack) {
+        error(getStackTraceElementMessage(stack));
     }
 
     public Logger printStackTrace(Throwable thr) {
