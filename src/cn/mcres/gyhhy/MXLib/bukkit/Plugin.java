@@ -15,11 +15,13 @@ import java.util.Map;
 import java.util.Scanner;
 
 /**
- *
+ * The Plugin Class
  * @author 32798
  */
 public class Plugin extends org.bukkit.plugin.java.JavaPlugin {
-
+    /**
+     * GitHub address for this project
+     */
     public static final String github = "https://raw.githubusercontent.com/GYHHY/MXBukkitLib/master/version.txt";
 
     static {

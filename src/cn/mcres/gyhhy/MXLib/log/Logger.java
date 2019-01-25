@@ -21,11 +21,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.Server;
 
 /**
- *
+ * a logger with color typography
  * @author 32798
  */
 public final class Logger {
-
+    /**
+     * Logger's PrintStream
+     */
     public class DefaultPrintStream extends PrintStream {
 
         private DefaultPrintStream() {
@@ -160,60 +162,86 @@ public final class Logger {
             Logger.this.error(x);
         }
     }
-
+    /**
+     * org.bukkit.Bukkit.getServer();
+     */
     public static Server server() {
         return Bukkit.getServer();
     }
-
+    /**
+     * Print a line
+     */
     public Logger println(String line) {
         write(prefix + line);
         return this;
     }
-
+    /**
+     * Print a line
+     */
     public Logger printf(Object data) {
         return printf(String.valueOf(data));
     }
-
+    /**
+     * Print a line with {@link cn.mcres.gyhhy.MXLib.StringHelper#variable(java.lang.String,java.lang.Object[])}
+     */
     public Logger printf(String line, Object... argc) {
         write(prefix + StringHelper.variable(line, argc));
         return this;
     }
-
+    /**
+     * Print a line with
+     * {@link cn.mcres.gyhhy.MXLib.StringHelper#variable(java.lang.String,java.util.Map)}
+     */
     public Logger printf(String line, Map<String, Object> argc) {
         write(prefix + StringHelper.variable(line, argc));
         return this;
     }
-
+    /**
+     * Print a line
+     */
     public Logger printf(String line) {
         write(prefix + line);
         return this;
     }
-
+    /**
+     * Print a line, use error prefix
+     */
     public Logger error(String line) {
         write(errprefix + line);
         return this;
     }
-
+    /**
+     * And {@link #printf(java.lang.String, java.lang.Object...)} different is that she is using the error prefix
+     */
     public Logger error(String line, Object... argc) {
         write(errprefix + StringHelper.variable(line, argc));
         return this;
     }
-
+    /**
+     * And {@link #printf(java.lang.String, java.util.Map) } different is that she is using the error prefix
+     */
     public Logger error(String line, Map<String, Object> argc) {
         write(errprefix + StringHelper.variable(line, argc));
         return this;
     }
-
+    /**
+     * And {@link #format(java.lang.String, java.lang.Object...)  } different is that she is using the error prefix
+     */
     public Logger errorformat(String format, Object... argc) {
         write(errprefix + String.format(format, argc));
         return this;
     }
-
+    /**
+     * Print a line with
+     *  {@link java.lang.String#format(java.lang.String, java.lang.Object...) }
+     */
     public Logger format(String format, Object... argc) {
         write(prefix + String.format(format, argc));
         return this;
     }
-
+    /**
+     * This method will write a line to console.
+     */
     public static void write(String line) {
         Server server = server();
         if (server == null) {
@@ -240,7 +268,9 @@ public final class Logger {
             }
         }
     }
-
+    /**
+     * Get the plugin to which the current Logger
+     */
     public final Plugin getPlugin() {
         return plugin;
     }
@@ -248,7 +278,9 @@ public final class Logger {
     private final int index;
     private final String prefix;
     private final String errprefix;
-
+    /**
+     * Get the current logger's id
+     */
     public final int getId() {
         return index;
     }
@@ -306,7 +338,9 @@ public final class Logger {
     public PrintStream getErrorPrintStream() {
         return err;
     }
-
+    /**
+     * Get logger based on id
+     */
     public static Logger getLogger(int id) {
         synchronized (lock) {
             if (id > -1 && id < lger.length) {
@@ -315,7 +349,9 @@ public final class Logger {
         }
         return null;
     }
-
+    /**
+     * Get the logger based on the plugin
+     */
     public static Logger getLogger(Plugin plugin) {
         if (plugin == null) {
             return null;
@@ -329,11 +365,15 @@ public final class Logger {
         }
         return null;
     }
-
+    /**
+     * Get/create a logger
+     */
     public static Logger getOrCreateLogger(Plugin plugin) {
         return getOrCreateLogger(plugin, null, null);
     }
-
+    /**
+     * Get/create a logger
+     */
     public static Logger getOrCreateLogger(Plugin plugin, String format) {
         String err = null;
         if (format != null) {
@@ -341,7 +381,9 @@ public final class Logger {
         }
         return getOrCreateLogger(plugin, format, err);
     }
-
+    /**
+     * Get/create a logger
+     */
     public static Logger getOrCreateLogger(Plugin plugin, String format, String errorFormat) {
         Logger logger = getLogger(plugin);
         if (logger == null) {
@@ -349,11 +391,17 @@ public final class Logger {
         }
         return logger;
     }
-
+    /**
+     * Create a logger<br>
+     * If the logger has been created before, it will throw a {@code java.lang.RuntimeException} exception.
+     */
     public static Logger createLogger(Plugin plugin) {
         return createLogger(plugin, null, null);
     }
-
+    /**
+     * Create a logger<br>
+     * If the logger has been created before, it will throw a {@code java.lang.RuntimeException} exception.
+     */
     public static Logger createLogger(Plugin plugin, String format) {
         String err = null;
         if (format != null) {
@@ -361,7 +409,10 @@ public final class Logger {
         }
         return createLogger(plugin, format, err);
     }
-
+    /**
+     * Create a logger<br>
+     * If the logger has been created before, it will throw a {@code java.lang.RuntimeException} exception.
+     */
     public static Logger createLogger(Plugin plugin, String format, String errorFormat) {
         return new Logger(plugin, format, errorFormat);
     }
