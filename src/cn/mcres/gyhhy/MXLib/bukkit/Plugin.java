@@ -6,6 +6,7 @@
 package cn.mcres.gyhhy.MXLib.bukkit;
 
 import cn.mcres.gyhhy.MXLib.StringHelper;
+import cn.mcres.gyhhy.MXLib.chat.BungeeChatAPI;
 import cn.mcres.gyhhy.MXLib.http.WebHelper;
 import cn.mcres.gyhhy.MXLib.spigot.SpigotHelper;
 import cn.mcres.gyhhy.MXLib.log.Logger;
@@ -51,9 +52,17 @@ public class Plugin extends org.bukkit.plugin.java.JavaPlugin {
 //        checkup();
         rundeb();
     }
+    
 
+    @Override
+    public void onDisable() {
+        BungeeChatAPI.uninstall();
+    }
+    public Logger getLoggerEX(){
+        return Logger.getOrCreateLogger(this);
+    }
     public void write(String sp) {
-        Logger logger = Logger.getOrCreateLogger(this);
+        Logger logger = getLoggerEX();
         if (sp.indexOf('\n') > -1) {
             String[] lines = sp.split("\\n");
             for (String line : lines) {

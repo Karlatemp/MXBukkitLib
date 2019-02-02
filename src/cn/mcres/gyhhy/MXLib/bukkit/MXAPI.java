@@ -14,9 +14,32 @@ import java.util.logging.Logger;
  */
 public class MXAPI {
     /**
+     * Get NMS Class<br>
+     * Add in version 0.6
+     */
+    public static Class<?> getNMSClass(String clazz){
+        try {
+            return Class.forName("net.minecraft.server."+getInfo().getServerNMSVersion() + "." + clazz);
+        } catch (ClassNotFoundException ex) {
+            return null;
+        }
+    }
+    /**
+     * Get Obc Class<br>
+     * Add in version 0.6
+     */
+    public static Class<?> getOBCClass(String clazz){
+        try {
+            return Class.forName("org.bukkit.craftbukkit."+getInfo().getServerNMSVersion() + "." + clazz);
+        } catch (ClassNotFoundException ex) {
+            return null;
+        }
+    }
+    
+    /**
      * Lib Current Version
      */
-    public static final String version = "0.5.2";
+    public static final String version = "0.6";
     public static CommandHelper getCommandHelper(){return CommandHelper.getHelper();}
     /**
      * Lib Current Version
@@ -68,7 +91,10 @@ public class MXAPI {
      * @return Whether to support (more than)
      */
     public static boolean support(final String ver) {
-        final String now = version,need = ver;
+        return support(version,ver);
+    }
+    public static boolean support(final String now, final String need) {
+//        final String now = version,need = ver;
         if(need.equals(now))return true;
         final String[] a = need.split("\\."), b = now.split("\\.");
         int off = Math.max(a.length, b.length);
