@@ -1,0 +1,7 @@
+name: MXBukkitLib
+anthor: GYHHY
+version: 0.8
+main: cn.mcres.gyhhy.MXLib.bukkit.Plugin
+load: STARTUP
+website: https://www.mcres.cn/resources/73/
+description: Bukkit Lib
