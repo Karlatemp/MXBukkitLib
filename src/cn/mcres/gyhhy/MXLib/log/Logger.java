@@ -28,145 +28,7 @@ import org.bukkit.Server;
  *
  * @author 32798
  */
-public class Logger {
-
-    /**
-     * Logger's PrintStream
-     */
-    public class DefaultPrintStream extends PrintStream {
-
-        private DefaultPrintStream() {
-            super(cn.mcres.gyhhy.MXLib.io.EmptyStream.stream.asOutputStream());
-        }
-
-        @Override
-        public PrintStream format(String format, Object... args) {
-            print(String.format(format, args));
-            return this;
-        }
-
-        @Override
-        public PrintStream format(Locale l, String format, Object... args) {
-            print(String.format(l, format, args));
-            return this;
-        }
-
-        @Override
-        public void print(Object obj) {
-            print(String.valueOf(obj));
-        }
-
-        @Override
-        public void print(String s) {
-            Logger.this.println(s);
-        }
-
-        @Override
-        public void print(boolean b) {
-            print(String.valueOf(b));
-        }
-
-        @Override
-        public void print(char c) {
-            print(String.valueOf(c));
-        }
-
-        @Override
-        public void print(char[] s) {
-            print(String.valueOf(s));
-        }
-
-        @Override
-        public void print(double d) {
-            print(String.valueOf(d));
-        }
-
-        @Override
-        public void print(float f) {
-            print(String.valueOf(f));
-        }
-
-        @Override
-        public void print(int i) {
-            print(String.valueOf(i));
-        }
-
-        @Override
-        public void print(long l) {
-            print(String.valueOf(l));
-        }
-
-        @Override
-        public PrintStream printf(String format, Object... args) {
-            return format(format, args);
-        }
-
-        @Override
-        public PrintStream printf(Locale l, String format, Object... args) {
-            return format(l, format, args);
-        }
-
-        @Override
-        public void println() {
-            print("");
-        }
-
-        @Override
-        public void println(Object x) {
-            print(x);
-        }
-
-        @Override
-        public void println(String x) {
-            print(x);
-        }
-
-        @Override
-        public void println(boolean x) {
-            print(x);
-        }
-
-        @Override
-        public void println(char x) {
-            print(x);
-        }
-
-        @Override
-        public void println(char[] x) {
-            print(x);
-        }
-
-        @Override
-        public void println(double x) {
-            print(x);
-        }
-
-        @Override
-        public void println(float x) {
-            print(x);
-        }
-
-        @Override
-        public void println(int x) {
-            print(x);
-        }
-
-        @Override
-        public void println(long x) {
-            print(x);
-        }
-
-    }
-
-    public class ErrorPrintStream extends DefaultPrintStream {
-
-        private ErrorPrintStream() {
-        }
-
-        public void print(String x) {
-            Logger.this.error(x);
-        }
-    }
+public class Logger extends BasicLogger{
 
     /**
      * org.bukkit.Bukkit.getServer();
@@ -179,7 +41,7 @@ public class Logger {
      * Print a line
      */
     public Logger println(String line) {
-        printf(line);
+        super.println(line);
         return this;
     }
 
@@ -187,7 +49,8 @@ public class Logger {
      * Print a line
      */
     public Logger printf(Object data) {
-        return printf(String.valueOf(data));
+        super.printf(data);
+        return this;
     }
 
     /**
@@ -195,7 +58,7 @@ public class Logger {
      * {@link cn.mcres.gyhhy.MXLib.StringHelper#variable(java.lang.String,java.lang.Object[])}
      */
     public Logger printf(String line, Object... argc) {
-        printf(StringHelper.variable(line, argc));
+        super.printf(line,argc);
         return this;
     }
 
@@ -204,7 +67,7 @@ public class Logger {
      * {@link cn.mcres.gyhhy.MXLib.StringHelper#variable(java.lang.String,java.util.Map)}
      */
     public Logger printf(String line, Map<String, Object> argc) {
-        printf(StringHelper.variable(line, argc));
+        super.printf(line,argc);
         return this;
     }
 
@@ -229,7 +92,7 @@ public class Logger {
      * that she is using the error prefix
      */
     public Logger error(String line, Object... argc) {
-        error(StringHelper.variable(line, argc));
+        super.error(line,argc);
         return this;
     }
 
@@ -238,7 +101,7 @@ public class Logger {
      * she is using the error prefix
      */
     public Logger error(String line, Map<String, Object> argc) {
-        error(StringHelper.variable(line, argc));
+        super.error(line,argc);
         return this;
     }
 
@@ -247,7 +110,7 @@ public class Logger {
      * that she is using the error prefix
      */
     public Logger errorformat(String format, Object... argc) {
-        error(String.format(format, argc));
+        super.errorformat(format,argc);
         return this;
     }
 
@@ -256,7 +119,7 @@ public class Logger {
      *  {@link java.lang.String#format(java.lang.String, java.lang.Object...) }
      */
     public Logger format(String format, Object... argc) {
-        printf(String.format(format, argc));
+        super.format(format,argc);
         return this;
     }
 
@@ -266,7 +129,7 @@ public class Logger {
     public static void write(String line) {
         Server server = server();
         if (server == null) {
-            System.out.println(line);
+            System.out.println(Ascii.ec(line));
             return;
         }
         server.getConsoleSender().sendMessage(line);
@@ -298,8 +161,6 @@ public class Logger {
     }
     private final Plugin plugin;
     private final int index;
-    protected final String prefix;
-    protected  final String errprefix;
 
     /**
      * Get the current logger's id
@@ -332,34 +193,21 @@ public class Logger {
             lger = arr;
         }
     }
-    private final DefaultPrintStream out, err;
 
-    Logger(Plugin plugin, String format, String errformat) {
-        if (plugin == null) {
-            throw new java.lang.IllegalArgumentException("No plugin found.");
-        }
-        if (format == null) {
-            format = "\u00a7f[\u00a7b%s\u00a7f] \u00a7e";
-        }
-        if (errformat == null) {
-            errformat = "\u00a7f[\u00a7b%s\u00a7f] \u00a7c";
-        }
-        prefix = String.format(format, plugin.getName());
-        errprefix = String.format(errformat, plugin.getName());
+    public Logger(Plugin plugin, String format, String errformat) {
+        super(format,errformat,plugin.getName());
         this.plugin = plugin;
 //        checkup(this, plugin);
         register(this);
         index = index(this);
-        out = new DefaultPrintStream();
-        err = new ErrorPrintStream();
     }
 
     public PrintStream getPrintStream() {
-        return out;
+        return super.getPrintStream();
     }
 
     public PrintStream getErrorPrintStream() {
-        return err;
+        return super.getErrorPrintStream();
     }
 
     /**
@@ -536,23 +384,14 @@ public class Logger {
         } catch (Throwable thr) {
             thr.printStackTrace();
         }
-        return String.format("\t\u00a76at \u00a7c%s\u00a7f.\u00a7e%s\u00a7f(%s\u00a7f) [\u00a7b%s\u00a76:\u00a7d%s\u00a7f]",
-                clazz, stack.getMethodName(),
-                stack.isNativeMethod() ? "\u00a7dNative Method"
-                : (stack.getFileName() == null
-                ? "\u00a77Unknown Source"
-                : (stack.getLineNumber() > -1
-                ? "\u00a72" + stack.getFileName() + "\u00a7f:\u00a76" + stack.getLineNumber()
-                : "\u00a72" + stack.getFileName())),
-                zip == null ? "?" : zip,
-                version == null ? "?" : version);
+        return Logger.getStackTraceElementMessage$return(stack, clazz, zip, version);
     }
 
-    private void printStackTraceElement(StackTraceElement stack) {
+    protected void printStackTraceElement(StackTraceElement stack) {
         printStackTraceElement(null, stack);
     }
 
-    private void printStackTraceElement(String prefix, StackTraceElement stack) {
+    protected void printStackTraceElement(String prefix, StackTraceElement stack) {
         if (prefix == null || prefix.isEmpty()) {
             error(getStackTraceElementMessage(stack));
         } else {
@@ -564,7 +403,7 @@ public class Logger {
      * Print our stack trace as an enclosed exception for the specified stack
      * trace.
      */
-    private void printEnclosedStackTrace(Throwable thiz,
+    protected void printEnclosedStackTrace(Throwable thiz,
             StackTraceElement[] enclosingTrace,
             String caption,
             String prefix,
@@ -704,21 +543,12 @@ public class Logger {
         }
         return this;
     }*/
-    Logger(String format, String errformat, String pname) {
-        if (format == null) {
-            format = "\u00a7f[\u00a7b%s\u00a7f] \u00a7e";
-        }
-        if (errformat == null) {
-            errformat = "\u00a7f[\u00a7b%s\u00a7f] \u00a7c";
-        }
-        prefix = String.format(format, pname);
-        errprefix = String.format(errformat, pname);
+    public Logger(String format, String errformat, String pname) {
+        super(format,errformat,pname);
         this.plugin = null;
 //        checkup(this, plugin);
 //        register(this);
         index = -1;
-        out = new DefaultPrintStream();
-        err = new ErrorPrintStream();
     }
     public static Logger createRawLogger(String format, String errformat, String plugin_name){
         return new Logger(format,errformat,plugin_name);
