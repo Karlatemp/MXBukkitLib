@@ -9,6 +9,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.command.Command;
@@ -19,7 +20,20 @@ import org.bukkit.entity.Player;
  *
  * @author 32798
  */
-public class SubCommandEX {
+public class SubCommandEX implements Translator{
+    private LanguageTranslator lt;
+
+    public void setLanguageTranslator(LanguageTranslator lt) {
+        Objects.requireNonNull(lt);
+        this.lt = lt;
+    }
+
+    public LanguageTranslator getLanguageTranslator() {
+        if (lt == null) {
+            lt = LanguageTranslator.getDefault();
+        }
+        return lt;
+    }
     SubCommandEX(){}
     
     private boolean empc = false;
@@ -211,7 +225,7 @@ public class SubCommandEX {
         }
         if (!sc.console()) {
             if (!(sc instanceof Player)) {
-                sender.sendMessage(msg$console_deny);
+                this.getLanguageTranslator().consoleDeny(exev, this, sender);
                 return false;
             }
         }
@@ -219,13 +233,13 @@ public class SubCommandEX {
         if (perm == null || perm.isEmpty()) {
         } else {
             if (!sender.hasPermission(perm)) {
-                sender.sendMessage(msg$permission_deny);
+                this.getLanguageTranslator().noPermission(exev, this, sender, perm);
                 return false;
             }
         }
         if (st != null && sender != null) {
             if (!st.isInstance(sender)) {
-                sender.sendMessage(msg$no_type_sender);
+                this.getLanguageTranslator().senderTypeError(exev, this, sender, st);
                 return false;
             }
         }

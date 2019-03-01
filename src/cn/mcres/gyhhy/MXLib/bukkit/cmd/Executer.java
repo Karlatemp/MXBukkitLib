@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -17,9 +18,37 @@ import org.bukkit.command.CommandSender;
  *
  * @author 32798
  */
-public class Executer implements org.bukkit.command.CommandExecutor, org.bukkit.command.TabCompleter {
+public class Executer implements Translator, org.bukkit.command.CommandExecutor, org.bukkit.command.TabCompleter {
 
     public boolean tab_case = true;
+
+    private LanguageTranslator lt;
+
+    public void setLanguageTranslator(LanguageTranslator lt) {
+        this.setLanguageTranslator(lt, false);
+    }
+
+    /**
+     * Set the Language Translator
+     *
+     * @param lt LT
+     * @param setall If it is true, set all subcommands to this LT.
+     */
+    public Executer setLanguageTranslator(final LanguageTranslator lt, boolean setall) {
+        Objects.requireNonNull(lt);
+        this.lt = lt;
+        if (setall) {
+            this.getSubs().values().forEach((c) -> c.setLanguageTranslator(lt));
+        }
+        return this;
+    }
+
+    public LanguageTranslator getLanguageTranslator() {
+        if (lt == null) {
+            lt = LanguageTranslator.getDefault();
+        }
+        return lt;
+    }
 
     public static String get(String[] a, int b) {
         if (b < 0) {
@@ -52,7 +81,8 @@ public class Executer implements org.bukkit.command.CommandExecutor, org.bukkit.
     }
 
     public Executer() {
-        mmp = new HashMap();
+        mmp = new HashMap<>();
+        lt = LanguageTranslator.getDefault();
     }
 
     public boolean onCommand(CommandSender sender, Command cmd, String ali, String[] argc) {

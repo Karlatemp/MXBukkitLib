@@ -42,7 +42,7 @@ public class StringHelperEX extends StringHelper{
     public static char[] setChars(String str,char[] news){
         return RefUtil.set(String$value, (Object)str, news);
     }
-    public static void main(String[] ag){
+    /*public static void main(String[] ag){
         System.out.println(ClassLoader.getSystemClassLoader().getResource("sun/reflect/UnsafeQualifiedStaticObjectFieldAccessorImpl.class"));
         
         System.out.println((Object)RefUtil.get(StringHelperEX.class, "awa"));
@@ -51,7 +51,7 @@ public class StringHelperEX extends StringHelper{
 //        System.out.println(field.getA);
         
         System.out.println((Object)RefUtil.get(StringHelperEX.class, "awa"));
-    }
+    }*/
 
     public StringHelperEX(String str) {
         super(str);

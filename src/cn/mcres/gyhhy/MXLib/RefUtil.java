@@ -18,8 +18,10 @@ import java.util.logging.Logger;
  */
 public class RefUtil {
 
+    @SuppressWarnings({"rawtypes"})
     public static final Class<?>[] emptyClassPar = new Class[0];
     public static final Object[] emptyArgPar = new Object[0];
+    @SuppressWarnings({"rawtypes","BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch", "AssignmentToMethodParameter"})
     private static Method getMethod(Class<?> clazz, String name, Class<?>[] par) {
         if (clazz != null) {
             if (par == null) {
@@ -41,14 +43,17 @@ public class RefUtil {
         return null;
     }
 
+    @SuppressWarnings({"rawtypes"})
     public static <T> T ink(Object thiz, String name, Class[] par, Object[] obj) {
         return ink(thiz, null, name, par, obj);
     }
 
+    @SuppressWarnings({"rawtypes"})
     public static <T> T ink(Class<?> cl, String name, Class[] par, Object[] obj) {
         return ink(null, cl, name, par, obj);
     }
 
+    @SuppressWarnings({"rawtypes","unchecked","AssignmentToMethodParameter", "BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch"})
     public static <T> T ink(Object thiz, Class<?> clazz, String name, Class[] par, Object[] obj) {
         if (clazz == null) {
             clazz = thiz.getClass();
@@ -103,6 +108,7 @@ public class RefUtil {
         return set(getField(clazz, field), thiz, value);
     }
 
+    @SuppressWarnings({"rawtypes","AssignmentToMethodParameter", "UseSpecificCatch", "BroadCatchBlock", "TooBroadCatch", "CallToPrintStackTrace"})
     public static <T> T set(Field fe, Object thiz, Object value) {
         T old = get(fe, thiz);
         boolean acc = fe.isAccessible();
@@ -175,6 +181,7 @@ public class RefUtil {
         return old;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T get(Field fe, Object o) {
         if (fe == null) {
             return null;
@@ -203,6 +210,7 @@ public class RefUtil {
         return getField(clazz, field, true);
     }
 
+    @SuppressWarnings({"BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch", "AssignmentToMethodParameter"})
     public static Field getField(Class<?> clazz, String field, boolean checkPublic) {
         if (checkPublic) {
             try {

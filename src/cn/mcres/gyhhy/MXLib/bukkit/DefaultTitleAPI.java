@@ -14,6 +14,7 @@ import java.lang.reflect.Field;
 /**
  * Created by magang on 16/6/10.
  */
+@SuppressWarnings({"rawtypes", "AssignmentToMethodParameter", "BroadCatchBlock", "TooBroadCatch", "CallToPrintStackTrace", "UseSpecificCatch"})    
 public class DefaultTitleAPI implements TitleAPI {
     
 

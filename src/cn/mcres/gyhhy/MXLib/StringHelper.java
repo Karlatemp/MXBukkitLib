@@ -348,7 +348,7 @@ public class StringHelper {
         if(line == null|| line.isEmpty() || args == null || args.length == 0){
             return line;
         }
-        HashMap<String,Object> mmp = new HashMap();
+        HashMap<String,Object> mmp = new HashMap<>();
         for (int i = 0;i < args.length;i++){
             mmp.put(String.valueOf(i),args[i]);
         }
@@ -381,6 +381,7 @@ public class StringHelper {
                                     case '%':
                                     case '}':{
                                         bx.append(f);
+                                        break;
                                     }
                                     default:{
                                         bx.append(c).append(f);

@@ -298,37 +298,20 @@ public class Logger extends BasicLogger{
     public static Logger createLogger(Plugin plugin, String format, String errorFormat) {
         return new Logger(plugin, format, errorFormat);
     }
-    private static final Method getOurStackTrace$met;
     private static final Class<? extends ClassLoader> PluginClassLoaderClass;
     private static final Field PluginClassLoader$plugin$field;
 
     static {
-        Method met = null;
         Field fie = null;
         Class<? extends ClassLoader> cz = null;
         try {
-            met = Throwable.class.getDeclaredMethod("getOurStackTrace");
             cz = Class.forName("org.bukkit.plugin.java.PluginClassLoader").asSubclass(ClassLoader.class);
             fie = cz.getDeclaredField("plugin");
         } catch (Throwable ex) {
             ex.printStackTrace();
         }
-        getOurStackTrace$met = met;
         PluginClassLoaderClass = cz;
         PluginClassLoader$plugin$field = fie;
-    }
-
-    private static StackTraceElement[] getOurStackTrace(Throwable thr) {
-        if (thr == null) {
-            return null;
-        }
-        try {
-            getOurStackTrace$met.setAccessible(true);
-            return (StackTraceElement[]) getOurStackTrace$met.invoke(thr);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-        }
-        return thr.getStackTrace();
     }
 
     private static Plugin getPluginClassLoaderPlugin(ClassLoader loader) {
@@ -447,26 +430,6 @@ public class Logger extends BasicLogger{
 //                ourCause.printEnclosedStackTrace(s, trace, CAUSE_CAPTION, prefix, dejaVu);
         }
     }
-
-    /**
-     * Message for trying to suppress a null exception.
-     */
-    public static final String NULL_CAUSE_MESSAGE = "Cannot suppress a null exception.";
-
-    /**
-     * Message for trying to suppress oneself.
-     */
-    public static final String SELF_SUPPRESSION_MESSAGE = "Self-suppression not permitted";
-
-    /**
-     * Caption for labeling causative exception stack traces
-     */
-    public static final String CAUSE_CAPTION = "Caused by: ";
-
-    /**
-     * Caption for labeling suppressed exception stack traces
-     */
-    public static final String SUPPRESSED_CAPTION = "Suppressed: ";
 
     public String toString(Throwable thr) {
         String s = thr.getClass().getName();

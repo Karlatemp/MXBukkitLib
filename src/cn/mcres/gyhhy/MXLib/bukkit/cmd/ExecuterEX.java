@@ -16,7 +16,6 @@ public class ExecuterEX extends Executer {
 
     private SubCommandEX $defexec;
     private SubCommandEX $nosub;
-
     public void reg(String a, SubCommandEX b) {
         switch (a) {
             case Variable.COMMAND_CMD_DEF: {
@@ -33,6 +32,7 @@ public class ExecuterEX extends Executer {
 
     private String per;
 
+    @SuppressWarnings({"unchecked","rawtypes", "OverridableMethodCallInConstructor"})
     public ExecuterEX(Class cx) {
         if (cx == null) {
             return;
@@ -43,7 +43,7 @@ public class ExecuterEX extends Executer {
         }
         Command ec = (Command) anc;
         setPermission(ec.permission());
-        reg("help",new SubCommandHelp());
+        reg("help", new SubCommandHelp());
     }
 
     public String getPermission() {
@@ -64,6 +64,7 @@ public class ExecuterEX extends Executer {
         return true; //To change body of generated methods, choose Tools | Templates.
     }
     public String msg$noper = "\u00a7cYou don't have the permission to do that.";
+
     @Override
     protected boolean check(CommandSender sender) {
         if (per == null || per.isEmpty()) {
@@ -72,7 +73,7 @@ public class ExecuterEX extends Executer {
         if (sender.hasPermission(per)) {
             return true;
         }
-        sender.sendMessage(msg$noper);
+        this.getLanguageTranslator().noPermission(this, sender, per);
         return false;
     }
 
@@ -81,9 +82,8 @@ public class ExecuterEX extends Executer {
         if (this.$defexec != null) {
             return this.$defexec.exec(sender, cmd, ali, argc, this);
         } else {
-            sender.sendMessage("\u00a7cPlease use \"/" + ali + " help\" to get help.");
+            return this.getLanguageTranslator().promptToHelp(this,sender, cmd, ali, argc);
         }
-        return true; //To change body of generated methods, choose Tools | Templates.
     }
 
 }

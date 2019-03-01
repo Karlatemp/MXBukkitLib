@@ -284,7 +284,7 @@ public class BasicLogger {
         getOurStackTrace$met = met;
     }
 
-    private static StackTraceElement[] getOurStackTrace(Throwable thr) {
+    protected static StackTraceElement[] getOurStackTrace(Throwable thr) {
         if (thr == null) {
             return null;
         }
@@ -333,7 +333,7 @@ public class BasicLogger {
         }
         return getStackTraceElementMessage$return(stack,clazz,zip,version);
     }
-    static String getStackTraceElementMessage$return(StackTraceElement stack,String clazz,String zip,String version){
+    protected static String getStackTraceElementMessage$return(StackTraceElement stack,String clazz,String zip,String version){
         return String.format("\t\u00a76at \u00a7c%s\u00a7f.\u00a7e%s\u00a7f(%s\u00a7f) [\u00a7b%s\u00a76:\u00a7d%s\u00a7f]",
                 clazz, stack.getMethodName(),
                 stack.isNativeMethod() ? "\u00a7dNative Method"

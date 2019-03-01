@@ -20,6 +20,7 @@ import java.util.zip.ZipInputStream;
  *
  * @author 32798
  */
+@SuppressWarnings({"rawtypes", "NestedAssignment", "BroadCatchBlock", "TooBroadCatch", "CallToPrintStackTrace", "UseSpecificCatch"})
 public class Manager {
 
     public static ExecuterEX exec(Class cx) {
@@ -103,8 +104,7 @@ public class Manager {
                         break;
                     }
                 }
-                
-                
+
                 String m = cxwe.getAnnotation(SubCommand.class).name();
                 if (m.isEmpty()) {
                     m = cxwe.getSimpleName();
