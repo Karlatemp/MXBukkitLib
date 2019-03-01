@@ -20,11 +20,11 @@ public class Chinese {
     }
 
     public void senderTypeError(Executer executer, SubCommandEX subcmd, CommandSender sender, Class<? extends CommandSender> expected) {
-        sender.sendMessage("\u00a7哦吼, 也行你不能执行这个命令呢");
+        sender.sendMessage("\u00a7c哦吼, 也许你不能执行这个命令呢");
     }
 
     public void noPermission(Executer executer, SubCommandEX subcmd, CommandSender sender, String permission) {
-        sender.sendMessage("\u00a7你没有权限来执行这个命令");
+        sender.sendMessage("\u00a7c你没有权限来执行这个命令");
     }
 
     public void noPermission(Executer executer, CommandSender sender, String permission) {

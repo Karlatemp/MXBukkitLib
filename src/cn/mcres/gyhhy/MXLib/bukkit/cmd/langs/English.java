@@ -6,7 +6,6 @@
 package cn.mcres.gyhhy.MXLib.bukkit.cmd.langs;
 
 import cn.mcres.gyhhy.MXLib.bukkit.cmd.Executer;
-import cn.mcres.gyhhy.MXLib.bukkit.cmd.ExecuterEX;
 import cn.mcres.gyhhy.MXLib.bukkit.cmd.LanguageTranslator;
 import cn.mcres.gyhhy.MXLib.bukkit.cmd.SubCommandEX;
 import org.bukkit.command.CommandSender;
@@ -18,11 +17,11 @@ public class English extends LanguageTranslator {
     }
 
     public void senderTypeError(Executer executer, SubCommandEX subcmd, CommandSender sender, Class<? extends CommandSender> expected) {
-        sender.sendMessage("\u00a7Oh roar, you cannot execute this command.");
+        sender.sendMessage("\u00a7cOh roar, you cannot execute this command.");
     }
 
     public void noPermission(Executer executer, SubCommandEX subcmd, CommandSender sender, String permission) {
-        sender.sendMessage("\u00a7You don't have the permission to execute this command.");
+        sender.sendMessage("\u00a7cYou don't have the permission to execute this command.");
     }
 
     public void noPermission(Executer executer, CommandSender sender, String permission) {
