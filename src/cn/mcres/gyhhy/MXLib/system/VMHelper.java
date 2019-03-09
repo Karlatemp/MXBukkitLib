@@ -5,10 +5,76 @@
  */
 package cn.mcres.gyhhy.MXLib.system;
 
-/**
- *
- * @author 32798
- */
+import java.lang.instrument.Instrumentation;
+import cn.mcres.gyhhy.MXLib.bukkit.Plugin;
+
 public class VMHelper {
-    private VMHelper(){}
+
+    public static final VMHelper vhelper;
+
+    static {
+        vhelper = load();
+    }
+
+    public static VMHelper getHelper() {
+        return vhelper;
+    }
+
+    public static VMHelper load() {
+        if (vhelper != null) {
+            return vhelper;
+        }
+        try {
+            VMHelperImpl.check();
+            return new VMHelperImpl();
+        } catch (Error | RuntimeException thr) {
+            try {
+                Plugin.plugin.getLoggerEX().printStackTrace(thr);
+            } catch (Throwable thrx) {
+                thrx.printStackTrace();
+                thr.printStackTrace();
+            }
+            return new VMHelper();
+        }
+    }
+
+    VMHelper() {
+    }
+
+    /**
+     * This method is called by MXBukkitLib System<br>
+     * Don't call this method.
+     */
+    @java.lang.Deprecated
+    public void onDisable() {
+    }
+
+    public Instrumentation getInstrumentation() {
+        return null;
+    }
+
+    public boolean classCkeckBoot(String name) {
+        ClassLoader etc = ClassLoader.getSystemClassLoader();
+        while (true) {
+            ClassLoader parent = etc.getParent();
+            if (parent == null) {
+                break;
+            }
+            etc = parent;
+        }
+        return classCheck(name, etc);
+    }
+
+    public boolean classCheck(String name, ClassLoader loader) {
+        try {
+            loader.loadClass(name);
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public boolean classCheck(String name) {
+        return classCheck(name, ClassLoader.getSystemClassLoader());
+    }
 }

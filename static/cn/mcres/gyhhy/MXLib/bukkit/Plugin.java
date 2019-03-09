@@ -7,9 +7,10 @@ package cn.mcres.gyhhy.MXLib.bukkit;
 
 import cn.mcres.gyhhy.MXLib.StringHelper;
 import cn.mcres.gyhhy.MXLib.http.WebHelper;
-import cn.mcres.gyhhy.MXLib.spigot.SpigotHelper;
 import cn.mcres.gyhhy.MXLib.log.Logger;
-import java.io.PrintStream;
+import cn.mcres.gyhhy.MXLib.spigot.SpigotHelper;
+import cn.mcres.gyhhy.MXLib.system.VMHelper;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -24,19 +25,27 @@ public class Plugin extends org.bukkit.plugin.java.JavaPlugin {
      */
     public static final String github = "https://raw.githubusercontent.com/GYHHY/MXBukkitLib/master/version.txt";
 
+    public static Plugin plugin = null;
     static {
         try {
             Class.forName(MXAPI.class.getName());
         } catch (ClassNotFoundException ex) {
         }
     }
-    public static Plugin plugin = null;
 
     public Plugin() {
         plugin = this;
     }
+    @Override
+    public File getFile() {
+        return super.getFile(); //To change body of generated methods, choose Tools | Templates.
+    }
 
     public void onEnable() {
+        VMHelper.load();
+        System.out.println(VMHelper.class.getClassLoader());
+        super.saveDefaultConfig();
+        this.reloadConfig();
         Info info = Info.getInfo();
         Map<String, Object> argc = new HashMap<>();
         argc.put("", "\u00a7e");
@@ -54,7 +63,9 @@ public class Plugin extends org.bukkit.plugin.java.JavaPlugin {
     }
     
     @Override
+    @SuppressWarnings("deprecation")
     public void onDisable() {
+        VMHelper.vhelper.onDisable();
     }
     public Logger getLoggerEX(){
         return Logger.getOrCreateLogger(this);

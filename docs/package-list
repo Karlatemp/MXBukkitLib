@@ -11,6 +11,7 @@ cn.mcres.gyhhy.MXLib.bukkit.v1_13_R2
 cn.mcres.gyhhy.MXLib.bukkit.v1_8_R3
 cn.mcres.gyhhy.MXLib.bytecode
 cn.mcres.gyhhy.MXLib.chat
+cn.mcres.gyhhy.MXLib.encryption
 cn.mcres.gyhhy.MXLib.entity
 cn.mcres.gyhhy.MXLib.fcs
 cn.mcres.gyhhy.MXLib.gson
@@ -19,6 +20,7 @@ cn.mcres.gyhhy.MXLib.image
 cn.mcres.gyhhy.MXLib.io
 cn.mcres.gyhhy.MXLib.log
 cn.mcres.gyhhy.MXLib.spigot
+cn.mcres.gyhhy.MXLib.store
 cn.mcres.gyhhy.MXLib.system
 cn.mcres.gyhhy.MXLib.tans
 cn.mcres.gyhhy.MXLib.time

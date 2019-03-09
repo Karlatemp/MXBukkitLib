@@ -1,6 +1,6 @@
 name: MXBukkitLib
-anthor: GYHHY
-version: 0.10
+anthor: Karlatemp
+version: 0.15
 main: cn.mcres.gyhhy.MXLib.bukkit.Plugin
 load: STARTUP
 website: https://www.mcres.cn/resources/73/

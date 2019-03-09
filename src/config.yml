@@ -1,0 +1,20 @@
+jvm:
+    # Allow to use VMHelper
+    enable: true
+    # Jdk tools download link
+    jdktool: https://dev.tencent.com/u/GYHHY/p/PubFiles/git/raw/master/jdktools/tools.jar
+    # 如果出现下述报错, if shows
+    # java.util.ServiceConfigurationError:
+    #     com.sun.tools.attach.spi.AttachProvider:
+    #          Provider sun.tools.attach.WindowsAttachProvider could not be instantiated
+    #
+    # 请从 ${JDK Home}/jre/bin 复制 attach.dll(attach.so - Linux) 到下面的路径
+    # 或者从网络上下载一份 (请注意区分java版本(32x 64x amd64))
+    # 如果后缀是so(或者其他) 请修改路径
+    # 或者直接在此处输入 attach.dll 的完整路径
+    #    # 例如
+    #    # clib: "C:/Program Files/Java/jdk1.8.0_121/jre/bin/attach.dll"
+    # 或者使用 JDK的jre运行服务器
+    # "C:\Program Files\Java\jdk1.8.0_121\jre\bin\java" -jar spigot.jar
+    # "C:\Program Files\Java\jdk1.8.0_121\bin\java" -jar spigot.jar
+    clib: ./plugins/MXBukkitLib/attach.dll

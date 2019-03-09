@@ -9,7 +9,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * <pre><code>public static void main(String[] args){
+ *      System.out.println("MXBukkitLib built using version: " + MXAPI.version);
+ *      System.out.println("MXBukkitLib version: " + MXAPI.getVersion());
+ * }</code></pre>
  * @author 32798
  */
 public class MXAPI {
@@ -41,7 +44,7 @@ public class MXAPI {
     /**
      * Lib Current Version
      */
-    public static final String version = "0.10";
+    public static final String version = "0.15";
     public static CommandHelper getCommandHelper(){return CommandHelper.getHelper();}
     /**
      * Lib Current Version

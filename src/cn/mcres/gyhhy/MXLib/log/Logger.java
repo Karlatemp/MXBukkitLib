@@ -28,7 +28,7 @@ import org.bukkit.Server;
  *
  * @author 32798
  */
-public class Logger extends BasicLogger{
+public class Logger extends BasicLogger {
 
     /**
      * org.bukkit.Bukkit.getServer();
@@ -58,7 +58,7 @@ public class Logger extends BasicLogger{
      * {@link cn.mcres.gyhhy.MXLib.StringHelper#variable(java.lang.String,java.lang.Object[])}
      */
     public Logger printf(String line, Object... argc) {
-        super.printf(line,argc);
+        super.printf(line, argc);
         return this;
     }
 
@@ -67,7 +67,7 @@ public class Logger extends BasicLogger{
      * {@link cn.mcres.gyhhy.MXLib.StringHelper#variable(java.lang.String,java.util.Map)}
      */
     public Logger printf(String line, Map<String, Object> argc) {
-        super.printf(line,argc);
+        super.printf(line, argc);
         return this;
     }
 
@@ -92,7 +92,7 @@ public class Logger extends BasicLogger{
      * that she is using the error prefix
      */
     public Logger error(String line, Object... argc) {
-        super.error(line,argc);
+        super.error(line, argc);
         return this;
     }
 
@@ -101,7 +101,7 @@ public class Logger extends BasicLogger{
      * she is using the error prefix
      */
     public Logger error(String line, Map<String, Object> argc) {
-        super.error(line,argc);
+        super.error(line, argc);
         return this;
     }
 
@@ -110,7 +110,7 @@ public class Logger extends BasicLogger{
      * that she is using the error prefix
      */
     public Logger errorformat(String format, Object... argc) {
-        super.errorformat(format,argc);
+        super.errorformat(format, argc);
         return this;
     }
 
@@ -119,7 +119,7 @@ public class Logger extends BasicLogger{
      *  {@link java.lang.String#format(java.lang.String, java.lang.Object...) }
      */
     public Logger format(String format, Object... argc) {
-        super.format(format,argc);
+        super.format(format, argc);
         return this;
     }
 
@@ -195,7 +195,7 @@ public class Logger extends BasicLogger{
     }
 
     public Logger(Plugin plugin, String format, String errformat) {
-        super(format,errformat,plugin.getName());
+        super(format, errformat, plugin.getName());
         this.plugin = plugin;
 //        checkup(this, plugin);
         register(this);
@@ -363,7 +363,7 @@ public class Logger extends BasicLogger{
                     stream.close();
                 }
             }
-        } catch (ClassNotFoundException ex) {
+        } catch (ClassNotFoundException | NoClassDefFoundError ex) {
         } catch (Throwable thr) {
             thr.printStackTrace();
         }
@@ -507,15 +507,17 @@ public class Logger extends BasicLogger{
         return this;
     }*/
     public Logger(String format, String errformat, String pname) {
-        super(format,errformat,pname);
+        super(format, errformat, pname);
         this.plugin = null;
 //        checkup(this, plugin);
 //        register(this);
         index = -1;
     }
-    public static Logger createRawLogger(String format, String errformat, String plugin_name){
-        return new Logger(format,errformat,plugin_name);
+
+    public static Logger createRawLogger(String format, String errformat, String plugin_name) {
+        return new Logger(format, errformat, plugin_name);
     }
+
     public static void main(String[] args) {
         Logger logger = new Logger((String) null, null, "Test");
         logger.printStackTrace(
