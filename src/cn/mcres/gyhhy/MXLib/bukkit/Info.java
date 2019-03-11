@@ -16,13 +16,14 @@ public class Info {
 
     private static Info info = null;
 
-    static {
+    private static void update() {
+        if(info != null)return;
         Server ser = Bukkit.getServer();
         if (ser != null) {
             String mv = ser.getVersion();
             String[] sp = mv.split("MC\\:");
-            mv = sp[sp.length-1].replace(")","").trim();
-            setInfo(
+            mv = sp[sp.length - 1].replace(")", "").trim();
+            Info.info = (
                     new Info(
                             ser.getClass().getName().split("\\.")[3],
                             mv,
@@ -32,13 +33,15 @@ public class Info {
         }
     }
 
+    static {
+        update();
+    }
+
     public static Info getInfo() {
+        if(info == null)update();
         return info;
     }
 
-    static void setInfo(Info info) {
-        Info.info = info;
-    }
     public final String serverVersion, mv, fv;
 
     Info(String sv, String mv, String fv) {

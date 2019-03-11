@@ -164,7 +164,6 @@ public class BasicLogger {
         }
     }
 
-
     /**
      * Print a line
      */
@@ -254,15 +253,13 @@ public class BasicLogger {
      * This method will write a line to console.
      */
     public static void write(String line) {
-            System.out.println(Ascii.ec(line));
+        System.out.println(Ascii.ec(line));
     }
 
     protected final String prefix;
-    protected  final String errprefix;
-
+    protected final String errprefix;
 
     private final DefaultPrintStream out, err;
-
 
     public PrintStream getPrintStream() {
         return out;
@@ -315,25 +312,26 @@ public class BasicLogger {
             {
                 InputStream stream = c.getResourceAsStream("/META-INF/MANIFEST.MF");
                 if (stream != null) {
-                    Scanner scanner = new Scanner(stream);
-                    while (scanner.hasNextLine()) {
-                        String next = scanner.nextLine();
-                        if (next.startsWith("Implementation-Version:")) {
-                            version = next.replace("Implementation-Version:", "").trim();
-                            break;
+                    try (Scanner scanner = new Scanner(stream)) {
+                        while (scanner.hasNextLine()) {
+                            String next = scanner.nextLine();
+                            if (next.startsWith("Implementation-Version:")) {
+                                version = next.replace("Implementation-Version:", "").trim();
+                                break;
+                            }
                         }
                     }
-                    scanner.close();
                     stream.close();
                 }
             }
-        } catch (ClassNotFoundException ex) {
+        } catch (ClassNotFoundException | NoClassDefFoundError ex) {
         } catch (Throwable thr) {
             thr.printStackTrace();
         }
-        return getStackTraceElementMessage$return(stack,clazz,zip,version);
+        return getStackTraceElementMessage$return(stack, clazz, zip, version);
     }
-    protected static String getStackTraceElementMessage$return(StackTraceElement stack,String clazz,String zip,String version){
+
+    protected static String getStackTraceElementMessage$return(StackTraceElement stack, String clazz, String zip, String version) {
         return String.format("\t\u00a76at \u00a7c%s\u00a7f.\u00a7e%s\u00a7f(%s\u00a7f) [\u00a7b%s\u00a76:\u00a7d%s\u00a7f]",
                 clazz, stack.getMethodName(),
                 stack.isNativeMethod() ? "\u00a7dNative Method"
@@ -358,15 +356,31 @@ public class BasicLogger {
         }
     }
 
-    /**
-     * Print our stack trace as an enclosed exception for the specified stack
-     * trace.
-     */
     protected void printEnclosedStackTrace(Throwable thiz,
             StackTraceElement[] enclosingTrace,
             String caption,
             String prefix,
             Set<Throwable> dejaVu) {
+        printEnclosedStackTrace(thiz, enclosingTrace, caption, prefix, dejaVu, true);
+    }
+
+    /**
+     * Print our stack trace as an enclosed exception for the specified stack
+     * trace.
+     *
+     * @param thiz throwable
+     * @param enclosingTrace
+     * @param caption
+     * @param prefix
+     * @param dejaVu
+     * @param printStacks
+     */
+    protected void printEnclosedStackTrace(Throwable thiz,
+            StackTraceElement[] enclosingTrace,
+            String caption,
+            String prefix,
+            Set<Throwable> dejaVu,
+            boolean printStacks) {
 //        assert Thread.holdsLock(s.lock());
         if (dejaVu.contains(thiz)) {
             error("\t\u00a76[CIRCULAR REFERENCE:" + toString(thiz) + "\u00a76]");
@@ -374,26 +388,28 @@ public class BasicLogger {
             dejaVu.add(thiz);
             // Compute number of frames in common between this and enclosing trace
             StackTraceElement[] trace = getOurStackTrace(thiz);
-            int m = trace.length - 1;
-            int n = enclosingTrace.length - 1;
-            while (m >= 0 && n >= 0 && trace[m].equals(enclosingTrace[n])) {
-                m--;
-                n--;
-            }
-            int framesInCommon = trace.length - 1 - m;
+            if (printStacks) {
+                int m = trace.length - 1;
+                int n = enclosingTrace.length - 1;
+                while (m >= 0 && n >= 0 && trace[m].equals(enclosingTrace[n])) {
+                    m--;
+                    n--;
+                }
+                int framesInCommon = trace.length - 1 - m;
 
-            // Print our stack trace
-            error(prefix + caption + toString(thiz));
-            for (int i = 0; i <= m; i++) {
-                this.printStackTraceElement(prefix, trace[i]);
-            }
-            if (framesInCommon != 0) {
-                error(prefix + "\t... " + framesInCommon + " more");
+                // Print our stack trace
+                error(prefix + caption + toString(thiz));
+                for (int i = 0; i <= m; i++) {
+                    this.printStackTraceElement(prefix, trace[i]);
+                }
+                if (framesInCommon != 0) {
+                    error(prefix + "\t... " + framesInCommon + " more");
+                }
             }
 
             // Print suppressed exceptions, if any
             for (Throwable se : thiz.getSuppressed()) {
-                this.printEnclosedStackTrace(se, trace, SUPPRESSED_CAPTION, prefix + "\t", dejaVu);
+                this.printEnclosedStackTrace(se, trace, SUPPRESSED_CAPTION, prefix + "\t", dejaVu, printStacks);
             }
 //                se.printEnclosedStackTrace(s, trace, SUPPRESSED_CAPTION,
 //                                           prefix +"\t", dejaVu);
@@ -401,7 +417,7 @@ public class BasicLogger {
             // Print cause, if any
             Throwable ourCause = thiz.getCause();
             if (ourCause != null) {
-                this.printEnclosedStackTrace(ourCause, trace, CAUSE_CAPTION, prefix, dejaVu);
+                this.printEnclosedStackTrace(ourCause, trace, CAUSE_CAPTION, prefix, dejaVu, printStacks);
             }
 //                ourCause.printEnclosedStackTrace(s, trace, CAUSE_CAPTION, prefix, dejaVu);
         }
@@ -435,31 +451,37 @@ public class BasicLogger {
     }
 
     public BasicLogger printStackTrace(Throwable thr) {
+        return printStackTrace(thr, true);
+    }
+
+    public BasicLogger printStackTrace(Throwable thr, boolean printStacks) {
         // Guard against malicious overrides of Throwable.equals by
         // using a Set with identity equality semantics.
         Set<Throwable> dejaVu
-                = Collections.newSetFromMap(new IdentityHashMap<Throwable, Boolean>());
+                = Collections.newSetFromMap(new IdentityHashMap<>());
         dejaVu.add(thr);
 
 //        synchronized (s.lock()) {
         // Print our stack trace
         error(toString(thr));
         StackTraceElement[] trace = getOurStackTrace(thr);
-        for (StackTraceElement traceElement : trace) {
-            this.printStackTraceElement(traceElement);
+        if (printStacks) {
+            for (StackTraceElement traceElement : trace) {
+                this.printStackTraceElement(traceElement);
 //            println("\tat " + traceElement);
+            }
         }
 
         // Print suppressed exceptions, if any
         for (Throwable se : thr.getSuppressed()) //                se.printEnclosedStackTrace(s, trace, SUPPRESSED_CAPTION, "\t", dejaVu);
         {
-            this.printEnclosedStackTrace(se, trace, SUPPRESSED_CAPTION, "\t", dejaVu);
+            this.printEnclosedStackTrace(se, trace, SUPPRESSED_CAPTION, "\t", dejaVu, printStacks);
         }
 
         // Print cause, if any
         Throwable ourCause = thr.getCause();
         if (ourCause != null) {
-            this.printEnclosedStackTrace(ourCause, trace, CAUSE_CAPTION, "", dejaVu);
+            this.printEnclosedStackTrace(ourCause, trace, CAUSE_CAPTION, "", dejaVu, printStacks);
         }
 //                ourCause.printEnclosedStackTrace(s, trace, CAUSE_CAPTION, "", dejaVu);
 //        }
@@ -502,6 +524,7 @@ public class BasicLogger {
         }
         return this;
     }*/
+    @SuppressWarnings("AssignmentToMethodParameter")
     public BasicLogger(String format, String errformat, String pname) {
         if (format == null) {
             format = "\u00a7f[\u00a7b%s\u00a7f] \u00a7e";
@@ -516,7 +539,8 @@ public class BasicLogger {
         out = new DefaultPrintStream();
         err = new ErrorPrintStream();
     }
-    public static BasicLogger createRawLogger(String format, String errformat, String plugin_name){
-        return new BasicLogger(format,errformat,plugin_name);
+
+    public static BasicLogger createRawLogger(String format, String errformat, String plugin_name) {
+        return new BasicLogger(format, errformat, plugin_name);
     }
 }

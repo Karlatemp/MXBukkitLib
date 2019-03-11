@@ -371,64 +371,19 @@ public class Logger extends BasicLogger {
     }
 
     protected void printStackTraceElement(StackTraceElement stack) {
-        printStackTraceElement(null, stack);
+        super.printStackTraceElement(stack);
     }
 
     protected void printStackTraceElement(String prefix, StackTraceElement stack) {
-        if (prefix == null || prefix.isEmpty()) {
-            error(getStackTraceElementMessage(stack));
-        } else {
-            error(prefix + getStackTraceElementMessage(stack));
-        }
+        super.printStackTraceElement(prefix,stack);
     }
 
-    /**
-     * Print our stack trace as an enclosed exception for the specified stack
-     * trace.
-     */
     protected void printEnclosedStackTrace(Throwable thiz,
             StackTraceElement[] enclosingTrace,
             String caption,
             String prefix,
             Set<Throwable> dejaVu) {
-//        assert Thread.holdsLock(s.lock());
-        if (dejaVu.contains(thiz)) {
-            error("\t\u00a76[CIRCULAR REFERENCE:" + toString(thiz) + "\u00a76]");
-        } else {
-            dejaVu.add(thiz);
-            // Compute number of frames in common between this and enclosing trace
-            StackTraceElement[] trace = getOurStackTrace(thiz);
-            int m = trace.length - 1;
-            int n = enclosingTrace.length - 1;
-            while (m >= 0 && n >= 0 && trace[m].equals(enclosingTrace[n])) {
-                m--;
-                n--;
-            }
-            int framesInCommon = trace.length - 1 - m;
-
-            // Print our stack trace
-            error(prefix + caption + toString(thiz));
-            for (int i = 0; i <= m; i++) {
-                this.printStackTraceElement(prefix, trace[i]);
-            }
-            if (framesInCommon != 0) {
-                error(prefix + "\t... " + framesInCommon + " more");
-            }
-
-            // Print suppressed exceptions, if any
-            for (Throwable se : thiz.getSuppressed()) {
-                this.printEnclosedStackTrace(se, trace, SUPPRESSED_CAPTION, prefix + "\t", dejaVu);
-            }
-//                se.printEnclosedStackTrace(s, trace, SUPPRESSED_CAPTION,
-//                                           prefix +"\t", dejaVu);
-
-            // Print cause, if any
-            Throwable ourCause = thiz.getCause();
-            if (ourCause != null) {
-                this.printEnclosedStackTrace(ourCause, trace, CAUSE_CAPTION, prefix, dejaVu);
-            }
-//                ourCause.printEnclosedStackTrace(s, trace, CAUSE_CAPTION, prefix, dejaVu);
-        }
+        super.printEnclosedStackTrace(thiz, enclosingTrace, caption, prefix, dejaVu);
     }
 
     public String toString(Throwable thr) {
@@ -437,36 +392,15 @@ public class Logger extends BasicLogger {
         //"\u00a7c%s\u00a7b: \u00a7e%s"
         return (message != null) ? ("\u00a7c" + s + "\u00a7b: \u00a7e" + message) : "\u00a7c" + s;
     }
+    
 
+    @Override
+    public Logger printStackTrace(Throwable thr, boolean printStacks) {
+        super.printStackTrace(thr, printStacks); //To change body of generated methods, choose Tools | Templates.
+        return this;
+    }
     public Logger printStackTrace(Throwable thr) {
-        // Guard against malicious overrides of Throwable.equals by
-        // using a Set with identity equality semantics.
-        Set<Throwable> dejaVu
-                = Collections.newSetFromMap(new IdentityHashMap<Throwable, Boolean>());
-        dejaVu.add(thr);
-
-//        synchronized (s.lock()) {
-        // Print our stack trace
-        error(toString(thr));
-        StackTraceElement[] trace = getOurStackTrace(thr);
-        for (StackTraceElement traceElement : trace) {
-            this.printStackTraceElement(traceElement);
-//            println("\tat " + traceElement);
-        }
-
-        // Print suppressed exceptions, if any
-        for (Throwable se : thr.getSuppressed()) //                se.printEnclosedStackTrace(s, trace, SUPPRESSED_CAPTION, "\t", dejaVu);
-        {
-            this.printEnclosedStackTrace(se, trace, SUPPRESSED_CAPTION, "\t", dejaVu);
-        }
-
-        // Print cause, if any
-        Throwable ourCause = thr.getCause();
-        if (ourCause != null) {
-            this.printEnclosedStackTrace(ourCause, trace, CAUSE_CAPTION, "", dejaVu);
-        }
-//                ourCause.printEnclosedStackTrace(s, trace, CAUSE_CAPTION, "", dejaVu);
-//        }
+        super.printStackTrace(thr);
         return this;
     }
 

@@ -29,7 +29,7 @@ public class VMHelper {
             return new VMHelperImpl();
         } catch (Error | RuntimeException thr) {
             try {
-                Plugin.plugin.getLoggerEX().printStackTrace(thr);
+                Plugin.getLoggerEX().printStackTrace(thr);
             } catch (Throwable thrx) {
                 thrx.printStackTrace();
                 thr.printStackTrace();

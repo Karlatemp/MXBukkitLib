@@ -39,7 +39,7 @@ public class UniJsonWriter extends JsonWriter {
             }
         } catch (Exception e) {
             try {
-                Plugin.plugin.getLoggerEX().printStackTrace(e);
+                Plugin.getLoggerEX().printStackTrace(e);
             } catch (Throwable thr) {
                 e.printStackTrace();
             }

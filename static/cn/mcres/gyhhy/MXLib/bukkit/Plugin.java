@@ -9,6 +9,7 @@ import cn.mcres.gyhhy.MXLib.StringHelper;
 import cn.mcres.gyhhy.MXLib.http.WebHelper;
 import cn.mcres.gyhhy.MXLib.log.Logger;
 import cn.mcres.gyhhy.MXLib.spigot.SpigotHelper;
+import cn.mcres.gyhhy.MXLib.system.ConfSave;
 import cn.mcres.gyhhy.MXLib.system.VMHelper;
 import java.io.File;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ public class Plugin extends org.bukkit.plugin.java.JavaPlugin {
     public static final String github = "https://raw.githubusercontent.com/GYHHY/MXBukkitLib/master/version.txt";
 
     public static Plugin plugin = null;
+    public static Logger exl = Logger.createRawLogger(null, null, "MXBukkitLib");
     static {
         try {
             Class.forName(MXAPI.class.getName());
@@ -41,11 +43,13 @@ public class Plugin extends org.bukkit.plugin.java.JavaPlugin {
         return super.getFile(); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public void onEnable() {
-        VMHelper.load();
-        System.out.println(VMHelper.class.getClassLoader());
-        super.saveDefaultConfig();
-        this.reloadConfig();
+    @Override
+    public void reloadConfig() {
+        super.reloadConfig(); //To change body of generated methods, choose Tools | Templates.
+        ConfSave.reload(getConfig());
+    }
+    public static void setup(org.bukkit.plugin.Plugin thiz){
+    
         Info info = Info.getInfo();
         Map<String, Object> argc = new HashMap<>();
         argc.put("", "\u00a7e");
@@ -57,7 +61,14 @@ public class Plugin extends org.bukkit.plugin.java.JavaPlugin {
                         MXAPI.getTitleAPI().getClass().getName(), SpigotHelper.isSupportSpigot(),
                         MXAPI.isPayMode()), argc);
         write(sp);
-        getServer().getScheduler().runTaskLaterAsynchronously(this, this::checkup, 0);
+        org.bukkit.Bukkit.getServer().getScheduler().runTaskLaterAsynchronously(thiz, Plugin::checkup, 0);
+    }
+    public void onEnable() {
+        VMHelper.load();
+        System.out.println(VMHelper.class.getClassLoader());
+        super.saveDefaultConfig();
+        this.reloadConfig();
+        setup(this);
 //        checkup();
         rundeb();
     }
@@ -67,10 +78,10 @@ public class Plugin extends org.bukkit.plugin.java.JavaPlugin {
     public void onDisable() {
         VMHelper.vhelper.onDisable();
     }
-    public Logger getLoggerEX(){
-        return Logger.getOrCreateLogger(this);
+    public static Logger getLoggerEX(){
+        return exl;
     }
-    public void write(String sp) {
+    public static void write(String sp) {
         Logger logger = getLoggerEX();
         if (sp.indexOf('\n') > -1) {
             String[] lines = sp.split("\\n");
@@ -82,7 +93,7 @@ public class Plugin extends org.bukkit.plugin.java.JavaPlugin {
         }
     }
 
-    private void checkup() {
+    private static void checkup() {
         WebHelper.http(github).response((a, b, c) -> {
             Scanner scanner = new Scanner(c);
             String lastest = scanner.nextLine();
@@ -99,7 +110,7 @@ public class Plugin extends org.bukkit.plugin.java.JavaPlugin {
         }).connect();
     }
 
-    private void haveNew() {
+    private static void haveNew() {
         write("This Lib is not the lastest.\ndownload the lastest from https://github.com/GYHHY/MXBukkitLib");
     }
 

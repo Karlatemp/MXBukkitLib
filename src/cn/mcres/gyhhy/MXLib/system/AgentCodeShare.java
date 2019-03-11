@@ -19,7 +19,7 @@ import java.util.zip.ZipOutputStream;
  * @author 32798
  */
 public class AgentCodeShare {
-
+    public static boolean setup = true;
     public static File copy(File f) throws IOException {
         File store = new File("./plugins/MXBukkitLib/Bootstrap.jar");
         if (!store.isFile() || store.lastModified() < f.lastModified()) {

@@ -11,6 +11,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 import java.util.jar.JarFile;
 
@@ -74,6 +75,7 @@ public class AgentStore {
 
         @Override
         public boolean add(ClassFileTransformer e) {
+            Objects.requireNonNull(e);
             if (this.contains(e)) {
                 return false;
             }
@@ -83,17 +85,13 @@ public class AgentStore {
                 nw[list.length] = e;
                 list = nw;
             }
-            try {
-                System.out.println("[MXBukkitLib][HotAgent] Append Class File Transformer: " + e);
-            } catch (Throwable t) {
-                System.out.println("[MXBukkitLib][HotAgent] Append Class File Transformer: " + e.getClass().getName());
-            }
             return true;
         }
 
         @Override
         @SuppressWarnings("element-type-mismatch")
         public boolean remove(Object o) {
+            Objects.requireNonNull(o);
             if (this.contains(o)) {
                 synchronized (this) {
                     int ind = -1;
@@ -108,11 +106,6 @@ public class AgentStore {
                     System.arraycopy(list, 0, nw, 0, ind);
                     System.arraycopy(list, ind + 1, nw, ind, nw.length - ind);
                     list = nw;
-                }
-                try {
-                    System.out.println("[MXBukkitLib][HotAgent] Remove Class File Transformer: " + o);
-                } catch (Throwable t) {
-                    System.out.println("[MXBukkitLib][HotAgent] Remove Class File Transformer: " + o.getClass().getName());
                 }
                 return true;
             }
@@ -156,18 +149,33 @@ public class AgentStore {
         @Override
         public void addTransformer(ClassFileTransformer transformer, boolean canRetransform) {
             cfts.add(transformer);
+            try {
+                System.out.println("[MXBukkitLib][HotAgent] Append Class File Transformer: " + transformer + ", canRetransform = " + canRetransform);
+            } catch (Throwable t) {
+                System.out.println("[MXBukkitLib][HotAgent] Append Class File Transformer: " + transformer.getClass().getName() + ", canRetransform = " + canRetransform);
+            }
             ix.addTransformer(transformer, canRetransform);
         }
 
         @Override
         public void addTransformer(ClassFileTransformer transformer) {
             cfts.add(transformer);
+            try {
+                System.out.println("[MXBukkitLib][HotAgent] Append Class File Transformer: " + transformer);
+            } catch (Throwable t) {
+                System.out.println("[MXBukkitLib][HotAgent] Append Class File Transformer: " + transformer.getClass().getName());
+            }
             ix.addTransformer(transformer);
         }
 
         @Override
         public boolean removeTransformer(ClassFileTransformer transformer) {
             cfts.remove(transformer);
+            try {
+                System.out.println("[MXBukkitLib][HotAgent] Remove Class File Transformer: " + transformer);
+            } catch (Throwable t) {
+                System.out.println("[MXBukkitLib][HotAgent] Remove Class File Transformer: " + transformer.getClass().getName());
+            }
             return ix.removeTransformer(transformer);
         }
 
@@ -178,6 +186,9 @@ public class AgentStore {
 
         @Override
         public void retransformClasses(Class<?>... classes) throws UnmodifiableClassException {
+            for (Class<?> c : classes) {
+                System.out.println("[MXBukkitLib][HotAgent] Retransform Classes: " + c);
+            }
             ix.retransformClasses(classes);
         }
 
@@ -188,6 +199,9 @@ public class AgentStore {
 
         @Override
         public void redefineClasses(ClassDefinition... definitions) throws ClassNotFoundException, UnmodifiableClassException {
+            for (ClassDefinition c : definitions) {
+                System.out.println("[MXBukkitLib][HotAgent] Redefine Classes: " + c);
+            }
             ix.redefineClasses(definitions);
         }
 
@@ -213,11 +227,13 @@ public class AgentStore {
 
         @Override
         public void appendToBootstrapClassLoaderSearch(JarFile jarfile) {
+            System.out.println("[MXBukkitLib][HotAgent] Append " + jarfile.getName() + " to Bootstarp Class Loader search");
             ix.appendToBootstrapClassLoaderSearch(jarfile);
         }
 
         @Override
         public void appendToSystemClassLoaderSearch(JarFile jarfile) {
+            System.out.println("[MXBukkitLib][HotAgent] Append " + jarfile.getName() + " to System Class Loader search");
             ix.appendToSystemClassLoaderSearch(jarfile);
         }
 
@@ -229,6 +245,11 @@ public class AgentStore {
         @Override
         public void setNativeMethodPrefix(ClassFileTransformer transformer, String prefix) {
             cfts.add(transformer);
+            try {
+                System.out.println("[MXBukkitLib][HotAgent] SetNativeMethodPrefix: " + transformer + ", prefix=" + prefix);
+            } catch (Throwable t) {
+                System.out.println("[MXBukkitLib][HotAgent] SetNativeMethodPrefix: " + transformer.getClass().getName() + ", prefix=" + prefix);
+            }
             ix.setNativeMethodPrefix(transformer, prefix);
         }
     }
