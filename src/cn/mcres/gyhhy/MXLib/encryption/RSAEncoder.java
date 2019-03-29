@@ -104,7 +104,7 @@ public class RSAEncoder extends Encoder {
     }
 
     @Override
-    public RSAPublicKey getPubkicKey(byte[] pub) {
+    public RSAPublicKey getPublicKey(byte[] pub) {
         return (RSAPublicKey) Encoder.getPublicKey(Encoder.getKeyFactory(AL), pub);
     }
 

@@ -24,7 +24,7 @@ public class TitleAPI extends DefaultTitleAPI{
     }
 
     @Override
-    public void sendTitle(Player player, Integer fadeIn, Integer stay, Integer fadeOut, String title, String subtitle) {
+    public void sendTitle(Player player, Integer fadeIn, Integer stay, Integer fadeOut, String title, String subtitle,TextFormatType format) {
 
         PacketPlayOutTitle.EnumTitleAction e;
         IChatBaseComponent chatTitle;
@@ -37,12 +37,12 @@ public class TitleAPI extends DefaultTitleAPI{
             title = title.replaceAll("%player%", player.getDisplayName());
             // Times packets
             e = PacketPlayOutTitle.EnumTitleAction.TIMES;
-            chatTitle = IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + title + "\"}");
+            chatTitle = IChatBaseComponent.ChatSerializer.a(format.format(title));
             titlePacket = new PacketPlayOutTitle(e, chatTitle, fadeIn, stay, fadeOut);
             sendPacket(player, titlePacket);
 
             e = PacketPlayOutTitle.EnumTitleAction.TITLE;
-            chatTitle = IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + title + "\"}");
+            chatTitle = IChatBaseComponent.ChatSerializer.a(format.format(title));
             titlePacket = new PacketPlayOutTitle(e, chatTitle);
             sendPacket(player, titlePacket);
         }
@@ -52,20 +52,20 @@ public class TitleAPI extends DefaultTitleAPI{
             subtitle = subtitle.replaceAll("%player%", player.getDisplayName());
             // Times packets
             e = PacketPlayOutTitle.EnumTitleAction.TIMES;
-            chatSubtitle = IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + title + "\"}");
+            chatSubtitle = IChatBaseComponent.ChatSerializer.a(format.format(title));
 
             subtitlePacket = new PacketPlayOutTitle(e, chatSubtitle, fadeIn, stay, fadeOut);
             sendPacket(player, subtitlePacket);
 
             e = PacketPlayOutTitle.EnumTitleAction.SUBTITLE;
-            chatSubtitle = IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + subtitle + "\"}");
+            chatSubtitle = IChatBaseComponent.ChatSerializer.a(format.format(subtitle));
             subtitlePacket = new PacketPlayOutTitle(e, chatSubtitle, fadeIn, stay, fadeOut);
             sendPacket(player, subtitlePacket);
         }
     }
 
     @Override
-    public void sendTabTitle(Player player, String header, String footer) {
+    public void sendTabTitle(Player player, String header, String footer,TextFormatType format) {
         if (header == null) {
             header = "";
         }
@@ -78,8 +78,8 @@ public class TitleAPI extends DefaultTitleAPI{
 
         header = header.replaceAll("%player%", player.getDisplayName());
         footer = footer.replaceAll("%player%", player.getDisplayName());
-        IChatBaseComponent tab_header = IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + header + "\"}");
-        IChatBaseComponent tab_footer = IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + footer + "\"}");
+        IChatBaseComponent tab_header = IChatBaseComponent.ChatSerializer.a(format.format(header));
+        IChatBaseComponent tab_footer = IChatBaseComponent.ChatSerializer.a(format.format(footer));
         PacketPlayOutPlayerListHeaderFooter packet = new PacketPlayOutPlayerListHeaderFooter();
         try {
             Field field = PacketPlayOutPlayerListHeaderFooter.class.getDeclaredField("b");
@@ -95,12 +95,12 @@ public class TitleAPI extends DefaultTitleAPI{
     }
 
     @Override
-    public void sendOutChat(Player player, String text) {
+    public void sendOutChat(Player player, String text,TextFormatType format) {
         if (text == null) {
             text = "";
         }
         text = ChatColor.translateAlternateColorCodes('&', text);
-        IChatBaseComponent chatText = IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + text + "\"}");
+        IChatBaseComponent chatText = IChatBaseComponent.ChatSerializer.a(format.format(text));
         //Object chatText = getNMSClass("IChatBaseComponent").getDeclaredClasses()[0].getMethod("a", new Class[]{String.class}).invoke(null, new Object[]{});
         PacketPlayOutChat packet = new PacketPlayOutChat(chatText, ChatMessageType.GAME_INFO);
 //        Constructor<?> titleConstructor = getNMSClass("PacketPlayOutChat").getConstructor(new Class[]{getNMSClass("IChatBaseComponent"), Byte.TYPE});

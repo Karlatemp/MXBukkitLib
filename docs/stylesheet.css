@@ -6,15 +6,13 @@ Overall document style
 @import url('resources/fonts/dejavu.css');
 
 body {
-    background-color:#ffffff;
-    color:#353833;
-    font-family:'DejaVu Sans', Arial, Helvetica, sans-serif;
-    font-size:14px;
+    background-color: black;
     margin:0;
+    color: white;
 }
 a:link, a:visited {
     text-decoration:none;
-    color:#4A6782;
+    color: #95b7d6;
 }
 a:hover, a:focus {
     text-decoration:none;
@@ -147,7 +145,7 @@ Navigation bar styles
     font-size:12px;
 }
 .subNav {
-    background-color:#dee3e9;
+    background-color: #545f6b;
     float:left;
     width:100%;
     overflow:hidden;
@@ -169,6 +167,7 @@ ul.navList li{
     float:left;
     padding: 5px 6px;
     text-transform:uppercase;
+    color: antiquewhite;
 }
 ul.subNavList li{
     list-style:none;
@@ -214,7 +213,7 @@ Page header and footer styles
     font-size:13px;
 }
 .title {
-    color:#2c4557;
+    color: #4499d6;
     margin:10px 0;
 }
 .subTitle {
@@ -235,13 +234,13 @@ Page header and footer styles
 Heading styles
 */
 div.details ul.blockList ul.blockList ul.blockList li.blockList h4, div.details ul.blockList ul.blockList ul.blockListLast li.blockList h4 {
-    background-color:#dee3e9;
+    background-color: #2c4563;
     border:1px solid #d0d9e0;
     margin:0 0 6px -8px;
     padding:7px 5px;
 }
 ul.blockList ul.blockList ul.blockList li.blockList h3 {
-    background-color:#dee3e9;
+    background-color: #4d5661;
     border:1px solid #d0d9e0;
     margin:0 0 6px -8px;
     padding:7px 5px;
@@ -331,12 +330,12 @@ ul.blockList li.blockList, ul.blockListLast li.blockList {
 }
 ul.blockList ul.blockList li.blockList, ul.blockList ul.blockListLast li.blockList {
     padding:0px 20px 5px 10px;
-    border:1px solid #ededed; 
-    background-color:#f8f8f8;
+    border:1px solid #ededed;
+    background-color: #191515;
 }
 ul.blockList ul.blockList ul.blockList li.blockList, ul.blockList ul.blockList ul.blockListLast li.blockList {
     padding:0 0 5px 8px;
-    background-color:#ffffff;
+    background-color: #5d4242;
     border:none;
 }
 ul.blockList ul.blockList ul.blockList ul.blockList li.blockList {
@@ -472,7 +471,8 @@ td.colOne, td.colFirst, td.colLast, .useSummary td, .constantsSummary td{
     padding-bottom:3px;
 }
 th.colFirst, th.colLast, th.colOne, .constantsSummary th {
-    background:#dee3e9;
+    background: #252f3c;
+    color: white;
     text-align:left;
     padding:8px 3px 3px 7px;
 }
@@ -502,10 +502,10 @@ td.colOne a:link, td.colOne a:active, td.colOne a:visited, td.colOne a:hover, td
     background-color:#EEEEFF;
 }
 .altColor {
-    background-color:#FFFFFF;
+    background-color: #251d1d;
 }
 .rowColor {
-    background-color:#EEEEEF;
+    background-color: #373740;
 }
 /*
 Content styles
@@ -553,7 +553,7 @@ h1.hidden {
 .block {
     display:block;
     margin:3px 10px 2px 0px;
-    color:#474747;
+    color: #cea0a0;
 }
 .deprecatedLabel, .descfrmTypeLabel, .memberNameLabel, .memberNameLink,
 .overrideSpecifyLabel, .packageHierarchyLabel, .paramLabel, .returnLabel,

@@ -98,7 +98,7 @@ public abstract class Encoder {
         }
     }
     public abstract PrivateKey getPrivateKey(byte[] pri);
-    public abstract PublicKey getPubkicKey(byte[] pub);
+    public abstract PublicKey getPublicKey(byte[] pub);
     public abstract KeyPairGenerator getKeyPairGenerator();
 
     public abstract byte[] encode(byte[] data, PublicKey pk);

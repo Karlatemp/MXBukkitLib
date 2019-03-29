@@ -1,6 +1,6 @@
 name: MXBukkitLib
 anthor: Karlatemp
-version: 0.16
+version: 0.19
 main: cn.mcres.gyhhy.MXLib.bukkit.Plugin
 load: STARTUP
 website: https://www.mcres.cn/resources/73/

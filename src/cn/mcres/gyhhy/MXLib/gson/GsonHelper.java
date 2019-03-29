@@ -6,6 +6,7 @@
 package cn.mcres.gyhhy.MXLib.gson;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
 
 /**
@@ -13,6 +14,8 @@ import com.google.gson.stream.JsonWriter;
  * @author 32798
  */
 public class GsonHelper {
+    public static final Gson def = new Gson();
+    public static final Gson format = new GsonBuilder().setPrettyPrinting().create();
     public static <T extends JsonWriter> T setPrettyPrinting(Gson gson,T t){
         t.setIndent("  ");
         return t;
