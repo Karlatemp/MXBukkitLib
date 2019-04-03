@@ -61,7 +61,7 @@ public class Plugin extends org.bukkit.plugin.java.JavaPlugin {
                         MXAPI.getTitleAPI().getClass().getName(), SpigotHelper.isSupportSpigot(),
                         MXAPI.isPayMode()), argc);
         write(sp);
-        org.bukkit.Bukkit.getServer().getScheduler().runTaskLaterAsynchronously(thiz, Plugin::checkup, 0);
+        UpdateCheck.check(thiz);
     }
     public void onEnable() {
         VMHelper.load();
@@ -93,41 +93,8 @@ public class Plugin extends org.bukkit.plugin.java.JavaPlugin {
         }
     }
 
-    private static void checkup() {
-        WebHelper.http(github).response((a, b, c) -> {
-            Scanner scanner = new Scanner(c);
-            String lastest = scanner.nextLine();
-            scanner.close();
-            b.disconnect();
-
-            if (!MXAPI.getVersion().trim().equalsIgnoreCase(lastest.trim())) {
-                haveNew();
-                write("The lastest version: " + lastest);
-            } else {
-                write("This lib is the lastest version.");
-            }
-
-        }).connect();
-    }
-
-    private static void haveNew() {
-        write("This Lib is not the lastest.\ndownload the lastest from https://github.com/GYHHY/MXBukkitLib");
-    }
 
     private void debug() {
-        this.getServer().getPluginManager().registerEvents(new org.bukkit.event.Listener() {
-            @org.bukkit.event.EventHandler
-            public void onPlayerJoin(org.bukkit.event.player.PlayerJoinEvent event) {
-                org.bukkit.entity.Player player = event.getPlayer();
-                cn.mcres.gyhhy.MXLib.bukkit.profile.Profile file
-                        = cn.mcres.gyhhy.MXLib.bukkit.profile.ProfileHelper.getPlayerProfile(event.getPlayer());
-                player.sendMessage(
-                        String.valueOf(
-                                file
-                        ));
-                player.sendMessage(file.getTextures().getSkin().getUrl());
-            }
-        }, this);
     }
 
     private void rundeb() {

@@ -5,10 +5,12 @@
  */
 package cn.mcres.gyhhy.MXLib.fcs;
 
+import java.io.IOException;
+
 /**
  *
  * @author 32798
  */
 public interface F3c<A,B> extends Func{
-    void call(int code,A a, B b);
+    void call(int code,A a, B b) throws IOException;
 }
