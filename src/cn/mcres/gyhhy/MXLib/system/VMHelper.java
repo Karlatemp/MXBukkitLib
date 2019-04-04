@@ -28,11 +28,20 @@ public class VMHelper {
             VMHelperImpl.check();
             return new VMHelperImpl();
         } catch (Error | RuntimeException thr) {
-            try {
-                Plugin.getLoggerEX().printStackTrace(thr);
-            } catch (Throwable thrx) {
-                thrx.printStackTrace();
-                thr.printStackTrace();
+            if (thr instanceof java.security.AccessControlException) {
+                try {
+                    Plugin.getLoggerEX().printStackTrace(thr,false);
+                } catch (Throwable thrx) {
+                    System.err.println(thrx);
+                    System.err.println(thr);
+                }
+            } else {
+                try {
+                    Plugin.getLoggerEX().printStackTrace(thr);
+                } catch (Throwable thrx) {
+                    thrx.printStackTrace();
+                    thr.printStackTrace();
+                }
             }
             return new VMHelper();
         }

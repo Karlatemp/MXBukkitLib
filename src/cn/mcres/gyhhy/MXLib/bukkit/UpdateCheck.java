@@ -35,7 +35,8 @@ public class UpdateCheck {
             }
             b.disconnect();
             if (!MXAPI.getVersion().trim().equalsIgnoreCase(lastest.trim())) {
-                final String st = "This lib is out of style.\nPlease download the lastest from https://dev.tencent.com/u/GYHHY/p/MXBukkitLib/git/blob/master/dist/MXBukkitLib.jar\nor https://github.com/GYHHY/MXBukkitLib/blob/master/dist/MXBukkitLib.jar";
+                final String st = "This lib is out of style.\nPlease download the lastest from https://dev.tencent.com/u/GYHHY/p/MXBukkitLib/git/blob/master/dist/MXBukkitLib.jar\nor https://github.com/GYHHY/MXBukkitLib/blob/master/dist/MXBukkitLib.jar\n"
+                        + "Current version: " + MXAPI.getVersion()+"\nLastest version: " + lastest;
                 write(st);
                 Server s = Bukkit.getServer();
                 s.getOnlinePlayers().stream()
@@ -56,10 +57,19 @@ public class UpdateCheck {
                 write("This lib is the lastest version.");
             }
         };
-        try {
-            WebHelper.http(github).response(func).connect();
-        } catch (Throwable thr) {
-            WebHelper.http(tencent).response(func).connect();
-        }
+        WebHelper.http(github).response(func).onCatch((cat) -> {
+            try {
+                cn.mcres.gyhhy.MXLib.bukkit.Plugin.getLoggerEX().error("Checkup error from github.");
+            } catch (Throwable thrx) {
+                System.err.println("Checkup error from github.");
+            }
+            WebHelper.http(tencent).response(func).onCatch((tw) -> {
+                try {
+                    cn.mcres.gyhhy.MXLib.bukkit.Plugin.getLoggerEX().printStackTrace(tw, false);
+                } catch (Throwable thrx) {
+                    System.err.println(tw);
+                }
+            }).connect();
+        }).connect();
     }
 }

@@ -11,8 +11,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.JarURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.CodeSource;
+import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.JarFile;
@@ -22,6 +25,7 @@ import java.util.zip.ZipInputStream;
 
 /**
  * Class add in version 0.20
+ *
  * @author 32798
  */
 public class Options {
@@ -33,8 +37,16 @@ public class Options {
             PACKAGE_SEARCH_TYPE_USE_CONNECTION = 0;
     private static final Pattern pt = Pattern.compile("\\.[cC][lL][aA][sS]{2}$");
 
-    public static void main(String[] args) {
-
+    public static void main(String[] args) throws Exception {
+        Class c = Options.class;
+        ProtectionDomain pd = c.getProtectionDomain();
+        System.out.println(pd);
+        CodeSource cs = pd.getCodeSource();
+        System.out.println(cs);
+        URL loc = cs.getLocation();
+        System.out.println(loc);
+        URLConnection oc = loc.openConnection();
+        System.out.println(oc);
     }
 
     @SuppressWarnings({"rawtypes"})
@@ -84,30 +96,35 @@ public class Options {
     @SuppressWarnings({"rawtypes"})
     public static void searchInPackageWithConnection(ArrayList<Object> sr, Class cx) {
         URL url = cx.getResource(cx.getSimpleName() + ".class");
+        String pc = url.getProtocol();
         Package pag = cx.getPackage();
         String pn = pag.getName();
 //        sun.net.www.protocol.file.FileURLConnection;
         try {
             final ArrayList<Object> names = sr;
+            if (pc.equalsIgnoreCase("jar")) {
+                url = new URL(url.toString().replaceFirst("!/.*$", "!/"));
+            }
             URLConnection conn = url.openConnection();
             System.out.println(conn.getClass());
             if (conn instanceof JarURLConnection) {
                 JarURLConnection juc = (JarURLConnection) conn;
-                JarFile jf = juc.getJarFile();
-                jf.stream().filter((je) -> {
-                    String name = je.getName();
-                    if (name.endsWith(".class")) {
-                        if (name.replaceFirst("^/", "").replaceAll("/", ".").startsWith(pn)) {
-                            return true;
+                try (JarFile jf = juc.getJarFile()) {
+                    jf.stream().filter((je) -> {
+                        String name = je.getName();
+                        if (name.endsWith(".class")) {
+                            if (name.replaceFirst("^/", "").replaceAll("/", ".").startsWith(pn)) {
+                                return true;
+                            }
                         }
-                    }
-                    return false;
-                }).forEach((je) -> {
-                    names.add(
-                            pt.matcher(
-                                    je.getName().replaceFirst("^/", "").replaceAll("/", ".")
-                            ).replaceFirst(""));
-                });
+                        return false;
+                    }).forEach((je) -> {
+                        names.add(
+                                pt.matcher(
+                                        je.getName().replaceFirst("^/", "").replaceAll("/", ".")
+                                ).replaceFirst(""));
+                    });
+                }
             } else if (conn instanceof sun.net.www.protocol.file.FileURLConnection) {
                 File f = RefUtil.get(conn, "file");
                 File dir = new File(f, "..");
@@ -190,6 +207,7 @@ public class Options {
     private Object thiz;
     private int type, pst;
     private LanguageTranslator tts;
+
     public Options() {
     }
 
@@ -201,7 +219,6 @@ public class Options {
         this.tts = tts;
         return this;
     }
-
 
     public Class<?> main() {
         return main;
@@ -282,7 +299,7 @@ public class Options {
                 break;
             }
         }
-        if(tts != null){
+        if (tts != null) {
             exe.setLanguageTranslator(tts);
         }
         return exe;
