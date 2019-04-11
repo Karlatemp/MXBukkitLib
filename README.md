@@ -3,9 +3,9 @@ MXBukkitLib
 
 > GitHub:
 > ------
-> source: https://github.com/GYHHY/MXBukkitLib <br/>
-> java docs: https://gyhhy.github.io/MXBukkitLib/index.html
-> raw doc: https://raw.githubusercontent.com/GYHHY/MXBukkitLib/master/docs/
+> source: https://github.com/Karlatemp/MXBukkitLib <br/>
+> java docs: https://karlatemp.github.io/MXBukkitLib/index.html <br/>
+> raw doc: https://raw.githubusercontent.com/Karlatemp/MXBukkitLib/master/docs/
 
 > 腾讯云开发者平台(Tencent dev):
 > ------
