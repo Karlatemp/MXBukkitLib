@@ -64,13 +64,14 @@ public class Plugin extends org.bukkit.plugin.java.JavaPlugin {
         UpdateCheck.check(thiz);
     }
     public void onEnable() {
-        VMHelper.load();
-        System.out.println(VMHelper.class.getClassLoader());
         super.saveDefaultConfig();
         this.reloadConfig();
+        VMHelper.load();
+        System.out.println(VMHelper.class.getClassLoader());
         setup(this);
 //        checkup();
         rundeb();
+        AutoUpdate.run(this);
     }
     
     @Override

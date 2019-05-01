@@ -28,9 +28,10 @@ public class VMHelper {
             VMHelperImpl.check();
             return new VMHelperImpl();
         } catch (Error | RuntimeException thr) {
-            if (thr instanceof java.security.AccessControlException) {
+            if (thr instanceof java.security.AccessControlException
+                    || thr instanceof java.lang.ExceptionInInitializerError) {
                 try {
-                    Plugin.getLoggerEX().printStackTrace(thr,false);
+                    Plugin.getLoggerEX().printStackTrace(thr, false);
                 } catch (Throwable thrx) {
                     System.err.println(thrx);
                     System.err.println(thr);

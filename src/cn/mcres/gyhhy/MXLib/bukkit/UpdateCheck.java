@@ -14,18 +14,24 @@ import java.util.Scanner;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import static cn.mcres.gyhhy.MXLib.bukkit.Plugin.write;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 import org.bukkit.entity.Player;
 
 public class UpdateCheck {
 
+    public static final List<Consumer<String>> updatecheck = new ArrayList<>();
     public static final String github = "https://raw.githubusercontent.com/GYHHY/MXBukkitLib/master/version.txt",
             tencent = "https://dev.tencent.com/u/GYHHY/p/MXBukkitLib/git/raw/master/version.txt";
-
+    
     public static void check(Plugin pl) {
-        Server s = Bukkit.getServer();
-        s.getScheduler().runTaskLaterAsynchronously(pl, () -> setup(pl), 0);
+        if (pl.getConfig().getBoolean("update.enable", true)) {
+            Server s = Bukkit.getServer();
+            s.getScheduler().runTaskLaterAsynchronously(pl, () -> setup(pl), 0);
+        }
     }
-
+    
     public static void setup(Plugin pl) {
         @SuppressWarnings("Convert2Lambda")
         F3c<HttpURLConnection, InputStream> func = (a, b, c) -> {
@@ -36,7 +42,7 @@ public class UpdateCheck {
             b.disconnect();
             if (!MXAPI.getVersion().trim().equalsIgnoreCase(lastest.trim())) {
                 final String st = "This lib is out of style.\nPlease download the lastest from https://dev.tencent.com/u/GYHHY/p/MXBukkitLib/git/blob/master/dist/MXBukkitLib.jar\nor https://github.com/GYHHY/MXBukkitLib/blob/master/dist/MXBukkitLib.jar\n"
-                        + "Current version: " + MXAPI.getVersion()+"\nLastest version: " + lastest;
+                        + "Current version: " + MXAPI.getVersion() + "\nLastest version: " + lastest;
                 write(st);
                 Server s = Bukkit.getServer();
                 s.getOnlinePlayers().stream()
@@ -53,6 +59,7 @@ public class UpdateCheck {
                         }
                     }
                 }, pl);
+                updatecheck.forEach(x -> x.accept(lastest));
             } else {
                 write("This lib is the lastest version.");
             }

@@ -388,17 +388,17 @@ public class BasicLogger {
             dejaVu.add(thiz);
             // Compute number of frames in common between this and enclosing trace
             StackTraceElement[] trace = getOurStackTrace(thiz);
-            if (printStacks) {
-                int m = trace.length - 1;
-                int n = enclosingTrace.length - 1;
-                while (m >= 0 && n >= 0 && trace[m].equals(enclosingTrace[n])) {
-                    m--;
-                    n--;
-                }
-                int framesInCommon = trace.length - 1 - m;
+            int m = trace.length - 1;
+            int n = enclosingTrace.length - 1;
+            while (m >= 0 && n >= 0 && trace[m].equals(enclosingTrace[n])) {
+                m--;
+                n--;
+            }
+            int framesInCommon = trace.length - 1 - m;
 
-                // Print our stack trace
-                error(prefix + caption + toString(thiz));
+            // Print our stack trace
+            error(prefix + caption + toString(thiz));
+            if (printStacks) {
                 for (int i = 0; i <= m; i++) {
                     this.printStackTraceElement(prefix, trace[i]);
                 }
