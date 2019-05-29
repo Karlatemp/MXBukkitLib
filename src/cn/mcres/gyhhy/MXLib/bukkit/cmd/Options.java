@@ -93,20 +93,36 @@ public class Options {
         }
     }
 
+    /**
+     * (ArrayList&lt;Object>, Class)void -> (List&lt;Object>, Class)void
+     */
+    @SuppressWarnings({"rawtypes"})
+    public static void searchInPackageDefault(ArrayList<Object> sr, Class cx) {
+        searchInPackageDefault((List<Object>) sr, cx);
+    }
+
+    /**
+     * (ArrayList&lt;Object>, Class)void -> (List&lt;Object>, Class)void
+     */
     @SuppressWarnings({"rawtypes"})
     public static void searchInPackageWithConnection(ArrayList<Object> sr, Class cx) {
+        searchInPackageWithConnection((List<Object>) sr, cx);
+    }
+
+    @SuppressWarnings({"rawtypes"})
+    public static void searchInPackageWithConnection(List<Object> sr, Class cx) {
         URL url = cx.getResource(cx.getSimpleName() + ".class");
         String pc = url.getProtocol();
         Package pag = cx.getPackage();
         String pn = pag.getName();
 //        sun.net.www.protocol.file.FileURLConnection;
         try {
-            final ArrayList<Object> names = sr;
+            final List<Object> names = sr;
             if (pc.equalsIgnoreCase("jar")) {
                 url = new URL(url.toString().replaceFirst("!/.*$", "!/"));
             }
             URLConnection conn = url.openConnection();
-            System.out.println(conn.getClass());
+//            System.out.println(conn.getClass());
             if (conn instanceof JarURLConnection) {
                 JarURLConnection juc = (JarURLConnection) conn;
                 try (JarFile jf = juc.getJarFile()) {
@@ -156,7 +172,7 @@ public class Options {
     }
 
     @SuppressWarnings({"rawtypes"})
-    public static void searchInPackageDefault(ArrayList<Object> sr, Class cx) {
+    public static void searchInPackageDefault(List<Object> sr, Class cx) {
         Package pag = cx.getPackage();
         String ul = pag.getName() + ".";
         URL res = cx.getResource(cx.getSimpleName() + ".class");

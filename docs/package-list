@@ -14,12 +14,16 @@ cn.mcres.gyhhy.MXLib.chat
 cn.mcres.gyhhy.MXLib.encode
 cn.mcres.gyhhy.MXLib.encryption
 cn.mcres.gyhhy.MXLib.entity
+cn.mcres.gyhhy.MXLib.ext.java.util
+cn.mcres.gyhhy.MXLib.ext.lookup
 cn.mcres.gyhhy.MXLib.fcs
 cn.mcres.gyhhy.MXLib.gson
 cn.mcres.gyhhy.MXLib.http
 cn.mcres.gyhhy.MXLib.image
 cn.mcres.gyhhy.MXLib.io
 cn.mcres.gyhhy.MXLib.log
+cn.mcres.gyhhy.MXLib.math.graph
+cn.mcres.gyhhy.MXLib.math.modifier
 cn.mcres.gyhhy.MXLib.spigot
 cn.mcres.gyhhy.MXLib.store
 cn.mcres.gyhhy.MXLib.system
