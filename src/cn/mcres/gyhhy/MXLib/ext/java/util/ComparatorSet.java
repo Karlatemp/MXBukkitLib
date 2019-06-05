@@ -102,6 +102,27 @@ public class ComparatorSet<T> implements Set<T> {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public T search(Object k) {
+        @SuppressWarnings("LocalVariableHidesMemberVariable")
+        T[] list = this.list;
+        switch (list.length) {
+            case 0:
+                return null;
+            case 1: {
+                T kk = list[0];
+                if (ct.compare(kk, (T) k) == 0) {
+                    return kk;
+                }
+                return null;
+            }
+            default: {
+                int id = Arrays.binarySearch((Object[]) list, k, (Comparator) ct);
+                return id > -1 ? list[id] : null;
+            }
+        }
+    }
+
     @Override
     public Iterator<T> iterator() {
         return Arrays.asList(list).iterator();

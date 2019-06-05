@@ -21,3 +21,23 @@ jvm:
 update:
     enable: true
     autoupdate: true
+events:
+    # Enable Net Event Listen
+    NetEvent: true
+    # Enable Logging Event Listen
+    LogEvent: true
+logging:
+    removeSystemErrorLogging: false
+    useLibsLogger: true
+    SystemNoLogging:
+        # java.util.Level, Level's name
+        - DEBUG
+        #- OFF
+        #- SEVERE
+        - WARNING
+        #- INFO
+        - CONFIG
+        #- FINE
+        #- FINER
+        #- FINEST
+        - ALL

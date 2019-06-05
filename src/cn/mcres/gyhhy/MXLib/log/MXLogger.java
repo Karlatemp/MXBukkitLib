@@ -51,6 +51,11 @@ public class MXLogger extends Logger {
     }
 
     @Override
+    public void write(String line) {
+        printf(line);
+    }
+
+    @Override
     public MXLogger error(String line) {
         if (out != null) {
             out.log(Level.SEVERE, Ascii.ec(errprefix, line, Ascii.RESET));
@@ -107,7 +112,6 @@ public class MXLogger extends Logger {
         super.printf(line, argc); //To change body of generated methods, choose Tools | Templates.
         return this;
     }
-    
 
     @Override
     public MXLogger printf(String line, Object... argc) {
@@ -118,7 +122,7 @@ public class MXLogger extends Logger {
     MXLogger(Plugin plugin, String format, String errformat) {
         super(plugin, format, errformat);
         this.setLogger(java.util.logging.Logger.getGlobal());
-        
+
     }
 
     MXLogger(String format, String errformat, String pname) {

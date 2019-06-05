@@ -32,4 +32,15 @@ public interface StraightLine extends Distancer {
     default Point[] getPointSet() {
         return new Point[]{getRandPoint(), getRandPoint()};
     }
+
+    ABCStraightLine toABCStraightLine();
+
+    @Override
+    default double distance(Distancer d) {
+        if (d instanceof Point) {
+            return distance((Point) d);
+        }
+        return toABCStraightLine().distance(d);
+    }
+
 }

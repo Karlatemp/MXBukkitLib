@@ -18,38 +18,43 @@ import java.util.Scanner;
 
 /**
  * The Plugin Class
+ *
  * @author 32798
  */
 public class Plugin extends org.bukkit.plugin.java.JavaPlugin {
+
     /**
      * GitHub address for this project
      */
     public static final String github = "https://raw.githubusercontent.com/GYHHY/MXBukkitLib/master/version.txt";
-
+    
     public static Plugin plugin = null;
     public static Logger exl = Logger.createRawLogger(null, null, "MXBukkitLib");
+
     static {
         try {
             Class.forName(MXAPI.class.getName());
         } catch (ClassNotFoundException ex) {
         }
     }
-
+    
     public Plugin() {
         plugin = this;
     }
+
     @Override
     public File getFile() {
         return super.getFile(); //To change body of generated methods, choose Tools | Templates.
     }
-
+    
     @Override
     public void reloadConfig() {
         super.reloadConfig(); //To change body of generated methods, choose Tools | Templates.
         ConfSave.reload(getConfig());
     }
-    public static void setup(org.bukkit.plugin.Plugin thiz){
-    
+
+    public static void setup(org.bukkit.plugin.Plugin thiz) {
+        
         Info info = Info.getInfo();
         Map<String, Object> argc = new HashMap<>();
         argc.put("", "\u00a7e");
@@ -63,6 +68,7 @@ public class Plugin extends org.bukkit.plugin.java.JavaPlugin {
         write(sp);
         UpdateCheck.check(thiz);
     }
+
     public void onEnable() {
         super.saveDefaultConfig();
         this.reloadConfig();
@@ -78,10 +84,13 @@ public class Plugin extends org.bukkit.plugin.java.JavaPlugin {
     @SuppressWarnings("deprecation")
     public void onDisable() {
         VMHelper.vhelper.onDisable();
+        cn.mcres.gyhhy.MXLib.impl.SSMapping.onPlDSB(this);
     }
-    public static Logger getLoggerEX(){
+
+    public static Logger getLoggerEX() {
         return exl;
     }
+
     public static void write(String sp) {
         Logger logger = getLoggerEX();
         if (sp.indexOf('\n') > -1) {
@@ -93,11 +102,10 @@ public class Plugin extends org.bukkit.plugin.java.JavaPlugin {
             logger.printf(sp);
         }
     }
-
-
+    
     private void debug() {
     }
-
+    
     private void rundeb() {
         boolean db = false;
         if (db) {

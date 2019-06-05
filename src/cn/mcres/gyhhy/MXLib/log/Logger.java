@@ -18,7 +18,9 @@ import java.util.Scanner;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Formatter;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
@@ -75,7 +77,7 @@ public class Logger extends BasicLogger {
      * Print a line
      */
     public Logger printf(String line) {
-        write(prefix + line);
+        super.printf(line);
         return this;
     }
 
@@ -83,7 +85,7 @@ public class Logger extends BasicLogger {
      * Print a line, use error prefix
      */
     public Logger error(String line) {
-        write(errprefix + line);
+        super.error(line);
         return this;
     }
 
@@ -123,10 +125,14 @@ public class Logger extends BasicLogger {
         return this;
     }
 
+    public void write(String line) {
+        write(this, line);
+    }
+
     /**
      * This method will write a line to console.
      */
-    public static void write(String line) {
+    public static void write(BasicLogger logger, String line) {
         Server server = server();
         if (server == null) {
             System.out.println(Ascii.ec(line));
@@ -370,35 +376,36 @@ public class Logger extends BasicLogger {
         return Logger.getStackTraceElementMessage$return(stack, clazz, zip, version);
     }
 
-    protected void printStackTraceElement(StackTraceElement stack) {
-        super.printStackTraceElement(stack);
+    protected void printStackTraceElement(StackTraceElement stack, boolean err) {
+        super.printStackTraceElement(stack, err);
     }
 
-    protected void printStackTraceElement(String prefix, StackTraceElement stack) {
-        super.printStackTraceElement(prefix,stack);
+    protected void printStackTraceElement(String prefix, StackTraceElement stack, boolean err) {
+        super.printStackTraceElement(prefix, stack, err);
     }
 
     protected void printEnclosedStackTrace(Throwable thiz,
             StackTraceElement[] enclosingTrace,
             String caption,
             String prefix,
-            Set<Throwable> dejaVu) {
-        super.printEnclosedStackTrace(thiz, enclosingTrace, caption, prefix, dejaVu);
+            Set<Throwable> dejaVu, boolean err) {
+        super.printEnclosedStackTrace(thiz, enclosingTrace, caption, prefix, dejaVu, err);
     }
 
     public String toString(Throwable thr) {
-        String s = thr.getClass().getName();
-        String message = thr.getLocalizedMessage();
-        //"\u00a7c%s\u00a7b: \u00a7e%s"
-        return (message != null) ? ("\u00a7c" + s + "\u00a7b: \u00a7e" + message) : "\u00a7c" + s;
+        return super.toString(thr);
     }
-    
+
+    public Logger printStackTrace(Throwable thr, boolean printStacks) {
+        return printStackTrace(thr, printStacks, true);
+    }
 
     @Override
-    public Logger printStackTrace(Throwable thr, boolean printStacks) {
-        super.printStackTrace(thr, printStacks); //To change body of generated methods, choose Tools | Templates.
+    public Logger printStackTrace(Throwable thr, boolean printStacks, boolean err) {
+        super.printStackTrace(thr, printStacks, err); //To change body of generated methods, choose Tools | Templates.
         return this;
     }
+
     public Logger printStackTrace(Throwable thr) {
         super.printStackTrace(thr);
         return this;

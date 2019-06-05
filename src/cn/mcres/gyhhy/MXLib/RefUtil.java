@@ -11,6 +11,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import cn.mcres.gyhhy.MXLib.encode.Base64Actuator;
+import cn.mcres.gyhhy.MXLib.ext.lookup.Looker;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  *
@@ -21,7 +26,12 @@ public class RefUtil {
     @SuppressWarnings({"rawtypes"})
     public static final Class<?>[] emptyClassPar = new Class[0];
     public static final Object[] emptyArgPar = new Object[0];
-    @SuppressWarnings({"rawtypes","BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch", "AssignmentToMethodParameter"})
+    private static final MethodHandle defineClass = new Looker(Looker.openLookup(ClassLoader.class, ~0))
+            .findVirtual(ClassLoader.class, "defineClass", MethodType.methodType(
+                    Class.class, String.class, byte[].class, int.class, int.class
+            ));
+
+    @SuppressWarnings({"rawtypes", "BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch", "AssignmentToMethodParameter"})
     private static Method getMethod(Class<?> clazz, String name, Class<?>[] par) {
         if (clazz != null) {
             if (par == null) {
@@ -53,7 +63,7 @@ public class RefUtil {
         return ink(null, cl, name, par, obj);
     }
 
-    @SuppressWarnings({"rawtypes","unchecked","AssignmentToMethodParameter", "BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch"})
+    @SuppressWarnings({"rawtypes", "unchecked", "AssignmentToMethodParameter", "BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch"})
     public static <T> T ink(Object thiz, Class<?> clazz, String name, Class[] par, Object[] obj) {
         if (clazz == null) {
             clazz = thiz.getClass();
@@ -108,7 +118,7 @@ public class RefUtil {
         return set(getField(clazz, field), thiz, value);
     }
 
-    @SuppressWarnings({"rawtypes","AssignmentToMethodParameter", "UseSpecificCatch", "BroadCatchBlock", "TooBroadCatch", "CallToPrintStackTrace"})
+    @SuppressWarnings({"rawtypes", "AssignmentToMethodParameter", "UseSpecificCatch", "BroadCatchBlock", "TooBroadCatch", "CallToPrintStackTrace"})
     public static <T> T set(Field fe, Object thiz, Object value) {
         T old = get(fe, thiz);
         boolean acc = fe.isAccessible();
@@ -234,6 +244,58 @@ public class RefUtil {
             clazz = clazz.getSuperclass();
         } while (last != clazz && clazz != null);
         return null;
+    }
+
+    public static String encodeClass(String name, byte[] code) {
+        Base64Actuator b = Base64Actuator.getInstance();
+        String bec = b.encodeToString(code);
+        if (name == null) {
+            return bec;
+        }
+        return b.encodeToString(name.getBytes(UTF_8)) + "|" + bec;
+    }
+
+    public static <T> Class<T> loadClass(ClassLoader loader, String name, byte[] code, int off, int len) {
+        try {
+            return (Class<T>) defineClass.invoke(loader, name, code, off, len);
+        } catch (Throwable ex) {
+            return ThrowHelper.getInstance().thr(ex);
+        }
+    }
+
+    /**
+     * 0b 00 00 00 00 00 01 - No Named
+     *
+     * @param encoded
+     * @param loader
+     * @param flags
+     * @return
+     */
+    public static Class<?> loadClass(String encoded, ClassLoader loader, int flags) {
+        String name;
+        String code;
+        String[] pp = encoded.split("\\|");
+        if (pp.length == 1) {
+            name = null;
+            code = pp[0];
+        } else {
+            if ((flags & 1) != 0) {
+                name = null;
+            } else {
+                name = pp[0];
+            }
+            code = pp[1];
+        }
+        Base64Actuator b = Base64Actuator.getInstance();
+        if (name != null) {
+            name = b.decodeToString(name);
+        }
+        byte[] c = b.decode(code);
+        return loadClass(loader, name, c, 0, c.length);
+    }
+
+    public static Class<?> loadClass(String encoded, ClassLoader loader) {
+        return loadClass(encoded, loader, 0);
     }
 
     private RefUtil() {

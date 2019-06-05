@@ -446,6 +446,13 @@ public class StringHelper {
     public static byte[] getBytes(String string) throws UnsupportedEncodingException{
         return getBytes(string,"UTF-8");
     }
+
+    public static String fill(char c, int length) {
+        char[] list = new char[length];
+        for(int i = 0; i < length; i ++)
+            list[i]=c;
+        return new String(list);
+    }
     private String str;
     public StringHelper(String str){
         this.str = str;

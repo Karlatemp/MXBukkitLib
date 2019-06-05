@@ -8,11 +8,13 @@ package cn.mcres.gyhhy.MXLib.math.graph;
 import static java.lang.Math.*;
 
 public class PointStraightLine implements StraightLine {
+
     public static void main(String[] args) {
         PointStraightLine l = new PointStraightLine(new DoublePoint(1, 0, 7), new DoublePoint(57, 15, 5));
         System.out.format("%s,%s,%s%n%s,%s,%s%n", l.x, l.y, l.z, l.xa, l.ya, l.za);
         System.out.println(l.getPoint(0));
     }
+
     /**
      * Copy from
      * <a href="https://blog.csdn.net/piaoxuezhong/article/details/71519426">
@@ -35,7 +37,6 @@ public class PointStraightLine implements StraightLine {
 
     private final double x, y, z, xa, ya, za;
     private final Point a, b;
-
 
     public PointStraightLine(Point a, Point b) {
         this.a = a;
@@ -66,10 +67,11 @@ public class PointStraightLine implements StraightLine {
 //        double len = Math.sqrt(x2 * x2 + y2 * y2 + z2 * z2);
         double len = x2;
 //        System.out.println("L:X " + len + "," + x2);
-        x2 /= len;
-        y2 /= len;
-        z2 /= len;
-
+        if (x2 != 0) {
+            x2 /= len;
+            y2 /= len;
+            z2 /= len;
+        }
         this.x = x1;
         this.y = y1;
         this.z = z1;
@@ -94,4 +96,17 @@ public class PointStraightLine implements StraightLine {
         return DistanceOfPointToLine(a, b, o);
     }
 
+    @Override
+    public ABCStraightLine toABCStraightLine() {
+        /*
+         * A = y2 - y1,
+         * B = x1 - x2,
+         * C = (x2 * y1) - (x1 * y2)
+         */
+        return new ABCStraightLine(
+                b.getYAsDouble() - a.getYAsDouble(),
+                a.getXAsDouble() - b.getXAsDouble(),
+                (b.getXAsDouble() * a.getYAsDouble()) - (a.getXAsDouble() * b.getYAsDouble())
+        );
+    }
 }

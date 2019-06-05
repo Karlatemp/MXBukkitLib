@@ -5,6 +5,8 @@
  */
 package cn.mcres.gyhhy.MXLib.bukkit;
 
+import cn.mcres.gyhhy.MXLib.Version;
+import cn.mcres.gyhhy.MXLib.impl.SSMapping;
 import org.bukkit.plugin.Plugin;
 import cn.mcres.gyhhy.MXLib.http.WebHelper;
 import cn.mcres.gyhhy.MXLib.fcs.F3c;
@@ -24,14 +26,15 @@ public class UpdateCheck {
     public static final List<Consumer<String>> updatecheck = new ArrayList<>();
     public static final String github = "https://raw.githubusercontent.com/GYHHY/MXBukkitLib/master/version.txt",
             tencent = "https://dev.tencent.com/u/GYHHY/p/MXBukkitLib/git/raw/master/version.txt";
-    
+
     public static void check(Plugin pl) {
+        SSMapping.onPlEnb(pl);
         if (pl.getConfig().getBoolean("update.enable", true)) {
             Server s = Bukkit.getServer();
             s.getScheduler().runTaskLaterAsynchronously(pl, () -> setup(pl), 0);
         }
     }
-    
+
     public static void setup(Plugin pl) {
         @SuppressWarnings("Convert2Lambda")
         F3c<HttpURLConnection, InputStream> func = (a, b, c) -> {
@@ -40,7 +43,7 @@ public class UpdateCheck {
                 lastest = scanner.nextLine();
             }
             b.disconnect();
-            if (!MXAPI.getVersion().trim().equalsIgnoreCase(lastest.trim())) {
+            if (Version.compare(MXAPI.getVersion().trim(), lastest.trim()) < 0) {
                 final String st = "This lib is out of style.\nPlease download the lastest from https://dev.tencent.com/u/GYHHY/p/MXBukkitLib/git/blob/master/dist/MXBukkitLib.jar\nor https://github.com/GYHHY/MXBukkitLib/blob/master/dist/MXBukkitLib.jar\n"
                         + "Current version: " + MXAPI.getVersion() + "\nLastest version: " + lastest;
                 write(st);

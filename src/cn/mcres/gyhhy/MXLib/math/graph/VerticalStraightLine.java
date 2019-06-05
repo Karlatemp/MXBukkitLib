@@ -53,4 +53,9 @@ public class VerticalStraightLine implements StraightLine {
         return getRandPoint();
     }
 
+    @Override
+    public ABCStraightLine toABCStraightLine() {
+        return new ABCStraightLine(1, 0, -x);
+    }
+
 }

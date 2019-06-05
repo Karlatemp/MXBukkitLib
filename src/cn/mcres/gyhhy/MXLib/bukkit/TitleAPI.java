@@ -23,8 +23,8 @@ public interface TitleAPI {
     public static abstract class TextFormatType {
 
         /**
-         * > "{\"text\":\"A\"}"<br>
-         * < "{\"text\":\"A\"}"
+         * &gt; "{\"text\":\"A\"}"<br>
+         * &lt; "{\"text\":\"A\"}"
          */
         public static TextFormatType PAINT = new TextFormatType() {
             @Override
@@ -33,8 +33,8 @@ public interface TitleAPI {
             }
         };
         /**
-         * > "Text" <br>
-         * < "{\"text\":\"Text\"}"
+         * &gt; "Text" <br>
+         * &lt; "{\"text\":\"Text\"}"
          */
         public static TextFormatType GSON = new TextFormatType() {
             @Override
@@ -48,9 +48,9 @@ public interface TitleAPI {
             }
         };
         /**
-         * > "Text"<br>
+         * &gt; "Text"<br>
          * return "{\"text\":\"" + input + "\"}"<br>
-         * < "{\"text\":\"A\"}"
+         * &lt; "{\"text\":\"A\"}"
          */
         public static TextFormatType DEFAULT = new TextFormatType() {
             @Override

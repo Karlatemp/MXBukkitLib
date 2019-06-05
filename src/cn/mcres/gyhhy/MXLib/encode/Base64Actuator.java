@@ -40,12 +40,12 @@ public class Base64Actuator implements SymmetricActuator, Actuator.Encoder, Actu
     }
 
     @Override
-    public byte[] decode(String data) throws DecodeException {
+    public byte[] decode(String data) {
         return Base64.getDecoder().decode(data);
     }
 
     @Override
-    public byte[] decode(byte[] b) throws DecodeException {
+    public byte[] decode(byte[] b) {
         try {
             return Base64.getDecoder().decode(b);
         } catch (IllegalArgumentException iae) {
@@ -54,12 +54,12 @@ public class Base64Actuator implements SymmetricActuator, Actuator.Encoder, Actu
     }
 
     @Override
-    public String encodeToString(byte[] b) throws EncodeException {
+    public String encodeToString(byte[] b) {
         return Base64.getEncoder().encodeToString(b);
     }
 
     @Override
-    public byte[] encode(byte[] b) throws EncodeException {
+    public byte[] encode(byte[] b) {
         return Base64.getEncoder().encode(b);
     }
 

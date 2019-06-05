@@ -44,7 +44,7 @@ public class MXAPI {
     /**
      * Lib Current Version
      */
-    public static final String version = "0.23";
+    public static final String version = "1.0.0";
     public static CommandHelper getCommandHelper(){return CommandHelper.getHelper();}
     /**
      * Lib Current Version

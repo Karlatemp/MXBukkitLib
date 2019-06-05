@@ -68,11 +68,7 @@ public class KBStraightLine implements StraightLine {
      * https://blog.csdn.net/ffgcc/article/details/79941512</a>
      */
     public static double distance(double A, double B, double C, Point p) {
-
-        double x0 = p.getXAsDouble();
-        double y0 = p.getYAsDouble();
-
-        return (Math.abs(A * x0 + B * y0 + C)) / (Math.sqrt(Math.pow(A, 2) + Math.pow(B, 2)));
+        return ABCStraightLine.distance(A, B, C, p);
     }
 
     @Override
@@ -108,6 +104,11 @@ public class KBStraightLine implements StraightLine {
     @Override
     public Point getPoint(double x) {
         return new DoublePoint(x, x * k + b);
+    }
+
+    @Override
+    public ABCStraightLine toABCStraightLine() {
+        return new ABCStraightLine(k, -1, b);
     }
 
 }

@@ -18,6 +18,11 @@ import java.util.Scanner;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Filter;
+import java.util.logging.Formatter;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.regex.Pattern;
 
 /**
  * a logger with color typography
@@ -29,27 +34,10 @@ public class BasicLogger {
     /**
      * Logger's PrintStream
      */
-    public class DefaultPrintStream extends PrintStream {
+    public class DefaultPrintStream extends cn.mcres.gyhhy.MXLib.io.PrintStream {
 
         private DefaultPrintStream() {
             super(cn.mcres.gyhhy.MXLib.io.EmptyStream.stream.asOutputStream());
-        }
-
-        @Override
-        public PrintStream format(String format, Object... args) {
-            print(String.format(format, args));
-            return this;
-        }
-
-        @Override
-        public PrintStream format(Locale l, String format, Object... args) {
-            print(String.format(l, format, args));
-            return this;
-        }
-
-        @Override
-        public void print(Object obj) {
-            print(String.valueOf(obj));
         }
 
         @Override
@@ -58,97 +46,12 @@ public class BasicLogger {
         }
 
         @Override
-        public void print(boolean b) {
-            print(String.valueOf(b));
-        }
-
-        @Override
-        public void print(char c) {
-            print(String.valueOf(c));
-        }
-
-        @Override
-        public void print(char[] s) {
-            print(String.valueOf(s));
-        }
-
-        @Override
-        public void print(double d) {
-            print(String.valueOf(d));
-        }
-
-        @Override
-        public void print(float f) {
-            print(String.valueOf(f));
-        }
-
-        @Override
-        public void print(int i) {
-            print(String.valueOf(i));
-        }
-
-        @Override
-        public void print(long l) {
-            print(String.valueOf(l));
-        }
-
-        @Override
-        public PrintStream printf(String format, Object... args) {
-            return format(format, args);
-        }
-
-        @Override
-        public PrintStream printf(Locale l, String format, Object... args) {
-            return format(l, format, args);
-        }
-
-        @Override
         public void println() {
             print("");
         }
 
         @Override
-        public void println(Object x) {
-            print(x);
-        }
-
-        @Override
         public void println(String x) {
-            print(x);
-        }
-
-        @Override
-        public void println(boolean x) {
-            print(x);
-        }
-
-        @Override
-        public void println(char x) {
-            print(x);
-        }
-
-        @Override
-        public void println(char[] x) {
-            print(x);
-        }
-
-        @Override
-        public void println(double x) {
-            print(x);
-        }
-
-        @Override
-        public void println(float x) {
-            print(x);
-        }
-
-        @Override
-        public void println(int x) {
-            print(x);
-        }
-
-        @Override
-        public void println(long x) {
             print(x);
         }
 
@@ -162,6 +65,33 @@ public class BasicLogger {
         public void print(String x) {
             BasicLogger.this.error(x);
         }
+    }
+    protected PrefixFormatter pf;
+
+    public PrefixFormatter getPrefixFormatter() {
+        if (pf == null) {
+            pf = NonFormatter.getInstance();
+        }
+        return pf;
+    }
+
+    public BasicLogger setPrefixFormatter(PrefixFormatter pf) {
+        this.pf = pf;
+        return this;
+    }
+
+    /**
+     * Lambda
+     */
+    public BasicLogger setPrefixFormatter(PrefixFormatter.PrefixFormatterNoBool pf) {
+        return setPrefixFormatter((PrefixFormatter) pf);
+    }
+
+    /**
+     * Lambda
+     */
+    public BasicLogger setPrefixFormatter(PrefixFormatter.PrefixFormatterWithBool pf) {
+        return setPrefixFormatter((PrefixFormatter) pf);
     }
 
     /**
@@ -196,20 +126,43 @@ public class BasicLogger {
         printf(StringHelper.variable(line, argc));
         return this;
     }
+    private static final Pattern linespl = Pattern.compile("\\n");
 
     /**
      * Print a line
      */
     public BasicLogger printf(String line) {
-        write(prefix + line);
+        write(getPrefix(line), line);
         return this;
+    }
+
+    protected static String excpre(String pre) {
+        StringBuilder b = new StringBuilder();
+        int lg = pre.length();
+        // \u4E00-\u9FFF
+        char[] cs = (pre.toCharArray());
+        fe:
+        for (int i = 0; i < cs.length; i++) {
+            char c = cs[i];
+            switch (c) {
+                case '\u00a7': {
+                    b.append('\u00a7').append(cs[++i]);
+                    lg -= 2;
+                    continue fe;
+                }
+            }
+            if (c >= 0x4E00 && c <= 0x9FFF) {
+                lg += 1;
+            }
+        }
+        return StringHelper.fill(' ', lg) + b;
     }
 
     /**
      * Print a line, use error prefix
      */
     public BasicLogger error(String line) {
-        write(errprefix + line);
+        write(getErrorPrefix(line), line);
         return this;
     }
 
@@ -252,11 +205,46 @@ public class BasicLogger {
     /**
      * This method will write a line to console.
      */
-    public static void write(String line) {
-        System.out.println(Ascii.ec(line));
+    protected void write(String line) {
+        write(this, line);
     }
 
+    protected void write(String prefix, String line) {
+        if (line.indexOf('\n') == -1) {
+            write(prefix + line);
+        } else {
+            String[] ls = linespl.split(line);
+            write(prefix + ls[0]);
+            String f = excpre(prefix);
+            for (int i = 1; i < ls.length; i++) {
+                write(f + ls[i]);
+            }
+        }
+    }
+
+    /**
+     * This method will write a line to console.
+     */
+    public static void write(BasicLogger bl, String line) {
+        System.out.println(Ascii.ec(line) + Ascii.RESET);
+    }
+
+    protected String getPrefix(String msg) {
+        return this.getPrefixFormatter().format(prefix, msg, false);
+    }
+
+    protected String getErrorPrefix(String msg) {
+        return this.getPrefixFormatter().format(prefix, msg, true);
+    }
+    /**
+     * Use {@link BasicLogger#getPrefix()}
+     */
+    @Deprecated
     protected final String prefix;
+    /**
+     * Use {@link BasicLogger#getErrorPrefix()}
+     */
+    @Deprecated
     protected final String errprefix;
 
     private final DefaultPrintStream out, err;
@@ -332,7 +320,7 @@ public class BasicLogger {
     }
 
     protected static String getStackTraceElementMessage$return(StackTraceElement stack, String clazz, String zip, String version) {
-        return String.format("\t\u00a76at \u00a7c%s\u00a7f.\u00a7e%s\u00a7f(%s\u00a7f) [\u00a7b%s\u00a76:\u00a7d%s\u00a7f]",
+        return String.format("\t\u00a76at \u00a7c%s\u00a7f.\u00a7e%s\u00a7r(%s\u00a7r) [\u00a7b%s\u00a76:\u00a7d%s\u00a7r]",
                 clazz, stack.getMethodName(),
                 stack.isNativeMethod() ? "\u00a7dNative Method"
                 : (stack.getFileName() == null
@@ -344,15 +332,31 @@ public class BasicLogger {
                 version == null ? "?" : version);
     }
 
-    protected void printStackTraceElement(StackTraceElement stack) {
-        printStackTraceElement(null, stack);
+    protected final void printStackTraceElement(StackTraceElement stack) {
+        printStackTraceElement(stack, true);
     }
 
-    protected void printStackTraceElement(String prefix, StackTraceElement stack) {
-        if (prefix == null || prefix.isEmpty()) {
-            error(getStackTraceElementMessage(stack));
+    protected final void printStackTraceElement(String prefix, StackTraceElement stack) {
+        printStackTraceElement(prefix, stack, true);
+    }
+
+    protected void printStackTraceElement(StackTraceElement stack, boolean err) {
+        printStackTraceElement(null, stack, err);
+    }
+
+    protected BasicLogger write(boolean err, String msg) {
+        if (err) {
+            return error(msg);
         } else {
-            error(prefix + getStackTraceElementMessage(stack));
+            return printf(msg);
+        }
+    }
+
+    protected void printStackTraceElement(String prefix, StackTraceElement stack, boolean err) {
+        if (prefix == null || prefix.isEmpty()) {
+            write(err, getStackTraceElementMessage(stack));
+        } else {
+            write(err, prefix + getStackTraceElementMessage(stack));
         }
     }
 
@@ -360,8 +364,8 @@ public class BasicLogger {
             StackTraceElement[] enclosingTrace,
             String caption,
             String prefix,
-            Set<Throwable> dejaVu) {
-        printEnclosedStackTrace(thiz, enclosingTrace, caption, prefix, dejaVu, true);
+            Set<Throwable> dejaVu, boolean err) {
+        printEnclosedStackTrace(thiz, enclosingTrace, caption, prefix, dejaVu, true, err);
     }
 
     /**
@@ -380,10 +384,10 @@ public class BasicLogger {
             String caption,
             String prefix,
             Set<Throwable> dejaVu,
-            boolean printStacks) {
+            boolean printStacks, boolean err) {
 //        assert Thread.holdsLock(s.lock());
         if (dejaVu.contains(thiz)) {
-            error("\t\u00a76[CIRCULAR REFERENCE:" + toString(thiz) + "\u00a76]");
+            write(err, "\t\u00a76[CIRCULAR REFERENCE:" + toString(thiz) + "\u00a76]");
         } else {
             dejaVu.add(thiz);
             // Compute number of frames in common between this and enclosing trace
@@ -397,19 +401,19 @@ public class BasicLogger {
             int framesInCommon = trace.length - 1 - m;
 
             // Print our stack trace
-            error(prefix + caption + toString(thiz));
+            write(err, prefix + caption + toString(thiz));
             if (printStacks) {
                 for (int i = 0; i <= m; i++) {
-                    this.printStackTraceElement(prefix, trace[i]);
+                    this.printStackTraceElement(prefix, trace[i], err);
                 }
                 if (framesInCommon != 0) {
-                    error(prefix + "\t... " + framesInCommon + " more");
+                    write(err, prefix + "\t... " + framesInCommon + " more");
                 }
             }
 
             // Print suppressed exceptions, if any
             for (Throwable se : thiz.getSuppressed()) {
-                this.printEnclosedStackTrace(se, trace, SUPPRESSED_CAPTION, prefix + "\t", dejaVu, printStacks);
+                this.printEnclosedStackTrace(se, trace, SUPPRESSED_CAPTION, prefix + "\t", dejaVu, printStacks, err);
             }
 //                se.printEnclosedStackTrace(s, trace, SUPPRESSED_CAPTION,
 //                                           prefix +"\t", dejaVu);
@@ -417,7 +421,7 @@ public class BasicLogger {
             // Print cause, if any
             Throwable ourCause = thiz.getCause();
             if (ourCause != null) {
-                this.printEnclosedStackTrace(ourCause, trace, CAUSE_CAPTION, prefix, dejaVu, printStacks);
+                this.printEnclosedStackTrace(ourCause, trace, CAUSE_CAPTION, prefix, dejaVu, printStacks, err);
             }
 //                ourCause.printEnclosedStackTrace(s, trace, CAUSE_CAPTION, prefix, dejaVu);
         }
@@ -454,7 +458,54 @@ public class BasicLogger {
         return printStackTrace(thr, true);
     }
 
+    public BasicLogger log(Level lv, String mg) {
+        if (lv.intValue() <= Level.INFO.intValue()) {
+            return printf(mg);
+        }
+        return error(mg);
+    }
+
+    public BasicLogger publish(LogRecord record, java.util.logging.Handler h) {
+//            publish(record,this);
+        if (!h.isLoggable(record)) {
+            return this;
+        }
+        Filter filter = h.getFilter();
+        if (filter != null && !filter.isLoggable(record)) {
+            return this;
+        }
+        Level lv = record.getLevel();
+        String msg = record.getMessage();
+        Throwable thr = record.getThrown();
+        if (msg != null) {
+            Formatter fe = h.getFormatter();
+            record.setThrown(null);
+            String mg = fe.formatMessage(record);
+            record.setThrown(thr);
+            log(lv, mg);
+        }
+        if (thr != null) {
+            printStackTrace(lv, thr);
+        }
+        return this;
+    }
+
+    public BasicLogger printStackTrace(Level lv, Throwable thr) {
+        return printStackTrace(lv, thr, true);
+    }
+
+    public BasicLogger printStackTrace(Level lv, Throwable thr, boolean printStacks) {
+        if (lv.intValue() <= Level.INFO.intValue()) {
+            return printStackTrace(thr, printStacks, false);
+        }
+        return printStackTrace(thr, printStacks, true);
+    }
+
     public BasicLogger printStackTrace(Throwable thr, boolean printStacks) {
+        return printStackTrace(thr, printStacks, true);
+    }
+
+    public BasicLogger printStackTrace(Throwable thr, boolean printStacks, boolean err) {
         // Guard against malicious overrides of Throwable.equals by
         // using a Set with identity equality semantics.
         Set<Throwable> dejaVu
@@ -463,11 +514,11 @@ public class BasicLogger {
 
 //        synchronized (s.lock()) {
         // Print our stack trace
-        error(toString(thr));
+        write(err, toString(thr));
         StackTraceElement[] trace = getOurStackTrace(thr);
         if (printStacks) {
             for (StackTraceElement traceElement : trace) {
-                this.printStackTraceElement(traceElement);
+                this.printStackTraceElement(traceElement, err);
 //            println("\tat " + traceElement);
             }
         }
@@ -475,13 +526,13 @@ public class BasicLogger {
         // Print suppressed exceptions, if any
         for (Throwable se : thr.getSuppressed()) //                se.printEnclosedStackTrace(s, trace, SUPPRESSED_CAPTION, "\t", dejaVu);
         {
-            this.printEnclosedStackTrace(se, trace, SUPPRESSED_CAPTION, "\t", dejaVu, printStacks);
+            this.printEnclosedStackTrace(se, trace, SUPPRESSED_CAPTION, "\t", dejaVu, printStacks, err);
         }
 
         // Print cause, if any
         Throwable ourCause = thr.getCause();
         if (ourCause != null) {
-            this.printEnclosedStackTrace(ourCause, trace, CAUSE_CAPTION, "", dejaVu, printStacks);
+            this.printEnclosedStackTrace(ourCause, trace, CAUSE_CAPTION, "", dejaVu, printStacks, err);
         }
 //                ourCause.printEnclosedStackTrace(s, trace, CAUSE_CAPTION, "", dejaVu);
 //        }
@@ -527,10 +578,10 @@ public class BasicLogger {
     @SuppressWarnings("AssignmentToMethodParameter")
     public BasicLogger(String format, String errformat, String pname) {
         if (format == null) {
-            format = "\u00a7f[\u00a7b%s\u00a7f] \u00a7e";
+            format = defaultFormat;
         }
         if (errformat == null) {
-            errformat = "\u00a7f[\u00a7b%s\u00a7f] \u00a7c";
+            errformat = defaultErrFormat;
         }
         prefix = String.format(format, pname);
         errprefix = String.format(errformat, pname);
@@ -538,6 +589,44 @@ public class BasicLogger {
 //        register(this);
         out = new DefaultPrintStream();
         err = new ErrorPrintStream();
+    }
+
+    @SuppressWarnings("AssignmentToMethodParameter")
+    public BasicLogger(String prefix, String errprefix) {
+        if (prefix == null) {
+            prefix = defaultFormat;
+        }
+        if (errprefix == null) {
+            errprefix = defaultErrFormat;
+        }
+        this.prefix = prefix;
+        this.errprefix = errprefix;
+//        checkup(this, plugin);
+//        register(this);
+        out = new DefaultPrintStream();
+        err = new ErrorPrintStream();
+    }
+    private static String defaultFormat = "\u00a7r[\u00a7b%s\u00a7r]\u00a7e ",
+            defaultErrFormat = "\u00a7r[\u00a7b%s\u00a7r]\u00a7c ";
+
+    public static void setDefaultFormat(String f) {
+        defaultFormat = f;
+    }
+
+    public static void setDefaultErrorFormat(String f) {
+        defaultErrFormat = f;
+    }
+
+    public static String getDefaultFormat() {
+        return defaultFormat;
+    }
+
+    public static String getDefaultErrorFormat() {
+        return defaultErrFormat;
+    }
+
+    public static BasicLogger createRawLogger(String prefix, String errprefix) {
+        return new BasicLogger(prefix, errprefix);
     }
 
     public static BasicLogger createRawLogger(String format, String errformat, String plugin_name) {
