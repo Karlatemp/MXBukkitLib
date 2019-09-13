@@ -1,0 +1,96 @@
+2.0
+    破坏性更新!
+1.12.0.2
+    FIX UP JVM HELPER
+    修补JVM Helper错误
+    现在你可以使用JVMHelper做更高级的事情了!
+1.12
+    Add BungeeChatAPI Module
+1.11
+    Update version checkup
+    Add NetWork Hiddens in config.yml/system.OPEN_NETWORK_SHOW.hiddens
+    Add time-out in yggdrasil.
+1.10.2
+    Fix up subcommand type check
+1.10.1
+    Fix up command Generator's bug
+1.10
+    Add Json Configuration
+    Add EnumTool
+1.9.5
+    Change CommandMap get code.
+1.9.3
+    Fix up update check url
+1.9.2
+    Fix up
+    openjdk version "1.8.0_212"
+    OpenJDK Runtime Environment (build 1.8.0_212-b04)
+    Eclipse OpenJ9 VM (build openj9-0.14.2, JRE 1.8.0 Linux amd64-64-Bit Compressed References 20190521_315 (JIT Enabled, AOT Enabled)
+    OpenJ9 - 4b1df46fe
+    OMR - b56045d2
+    JCL - a8c217d402 based on jdk8u212-b04)
+1.9.1
+    Fixup Loggin Bug
+1.9
+    Add MCON (Similar to Rcon)
+1.8
+    Modify the bukkit.cmd.Options Judgment Rule
+    Add encode.URLDecoder, encode.URLEncoder with java.nio.charset.Charset
+    Add rcon:// protocol(Need load http.URLStreamManager)
+    Add FileParser. Fast copy you config
+    Modify the access modifiers of some methods of yggdrasil.Yggdrasil to public
+    Add io.CharCompiler, Fast encoding URL/URI/E-Mail Body.
+    Add io.LineOutputStream. Fast parse line.
+    Use io.Channels for better processing.
+1.7.2
+    Fix up DevTools NullPointerException
+1.7.1
+    Fix up nopermission can perfrom /dev
+1.7
+    Update System Logging Core Code
+    Update Options code
+    Add devtools: /dev help
+    Fix up SystemHelper bootstarp copy bug.
+    Update Command System.
+        TabComplete System support!
+        Add @ClassIgnore to ignore class
+    Add Logger PrintingType select. (RAW, COLROED, SKIP_COLOR)(default COLORED)
+    Add IDE Debugger CommandSender
+1.6.1
+    Update RSAActuator eccheck
+    Update ThrowHelperImpl Bytecode
+    Fixup System Logging NoClassDefFoundError
+    Add Updater Auto delete update catch.
+1.6.0
+    Yggdrasil信息查询改用 Callback 模块
+    Yggdrasil request use Callback module
+1.5.9
+    Add application
+    添加 Application
+    Use cause 使用方法
+        java -jar MXBukkitLib.jar -app
+        java -jar MXBukkitLib.jar -app [AppName] [App Args]
+
+1.5.1
+    Fixup Yggdrasil Beans worning
+    修复Yggdrasil Beans的错误
+
+1.5.0
+    Add Yggdrasil Client(Requester)(Beta)(Exception)
+    添加Yggdrasil客户端(访问器)(测试版)(有错误)
+    
+    Fix AutoUpdate's Bug
+    修复自动更新的错误
+        Cause: No close OutputStream
+        错误原因: TM没关掉输出流导致没能移动到 /plugins/update 文件夹
+    
+    Add URIActuator in package encode
+    在encode包添加URIActuator
+    
+    Fix WebHelper.PostHelper's exception
+    修复位于WebHelper.PostHelper的错误
+        Fixup:
+            Cannot autoset Content-Lenth and Context-Type
+            未能直接设置Content-Length和Context-Type的内容
+    PostHelper deprecated old write(Consumer<OutputStream>) method
+    PostHelper 启用了旧的 write(Consumer<OutputStream>) 方法

@@ -1,0 +1,24 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="MXBukkitLib:jar">
+    <output-path>$PROJECT_DIR$/dist</output-path>
+    <root id="archive" name="MXBukkitLibRebuild.jar">
+      <element id="module-output" name="Bukkit" />
+      <element id="module-output" name="API" />
+      <element id="module-output" name="Static" />
+      <element id="module-output" name="Spigot" />
+      <element id="module-output" name="Share" />
+      <element id="library" level="application" name="Gson" />
+      <element id="module-output" name="Mediator" />
+      <element id="extracted-dir" path="$USER_HOME$/Desktop/LinuxFiles/java/Libs/javassist.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/BungeeChatAPI.jar" path-in-jar="/" />
+      <element id="module-output" name="Legacy" />
+      <element id="artifact" artifact-name="Instrumentation:jar" />
+      <element id="directory" name="org">
+        <element id="extracted-dir" path="G:/Java/asm-all-5.2.jar" path-in-jar="/org/" />
+        <element id="extracted-dir" path="G:/Java/JetBrains Java Annotations-13.0.jar" path-in-jar="/org/" />
+      </element>
+      <element id="module-output" name="API$Med" />
+      <element id="module-output" name="API$OpenJ12" />
+    </root>
+  </artifact>
+</component>

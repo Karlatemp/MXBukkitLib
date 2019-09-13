@@ -1,0 +1,2 @@
+Main-Class: cn.mcres.karlatemp.mxlib.MXBukkitLib
+Manifest-Version: 1.0

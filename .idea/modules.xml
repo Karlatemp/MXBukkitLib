@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/API/API.iml" filepath="$PROJECT_DIR$/API/API.iml" />
+      <module fileurl="file://$PROJECT_DIR$/API/$Med/API$Med.iml" filepath="$PROJECT_DIR$/API/$Med/API$Med.iml" />
+      <module fileurl="file://$PROJECT_DIR$/API/$OpenJ12/API$OpenJ12.iml" filepath="$PROJECT_DIR$/API/$OpenJ12/API$OpenJ12.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Bukkit/Bukkit.iml" filepath="$PROJECT_DIR$/Bukkit/Bukkit.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Instrumentation/Instrumentation.iml" filepath="$PROJECT_DIR$/Instrumentation/Instrumentation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Instrumentation/$CodeShare/Instrumentation$CodeShare.iml" filepath="$PROJECT_DIR$/Instrumentation/$CodeShare/Instrumentation$CodeShare.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Instrumentation/$JDK9/Instrumentation$JDK9.iml" filepath="$PROJECT_DIR$/Instrumentation/$JDK9/Instrumentation$JDK9.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Legacy/Legacy.iml" filepath="$PROJECT_DIR$/Legacy/Legacy.iml" />
+      <module fileurl="file://$PROJECT_DIR$//MXBukkitLib.iml" filepath="$PROJECT_DIR$//MXBukkitLib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Mediator/Mediator.iml" filepath="$PROJECT_DIR$/Mediator/Mediator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Share/Share.iml" filepath="$PROJECT_DIR$/Share/Share.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Spigot/Spigot.iml" filepath="$PROJECT_DIR$/Spigot/Spigot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Static/Static.iml" filepath="$PROJECT_DIR$/Static/Static.iml" />
+    </modules>
+  </component>
+</project>
