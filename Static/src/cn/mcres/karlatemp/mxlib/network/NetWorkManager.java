@@ -9,6 +9,7 @@ import cn.mcres.karlatemp.mxlib.MXBukkitLib;
 import cn.mcres.karlatemp.mxlib.tools.ThrowHelper;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.net.URL;
@@ -40,7 +41,7 @@ public class NetWorkManager {
     }
 
     public static Reference<NetWorkListener> registerListener(@NotNull NetWorkListener listener) {
-        Reference<NetWorkListener> ref = new WeakReference<>(listener);
+        Reference<NetWorkListener> ref = new SoftReference<>(listener);
         registerListener(ref);
         return ref;
     }
