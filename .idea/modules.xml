@@ -11,6 +11,7 @@
       <module fileurl="file://$PROJECT_DIR$/Instrumentation/$JDK9/Instrumentation$JDK9.iml" filepath="$PROJECT_DIR$/Instrumentation/$JDK9/Instrumentation$JDK9.iml" />
       <module fileurl="file://$PROJECT_DIR$/Legacy/Legacy.iml" filepath="$PROJECT_DIR$/Legacy/Legacy.iml" />
       <module fileurl="file://$PROJECT_DIR$//MXBukkitLib.iml" filepath="$PROJECT_DIR$//MXBukkitLib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../MXBukkitLibDocs/MXBukkitLibDocs.iml" filepath="$PROJECT_DIR$/../MXBukkitLibDocs/MXBukkitLibDocs.iml" />
       <module fileurl="file://$PROJECT_DIR$/Mediator/Mediator.iml" filepath="$PROJECT_DIR$/Mediator/Mediator.iml" />
       <module fileurl="file://$PROJECT_DIR$/Share/Share.iml" filepath="$PROJECT_DIR$/Share/Share.iml" />
       <module fileurl="file://$PROJECT_DIR$/Spigot/Spigot.iml" filepath="$PROJECT_DIR$/Spigot/Spigot.iml" />

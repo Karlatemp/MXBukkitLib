@@ -1,26 +1,6 @@
 /*
- * Copyright (c) 1995, 2013, Oracle and/or its affiliates. All rights reserved.
- * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Copyright (c) 2018-2019 Karlatemp. All rights reserved.
+ * Reserved.FileName: URLEncoder.java@author: karlatemp@vip.qq.com: 19-9-18 下午5:54@version: 2.0
  */
 package cn.mcres.gyhhy.MXLib.encode;
 

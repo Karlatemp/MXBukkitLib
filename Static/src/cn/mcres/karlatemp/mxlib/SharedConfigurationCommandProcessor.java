@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2018-2019 Karlatemp. All rights reserved.
+ * Reserved.FileName: SharedConfigurationCommandProcessor.java@author: karlatemp@vip.qq.com: 19-9-18 下午5:55@version: 2.0
+ */
+
 package cn.mcres.karlatemp.mxlib;
 
 import cn.mcres.karlatemp.mxlib.bean.IBeanManager;

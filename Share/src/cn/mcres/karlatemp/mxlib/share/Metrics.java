@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2018-2019 Karlatemp. All rights reserved.
- * Reserved.FileName: Metrics.java@author: karlatemp@vip.qq.com: 19-9-17 下午12:31@version: 2.0
- * https://github.com/Bastian/bStats-Metrics/blob/master/bstats-bukkit/src/main/java/org/bstats/bukkit/Metrics.java
+ * Reserved.FileName: Metrics.java@author: karlatemp@vip.qq.com: 19-9-18 下午5:54@version: 2.0
  */
 
 package cn.mcres.karlatemp.mxlib.share;
