@@ -8,7 +8,12 @@ import cn.mcres.karlatemp.mxlib.logging.PrintStreamLogger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
+import java.util.logging.*;
 
+/**
+ * MXBukkitLib核心类, 需要先执行
+ * cn.mcres.karlatemp.mxlib.MXLib.boot();
+ */
 @ProhibitBean
 public class MXBukkitLib {
     /**
@@ -30,6 +35,9 @@ public class MXBukkitLib {
 
     private static IBeanManager beanManager;
 
+    /**
+     * 获取BeanManager, Lib核心
+     */
     public static IBeanManager getBeanManager() {
         return beanManager;
     }
@@ -61,5 +69,55 @@ public class MXBukkitLib {
         if (DEBUG) {
             getLogger().printf(message.get());
         }
+    }
+
+    private static class MLogger extends Logger {
+        private static final MLogger instance = new MLogger();
+
+        private static class MHandler extends Handler {
+            private static final MHandler instance = new MHandler();
+
+            {
+                setLevel(Level.INFO);
+                setFormatter(new SimpleFormatter());
+            }
+
+            @Override
+            public void publish(LogRecord record) {
+                if (isLoggable(record))
+                    MXBukkitLib.getLogger().publish(record, this);
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() throws SecurityException {
+            }
+        }
+
+        protected MLogger() {
+            super("MXBukkitLib", null);
+        }
+
+        @Override
+        public void log(LogRecord record) {
+            MXBukkitLib.getLogger().publish(record, MHandler.instance);
+        }
+
+        @Override
+        public void setUseParentHandlers(boolean useParentHandlers) {
+            throw new UnsupportedOperationException("setUserparentHandlers(B)V");
+        }
+
+        @Override
+        public boolean getUseParentHandlers() {
+            return false;
+        }
+    }
+
+    public static Logger getAsJavaLogger() {
+        return MLogger.instance;
     }
 }

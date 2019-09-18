@@ -9,6 +9,9 @@ import java.lang.management.ThreadInfo;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * 一个基础的工厂, 没有任何颜色
+ */
 @SuppressWarnings("Duplicates")
 public class MessageFactoryImpl implements IMessageFactory {
     protected String unuri(String x) {

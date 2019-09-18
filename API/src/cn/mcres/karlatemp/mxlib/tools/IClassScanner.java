@@ -7,6 +7,9 @@ import java.io.File;
 import java.net.URL;
 import java.util.List;
 
+/**
+ * 类搜索器，在BeanManager获取
+ */
 public interface IClassScanner {
     @NotNull
     List<String> scan(@NotNull File file, @NotNull List<String> list) throws ScanException;

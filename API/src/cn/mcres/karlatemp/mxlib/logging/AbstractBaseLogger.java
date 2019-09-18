@@ -7,6 +7,9 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+/**
+ * 一个基本的日志类
+ */
 public abstract class AbstractBaseLogger extends AbstractLogger implements PrefixSupplier {
     protected Level publish_level;
     protected LogRecord publish_record;

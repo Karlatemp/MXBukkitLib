@@ -9,6 +9,9 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Set;
 
+/**
+ * 一个基本的日志类
+ */
 public abstract class AbstractLogger implements ILogger {
     protected final IMessageFactory factory;
     protected final Object lock;

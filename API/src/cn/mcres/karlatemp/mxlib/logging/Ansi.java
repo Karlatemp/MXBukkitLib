@@ -9,14 +9,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
+ * ANSI基本颜色, 从 bukkit 获取
  *
- * @author 32798
+ * @author karlatemp
  */
 public class Ansi {
 
     public static String ec(String... s) {
         return encodeToConsole(s);
     }
+
     public static final String RESET = "\033[m",
             _1 = "\033[0;34;22m",
             _2 = "\033[0;32;22m",

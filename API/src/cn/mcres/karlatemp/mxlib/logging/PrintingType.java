@@ -1,5 +1,8 @@
 package cn.mcres.karlatemp.mxlib.logging;
 
+/**
+ * 未使用...
+ */
 public enum PrintingType {
     RAW(0), COLORED(1), SKIP_COLOR(2);
     private final int type;

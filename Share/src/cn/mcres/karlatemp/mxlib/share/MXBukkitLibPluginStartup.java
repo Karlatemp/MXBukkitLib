@@ -42,6 +42,7 @@ public class MXBukkitLibPluginStartup extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        new Metrics(this);
         hooks.forEach(c -> c.accept(true));
         getLogger().setLevel(Level.INFO);
         if (DEBUG) getLogger().setLevel(Level.ALL);

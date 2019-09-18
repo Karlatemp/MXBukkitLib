@@ -8,6 +8,9 @@ import java.lang.management.ThreadInfo;
 import java.util.Locale;
 import java.util.logging.*;
 
+/**
+ * 日志模块
+ */
 public interface ILogger {
     /**
      * Message for trying to suppress a null exception.

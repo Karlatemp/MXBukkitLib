@@ -10,6 +10,12 @@ import java.io.DataOutputStream;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Modifier;
 
+/**
+ * 错误抛出器
+ * <code>
+ *    return ThrowHelper.thrown(new Throwable("A checked throwable."));
+ * </code>
+ */
 public class ThrowHelper {
     private static final ThrowHelper impl;
 

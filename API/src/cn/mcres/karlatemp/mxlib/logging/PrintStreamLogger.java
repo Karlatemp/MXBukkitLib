@@ -7,6 +7,9 @@ import java.util.function.BiFunction;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+/**
+ * 使用PrintStream作为输出的日志系统
+ */
 public class PrintStreamLogger extends AbstractBaseLogger {
     private final PrefixSupplier prefix;
     private final PrintStream out, err;

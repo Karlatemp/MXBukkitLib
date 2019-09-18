@@ -7,6 +7,11 @@ import java.util.function.Supplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * 指针???
+ *
+ * @param <T> 存储的值
+ */
 @ProhibitBean
 public class Pointer<T> implements Supplier<T>, Consumer<T>, Function<T, T> {
     private T value;

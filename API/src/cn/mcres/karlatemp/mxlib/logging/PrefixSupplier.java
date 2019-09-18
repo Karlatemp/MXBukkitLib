@@ -11,10 +11,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+/**
+ * 前缀获取器
+ */
 public interface PrefixSupplier {
     @NotNull
     String get(boolean error, @Nullable String line, @Nullable Level level, @Nullable LogRecord record);
 
+    /**
+     * 返回一个锁定的前缀获取器
+     * @param prefix 固定的前缀
+     * @return 固定的前缀
+     */
     @NotNull
     static PrefixSupplier of(@NotNull String prefix) {
         return (e, l, lv, lr) -> prefix;

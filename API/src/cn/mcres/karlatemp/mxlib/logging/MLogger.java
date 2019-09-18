@@ -8,6 +8,9 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.Handler;
 
+/**
+ * Java原生日志支持
+ */
 public class MLogger extends Logger {
     private final Handler logger;
 

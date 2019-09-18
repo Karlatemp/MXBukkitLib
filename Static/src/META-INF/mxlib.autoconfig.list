@@ -1,4 +1,5 @@
 cn.mcres.karlatemp.mxlib.DefaultAutoConfig
+cn.mcres.karlatemp.mxlib.unsafe.StaticAutoConfig
 cn.mcres.karlatemp.mxlib.share.PluginAutoConfig
 cn.mcres.karlatemp.mxlib.impl.ImplSetupAutoConfig
 cn.mcres.gyhhy.MXLib.legacy.LegacyAutoConfig

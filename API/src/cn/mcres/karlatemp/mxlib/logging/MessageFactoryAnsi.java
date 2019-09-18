@@ -6,6 +6,9 @@ import java.lang.management.LockInfo;
 import java.lang.management.MonitorInfo;
 import java.lang.management.ThreadInfo;
 
+/**
+ * 带ANSI支持的日志信息工厂
+ */
 @SuppressWarnings("Duplicates")
 public class MessageFactoryAnsi extends MessageFactoryImpl {
     @Override

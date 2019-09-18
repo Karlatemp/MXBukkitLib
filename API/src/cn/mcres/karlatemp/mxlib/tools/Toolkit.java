@@ -2,6 +2,7 @@ package cn.mcres.karlatemp.mxlib.tools;
 
 import cn.mcres.karlatemp.mxlib.cmd.ICommand;
 import cn.mcres.karlatemp.mxlib.cmd.ICommands;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -14,7 +15,14 @@ import java.security.ProtectionDomain;
 import java.util.Comparator;
 import java.util.function.Function;
 
+/**
+ * 一个工具集合
+ */
 public class Toolkit {
+    /**
+     * 截取类名的包名字
+     */
+    @NotNull
     public static String getPackageByClassName(String name) {
         if (name == null) return "";
         int x = name.lastIndexOf('.');
@@ -24,6 +32,9 @@ public class Toolkit {
         return "";
     }
 
+    /**
+     * 获取类名的精简名
+     */
     public static String getClassSimpleName(String name) {
         int last = name.lastIndexOf('.');
         if (last == -1) return name;
@@ -41,6 +52,9 @@ public class Toolkit {
         return PACKAGE_COMPARATOR;
     }
 
+    /**
+     * @see java.lang.Object#getClass()
+     */
     @SuppressWarnings("unchecked")
     public static <T> Class<T> getClass(T obj) {
         if (obj == null) return null;
@@ -236,11 +250,19 @@ public class Toolkit {
             }
         }
 
+        /**
+         * 获取调用者的Class
+         * @return 获取调用者的Class
+         */
         public static Class<?> getCallerClass() {
             final Class[] ct = StackTrace.kit.ct();
             return ct[3];
         }
 
+        /**
+         * 获取调用者的Class
+         * @return 获取调用者的Class
+         */
         public static Class<?> getCallerClass(int point) {
             if (point < 0) return null;
             final Class[] ct = StackTrace.kit.ct();
@@ -251,6 +273,9 @@ public class Toolkit {
         }
     }
 
+    /**
+     * 堆栈
+     */
     public static class StackTrace {
         Class c;
         StackTraceElement elm;
@@ -334,10 +359,16 @@ public class Toolkit {
             kit = tk;
         }
 
+        /**
+         * 获取当前线程堆栈
+         */
         public static StackTrace[] getStackTraces() {
             return kit.classes();
         }
 
+        /**
+         * 获取当前线程堆栈
+         */
         public static Class[] getClassContext() {
             Class[] cc = kit.ct();
             if (cc.length < 2) return new Class[0];

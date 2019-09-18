@@ -7,6 +7,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
+/**
+ * 类成员搜索器, 在BeanManager获取
+ */
 public interface IMemberScanner {
     @NotNull
     Collection<Method> getAllMethod(@NotNull Class c);

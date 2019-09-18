@@ -1,11 +1,16 @@
 package cn.mcres.karlatemp.mxlib.bean;
 
+import cn.mcres.karlatemp.mxlib.MXBukkitLib;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * 一个BeanManager, 处理核心
+ * @see MXBukkitLib#getBeanManager()
+ */
 public interface IBeanManager {
     <T> void addBean(@NotNull Class<T> c, @NotNull T bean);
 

@@ -6,6 +6,10 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
+/**
+ * Java原生日志支持
+ * @see java.util.logging.Logger#addHandler(Handler)
+ */
 public class MLoggerHandler extends Handler {
     private final ILogger logger;
 

@@ -3,6 +3,9 @@ package cn.mcres.karlatemp.mxlib.logging;
 import java.lang.management.LockInfo;
 import java.lang.management.ThreadInfo;
 
+/**
+ * 日志信息格式化工厂
+ */
 public interface IMessageFactory {
     String getStackTraceElementMessage(StackTraceElement stack);
 

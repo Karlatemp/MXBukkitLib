@@ -14,6 +14,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
 /**
+ * 一个完全空的IO流
  * @author Karlatemp
  */
 public class EmptyStream extends Writer implements ReadableByteChannel, WritableByteChannel, Appendable {
