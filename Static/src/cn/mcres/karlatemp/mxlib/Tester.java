@@ -11,6 +11,7 @@ import cn.mcres.karlatemp.mxlib.logging.MessageFactoryAnsi;
 import cn.mcres.karlatemp.mxlib.logging.PrintStreamLogger;
 import cn.mcres.karlatemp.mxlib.tools.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 // Test Only
@@ -74,6 +75,7 @@ public class Tester {
         MXLib.boot();
         class InterEnv {
             private int inter;
+            private List<String> strings;
         }
         class Envs {
             private String a;
@@ -96,32 +98,13 @@ public class Tester {
             System.out.println(o);
         }
         Envs env = factory.loadEnvironment(Envs.class, new MapBuilder().add("a", "ValueA")
-                .add("b", "FUCKQ").add("env", new MapBuilder().add("inter", 50)));
+                .add("b", "FUCKQ").add("env", new MapBuilder().add("inter", 50)
+                        .add("strings", Arrays.asList("1,2,3,4", "FAQ", "AA"))));
         System.out.println(env.a);
         System.out.println(env.b);
         System.out.println(env.env.inter);
         System.out.println(factory.toEnvironment(env));
         System.out.println(factory.toEnvironment($A.a));
         Pointer<Runnable> p = new Pointer<>();
-        try {
-            p.value(() -> {
-                p.value().run();
-            });
-            p.value().run();
-        } catch (Throwable thr) {
-            final StackTraceElement[] stackTrace = thr.getStackTrace();
-            Pointer<Integer> px = new Pointer<>(0);
-            new PrintStreamLogger(null,
-                    new MessageFactoryAnsi(), "",
-                    System.out) {
-                @Override
-                protected void printStackTraceElement(StackTraceElement element, boolean err) {
-                    px.value(px.value() + 1);
-                    super.printStackTraceElement(element, err);
-                }
-            }.printStackTrace(thr);
-            System.out.println(stackTrace.length);
-            System.out.println(px.value());
-        }
     }
 }

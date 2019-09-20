@@ -13,6 +13,7 @@ import java.lang.annotation.*;
 public @interface Resource {
     /**
      * 设置需要的Bean
+     * @return Bean的类型
      */
     Class value() default Object.class;
 }

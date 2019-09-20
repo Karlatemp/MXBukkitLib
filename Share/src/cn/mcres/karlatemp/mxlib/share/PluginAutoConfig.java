@@ -10,6 +10,7 @@ import cn.mcres.karlatemp.mxlib.annotations.Configuration;
 import cn.mcres.karlatemp.mxlib.bean.IEnvironmentFactory;
 import cn.mcres.karlatemp.mxlib.bukkit.IBukkitConfigurationProcessor;
 import cn.mcres.karlatemp.mxlib.cmd.ICommandProcessor;
+import cn.mcres.karlatemp.mxlib.logging.IMessageFactory;
 
 @Configuration
 public class PluginAutoConfig {
@@ -24,7 +25,10 @@ public class PluginAutoConfig {
             }
         }
     }
-
+    @Bean
+    IMessageFactory mf(){
+        return new BukkitPluginMessageFactory();
+    }
     @Bean
     IBukkitConfigurationProcessor bc() {
         return new BukkitConfigurationProcessor();

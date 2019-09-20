@@ -6,6 +6,7 @@
 package cn.mcres.karlatemp.mxlib.bean;
 
 import cn.mcres.karlatemp.mxlib.MXBukkitLib;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,12 +15,14 @@ import java.util.Optional;
 
 /**
  * 一个BeanManager, 处理核心
+ *
  * @see MXBukkitLib#getBeanManager()
  */
 public interface IBeanManager {
     <T> void addBean(@NotNull Class<T> c, @NotNull T bean);
 
     @Nullable
+    @Contract(pure = true)
     <T> T getBean(@NotNull Class<T> c);
 
     @NotNull
@@ -30,10 +33,12 @@ public interface IBeanManager {
     }
 
     @NotNull
+    @Contract(pure = true)
     default <T> Optional<T> getOptional(@NotNull Class<T> c) {
         return Optional.ofNullable(getBean(c));
     }
 
     @NotNull
+    @Contract(pure = true)
     Map<Class<?>, Object> getBeans();
 }

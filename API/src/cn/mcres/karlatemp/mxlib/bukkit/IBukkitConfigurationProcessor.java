@@ -13,6 +13,7 @@ public interface IBukkitConfigurationProcessor {
      *
      * @param plugin The plugin object
      * @param path   The Path
+     * @return The configuration data
      */
     Map<String, Object> load(Object plugin, String path);
 
@@ -21,7 +22,10 @@ public interface IBukkitConfigurationProcessor {
      *
      * @param config the type of value is
      *               {@link org.bukkit.configuration.ConfigurationSection}
+     * @return The configuration data
      */
     @SuppressWarnings("JavadocReference")
     Map<String, Object> load(Object config);
+
+    void save(Map<String, Object> config, String path, Object plugin);
 }

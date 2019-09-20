@@ -66,13 +66,21 @@ public class MessageFactoryImpl implements IMessageFactory {
         return null;
     }
 
+    protected Class<?> forName(String name) throws ClassNotFoundException {
+        try {
+            return Class.forName(name, false, Thread.currentThread().getContextClassLoader());
+        } catch (Throwable thr) {
+            return Class.forName(name, false, getClass().getClassLoader());
+        }
+    }
+
     @Override
     public String getStackTraceElementMessage(StackTraceElement stack) {
         String zip = null;
         String version = null;
         String clazz = stack.getClassName();
         try {
-            Class<?> c = Class.forName(clazz, false, getClass().getClassLoader());
+            Class<?> c = forName(clazz);
             URL url = c.getResource(c.getSimpleName() + ".class");
             zip = getStackTraceElementMessage$zip(c, url, stack);
             version = getStackTraceElementMessage$version(c, url, stack);

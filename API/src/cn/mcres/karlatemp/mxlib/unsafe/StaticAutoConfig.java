@@ -7,6 +7,8 @@ package cn.mcres.karlatemp.mxlib.unsafe;
 
 import cn.mcres.karlatemp.mxlib.annotations.Bean;
 import cn.mcres.karlatemp.mxlib.annotations.Configuration;
+import cn.mcres.karlatemp.mxlib.logging.IMessageFactory;
+import cn.mcres.karlatemp.mxlib.logging.MessageFactoryImpl;
 import cn.mcres.karlatemp.mxlib.tools.CollectionsJsonWriter;
 import cn.mcres.karlatemp.mxlib.tools.GsonJsonWriter;
 import cn.mcres.karlatemp.mxlib.tools.IJsonWriter;
@@ -21,5 +23,10 @@ public class StaticAutoConfig {
         } catch (Throwable thr) {
         }
         return new CollectionsJsonWriter();
+    }
+
+    @Bean
+    public IMessageFactory mf() {
+        return new MessageFactoryImpl();
     }
 }

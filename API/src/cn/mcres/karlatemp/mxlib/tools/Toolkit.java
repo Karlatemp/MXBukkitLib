@@ -7,8 +7,10 @@ package cn.mcres.karlatemp.mxlib.tools;
 
 import cn.mcres.karlatemp.mxlib.cmd.ICommand;
 import cn.mcres.karlatemp.mxlib.cmd.ICommands;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -23,9 +25,13 @@ import java.util.function.Function;
 /**
  * 一个工具集合
  */
+@SuppressWarnings("JavadocReference")
 public class Toolkit {
     /**
      * 截取类名的包名字
+     *
+     * @param name 类的全名
+     * @return 类的包名
      */
     @NotNull
     public static String getPackageByClassName(String name) {
@@ -39,6 +45,9 @@ public class Toolkit {
 
     /**
      * 获取类名的精简名
+     *
+     * @param name 类全名
+     * @return 类精简名
      */
     public static String getClassSimpleName(String name) {
         int last = name.lastIndexOf('.');
@@ -58,8 +67,11 @@ public class Toolkit {
     }
 
     /**
+     * @param <T> 对象类型
+     * @return 对象的类|null
      * @see java.lang.Object#getClass()
      */
+    @Contract(value = "null -> null", pure = true)
     @SuppressWarnings("unchecked")
     public static <T> Class<T> getClass(T obj) {
         if (obj == null) return null;
@@ -91,16 +103,98 @@ public class Toolkit {
         return current;
     }
 
+    /**
+     * 反射工具
+     */
     public abstract static class Reflection {
         private static final MethodHandles.Lookup root;
         private static final Reflection ref;
 
+        /**
+         * 这只能用来判断使用哪种方法{@link Object#getClass()}
+         *
+         * @return 使用的实例
+         */
+        @Contract(pure = true)
         public static Reflection getInstance() {
             return ref;
         }
 
+        /**
+         * 获取最高权限的Lookup
+         *
+         * @return 最高权限的Lookup
+         */
+        @Contract(pure = true)
         public static MethodHandles.Lookup getRoot() {
             return root;
+        }
+
+        /**
+         * Returns the {@code Class} object associated with the class or
+         * interface with the given string name, using the given class loader.
+         * Given the fully qualified name for a class or interface (in the same
+         * format returned by {@code getName}) this method attempts to
+         * locate, load, and link the class or interface.  The specified class
+         * loader is used to load the class or interface.  If the parameter
+         * {@code loader} is null, the class is loaded through the bootstrap
+         * class loader.  The class is initialized only if the
+         * {@code initialize} parameter is {@code true} and if it has
+         * not been initialized earlier.
+         *
+         * <p> If {@code name} denotes a primitive type or void, an attempt
+         * will be made to locate a user-defined class in the unnamed package whose
+         * name is {@code name}. Therefore, this method cannot be used to
+         * obtain any of the {@code Class} objects representing primitive
+         * types or void.
+         *
+         * <p> If {@code name} denotes an array class, the component type of
+         * the array class is loaded but not initialized.
+         *
+         * <p> For example, in an instance method the expression:
+         *
+         * <blockquote>
+         * {@code Class.forName("Foo")}
+         * </blockquote>
+         * <p>
+         * is equivalent to:
+         *
+         * <blockquote>
+         * {@code Class.forName("Foo", true, this.getClass().getClassLoader())}
+         * </blockquote>
+         * <p>
+         * Note that this method throws errors related to loading, linking or
+         * initializing as specified in Sections 12.2, 12.3 and 12.4 of <em>The
+         * Java Language Specification</em>.
+         * Note that this method does not check whether the requested class
+         * is accessible to its caller.
+         *
+         * @param name       fully qualified name of the desired class
+         * @param initialize if {@code true} the class will be initialized.
+         *                   See Section 12.4 of <em>The Java Language Specification</em>.
+         * @param loader     class loader from which the class must be loaded
+         * @return class object representing the desired class
+         * @throws LinkageError                if the linkage fails
+         * @throws ExceptionInInitializerError if the initialization provoked
+         *                                     by this method fails
+         * @throws NoClassDefFoundError        if the class cannot be located by
+         *                                     the specified class loader
+         * @throws SecurityException           if a security manager is present, and the {@code loader} is
+         *                                     {@code null}, and the caller's class loader is not
+         *                                     {@code null}, and the caller does not have the
+         *                                     {@link RuntimePermission}{@code ("getClassLoader")}
+         * @see java.lang.Class#forName(String)
+         * @see java.lang.Class#forName(String, boolean, ClassLoader)
+         * @see java.lang.ClassLoader
+         * @since 1.2
+         */
+        public static Class<?> forName(String name, boolean initialize,
+                                       ClassLoader loader) {
+            try {
+                return Class.forName(name, initialize, loader);
+            } catch (ClassNotFoundException e) {
+                throw new NoClassDefFoundError(e.toString());
+            }
         }
 
         protected abstract Class<?> defineClass0(
@@ -151,6 +245,8 @@ public class Toolkit {
          *                                   certificates than this class, or if <tt>name</tt> begins with
          *                                   "<tt>java.</tt>".
          */
+        @Contract("null,_,_,_,_,_ -> fail;" +
+                "_,_,null,_,_,_ -> fail;")
         public static Class<?> defineClass(
                 ClassLoader loader,
                 String name, byte[] b, int off, int len,
@@ -257,8 +353,11 @@ public class Toolkit {
 
         /**
          * 获取调用者的Class
+         *
          * @return 获取调用者的Class
+         * @throws ArrayIndexOutOfBoundsException 在程序main入口调用时抛出
          */
+        @Contract(pure = true)
         public static Class<?> getCallerClass() {
             final Class[] ct = StackTrace.kit.ct();
             return ct[3];
@@ -266,8 +365,11 @@ public class Toolkit {
 
         /**
          * 获取调用者的Class
+         *
          * @return 获取调用者的Class
          */
+        @Nullable
+        @Contract(pure = true)
         public static Class<?> getCallerClass(int point) {
             if (point < 0) return null;
             final Class[] ct = StackTrace.kit.ct();
@@ -286,14 +388,17 @@ public class Toolkit {
         StackTraceElement elm;
 
         @Override
+        @Contract(pure = true)
         public String toString() {
             return elm + "#" + c;
         }
 
+        @Contract(pure = true)
         public Class getContent() {
             return c;
         }
 
+        @Contract(pure = true)
         public StackTraceElement getStackTraceElement() {
             return elm;
         }
@@ -366,14 +471,20 @@ public class Toolkit {
 
         /**
          * 获取当前线程堆栈
+         *
+         * @return 堆栈列表
          */
+        @Contract(pure = true)
         public static StackTrace[] getStackTraces() {
             return kit.classes();
         }
 
         /**
          * 获取当前线程堆栈
+         *
+         * @return 堆栈列表(只有类)
          */
+        @Contract(pure = true)
         public static Class[] getClassContext() {
             Class[] cc = kit.ct();
             if (cc.length < 2) return new Class[0];

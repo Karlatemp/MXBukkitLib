@@ -12,7 +12,9 @@ package cn.mcres.gyhhy.MXLib.event;
 
 import java.io.IOException;
 import java.net.URI;
+
 import org.bukkit.event.HandlerList;
+import org.bukkit.plugin.Plugin;
 
 public class NetURIConnectEvent extends NetEvent implements C {
 
@@ -21,11 +23,17 @@ public class NetURIConnectEvent extends NetEvent implements C {
     public static HandlerList getHandlerList() {
         return list;
     }
+
     private boolean c = false;
 
     public NetURIConnectEvent(URI uri) {
         super(uri);
     }
+
+    public NetURIConnectEvent(URI uri, Plugin plugin) {
+        super(uri, plugin);
+    }
+
     IOException ioe;
 
     public IOException getCancelThrow() {

@@ -87,7 +87,8 @@ public class SharedEnvironmentFactory implements
             if (val != null) {
                 Class c = val.getClass();
                 if (val instanceof String || val instanceof Number ||
-                        val instanceof Boolean || val instanceof Character || val instanceof Map) {
+                        val instanceof Boolean || val instanceof Character || val instanceof Map
+                        || val instanceof List) {
                 } else if (c.isPrimitive()) {
                 } else {
                     val = toEnvironment(c, val);

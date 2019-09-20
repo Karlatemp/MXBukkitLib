@@ -5,6 +5,7 @@
 
 package cn.mcres.karlatemp.mxlib.share;
 
+import cn.mcres.karlatemp.mxlib.MXBukkitLib;
 import cn.mcres.karlatemp.mxlib.bukkit.IBukkitConfigurationProcessor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -18,8 +19,26 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BukkitConfigurationProcessor implements IBukkitConfigurationProcessor {
+    @Override
+    public void save(Map<String, Object> config, String path, Object plugin) {
+        Logger logger = MXBukkitLib.getAsJavaLogger();
+        try {
+            MXBukkitLib.debug(() -> "Saving configuration for plugin " + plugin + " in path " + path + " with data: " + config);
+            Plugin pl = (Plugin) plugin;
+            logger = pl.getLogger();
+            YamlConfiguration yc = new YamlConfiguration();
+            for (Map.Entry<String, Object> data : config.entrySet()) {
+                yc.set(data.getKey(), data.getValue());
+            }
+            yc.save(new File(pl.getDataFolder(), path));
+        } catch (Throwable thr) {
+            logger.log(Level.SEVERE, "Error in saving config \"" + path + "\" of plugin " + plugin);
+        }
+    }
+
     @Override
     public Map<String, Object> load(@NotNull Object plugin, @NotNull String path) {
         Plugin p = (Plugin) plugin;

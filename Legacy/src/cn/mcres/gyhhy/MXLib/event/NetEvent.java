@@ -10,14 +10,26 @@
  */
 package cn.mcres.gyhhy.MXLib.event;
 
+import org.bukkit.plugin.Plugin;
+
 import java.net.URI;
 
 public abstract class NetEvent extends org.bukkit.event.Event {
 
     protected final URI uri;
+    private final Plugin plugin;
 
     protected NetEvent(URI uri) {
+        this(uri, null);
+    }
+
+    protected NetEvent(URI uri, Plugin plugin) {
         this.uri = uri;
+        this.plugin = plugin;
+    }
+
+    public Plugin getPlugin() {
+        return plugin;
     }
 
     @SuppressWarnings("FinalMethod")

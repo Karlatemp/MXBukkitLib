@@ -26,7 +26,7 @@ public class MXBukkitLib {
      * <p>
      * 使用此字段获取你所使用的MXBukkitLib版本
      */
-    public static final String BUILD_VERSION = "2.0";
+    public static final String BUILD_VERSION = "2.1";
     private static final boolean DEBUG = System.getProperty("mxlib.debug") != null;
 
     public static String getCurrentVersion() {
@@ -42,6 +42,7 @@ public class MXBukkitLib {
 
     /**
      * 获取BeanManager, Lib核心
+     * @return 管理核心
      */
     public static IBeanManager getBeanManager() {
         return beanManager;

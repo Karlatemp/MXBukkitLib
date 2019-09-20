@@ -33,6 +33,7 @@ public class MLogger extends Logger {
      * @param resourceBundleName name of ResourceBundle to be used for localizing
      *                           messages for this logger.  May be null if none
      *                           of the messages require localization.
+     * @param logger             The Logger of MXLib
      * @throws MissingResourceException if the resourceBundleName is non-null and
      *                                  no corresponding resource can be found.
      */
@@ -54,6 +55,7 @@ public class MLogger extends Logger {
      * @param resourceBundleName name of ResourceBundle to be used for localizing
      *                           messages for this logger.  May be null if none
      *                           of the messages require localization.
+     * @param handler            The main logging handler
      * @throws MissingResourceException if the resourceBundleName is non-null and
      *                                  no corresponding resource can be found.
      */

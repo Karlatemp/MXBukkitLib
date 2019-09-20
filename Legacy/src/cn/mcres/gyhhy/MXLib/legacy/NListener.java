@@ -6,11 +6,16 @@
 package cn.mcres.gyhhy.MXLib.legacy;
 
 import cn.mcres.gyhhy.MXLib.event.NetURIConnectEvent;
+import cn.mcres.karlatemp.mxlib.MXBukkitLib;
 import cn.mcres.karlatemp.mxlib.network.NetWorkManager;
+import cn.mcres.karlatemp.mxlib.share.BukkitToolkit;
 import cn.mcres.karlatemp.mxlib.tools.ThrowHelper;
+import cn.mcres.karlatemp.mxlib.tools.Toolkit;
+import org.bukkit.plugin.Plugin;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.Objects;
 
 import static cn.mcres.gyhhy.MXLib.event.EventHelper.plon;
 
@@ -34,10 +39,16 @@ public class NListener implements NetWorkManager.NetWorkListener {
             }
         }
 
+        private Plugin getPlugin() {
+            return BukkitToolkit.getPluginByClass(
+                    Objects.requireNonNull(Toolkit.Reflection.getCallerClass(3))
+            );
+        }
+
         protected void post(URL url) throws IOException {
             NetURIConnectEvent ev;
             try {
-                ev = new NetURIConnectEvent(url.toURI());
+                ev = new NetURIConnectEvent(url.toURI(), getPlugin());
             } catch (URISyntaxException e) {
                 throw new IOException(e);
             }

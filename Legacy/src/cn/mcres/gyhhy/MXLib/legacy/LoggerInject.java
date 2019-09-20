@@ -17,6 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginLogger;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -77,6 +78,24 @@ public class LoggerInject extends PrintStreamLogger implements Listener, EventEx
                     logger.setResourceBundle(resourceBundle);
             }
             lg.set(pl, logger);
+            if (log instanceof PluginLogger) {
+                log.setUseParentHandlers(false);
+                log.addHandler(new Handler() {
+                    @Override
+                    public void publish(LogRecord record) {
+                        logger.log(record);
+                    }
+
+                    @Override
+                    public void flush() {
+                    }
+
+                    @Override
+                    public void close() throws SecurityException {
+                    }
+                });
+                log.setLevel(Level.ALL);
+            }
         } catch (Throwable thr) {
             instance.printStackTrace(thr);
         }
