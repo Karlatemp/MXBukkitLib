@@ -34,7 +34,7 @@ public class UpdateModule {
 
         VersionInfo.updates.add((lastest) -> {
             F3c<HttpURLConnection, InputStream> fc = (code, conn, inp) -> {
-                MXBukkitLib.getLogger().printf("[Update] Starting download update.");
+                MXBukkitLib.getLogger().printf("[MXLib] [Update] Starting download update.");
                 if (code == 200) {
                     byte[] buffer = new byte[1 << 4];
                     temp.createNewFile();
@@ -51,16 +51,16 @@ public class UpdateModule {
                             if (System.currentTimeMillis() - time > 1000) {
                                 time = System.currentTimeMillis();
                                 if (downsize < 1024) {
-                                    MXBukkitLib.getLogger().format("[Update] File download %s B", downsize);
+                                    MXBukkitLib.getLogger().format("[MXLib] [Update] File download %s B", downsize);
                                 } else if (downsize < 1024 * 1024) {
-                                    MXBukkitLib.getLogger().format("[Update] File download %s KB", downsize / 1024);
+                                    MXBukkitLib.getLogger().format("[MXLib] [Update] File download %s KB", downsize / 1024);
                                 } else {
-                                    MXBukkitLib.getLogger().format("[Update] File download %s MB", downsize / 1024 / 1024);
+                                    MXBukkitLib.getLogger().format("[MXLib] [Update] File download %s MB", downsize / 1024 / 1024);
                                 }
                             }
                         }
                     }
-                    MXBukkitLib.getLogger().printf("Lastest version(" + lastest + ") downloaded.");
+                    MXBukkitLib.getLogger().printf("[MXLib] Lastest version(" + lastest + ") downloaded.");
                     uf.mkdirs();
                     File to = new File(uf, file.getName());
 //                    Core.getBL().printf(to);

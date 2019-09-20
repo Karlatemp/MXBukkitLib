@@ -9,6 +9,7 @@ import cn.mcres.gyhhy.MXLib.bukkit.MXAPI;
 import cn.mcres.gyhhy.MXLib.fcs.F3c;
 import cn.mcres.gyhhy.MXLib.http.WebHelper;
 import cn.mcres.karlatemp.mxlib.MXBukkitLib;
+import cn.mcres.karlatemp.mxlib.share.MXBukkitLibPluginStartup;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
@@ -18,6 +19,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 /**
  * @author Karlatemp
@@ -26,7 +28,7 @@ public class VersionInfo {
     public static final List<Consumer<String>> updates = new ArrayList<>();
 
     private static void write(String s) {
-        MXBukkitLib.getLogger().printf(s);
+        MXBukkitLibPluginStartup.plugin.getLogger().info(s);
     }
 
     public static void check(Plugin pl) {
@@ -84,7 +86,7 @@ public class VersionInfo {
                 "https://raw.githubusercontent.com/Karlatemp/MXBukkitLib/master/UPDATE.TXT"
         ).response(func).onCatch((cat) -> {
             try {
-                MXBukkitLib.getLogger().error("Checkup error from github.");
+                MXBukkitLibPluginStartup.plugin.getLogger().warning("Checkup error from github.");
             } catch (Throwable thrx) {
                 System.err.println("Checkup error from github.");
             }
@@ -92,7 +94,7 @@ public class VersionInfo {
                     "https://dev.tencent.com/u/GYHHY/p/MXBukkitLib/git/raw/master/UPDATE.TXT"
             ).response(func).onCatch((tw) -> {
                 try {
-                    MXBukkitLib.getLogger().printStackTrace(tw, false, true);
+                    MXBukkitLibPluginStartup.plugin.getLogger().log(Level.SEVERE, null, tw);
                 } catch (Throwable thrx) {
                     System.err.println(tw);
                 }
