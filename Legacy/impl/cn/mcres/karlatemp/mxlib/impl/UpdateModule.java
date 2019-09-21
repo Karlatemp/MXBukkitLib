@@ -25,7 +25,7 @@ public class UpdateModule {
     public static void run(MXBukkitLibPluginStartup pl) {
         File file = pl.getFile();
         File temp = new File(pl.getDataFolder(), "download.jar");
-        if ($MXBukkitLibConfiguration.configuration.update.autoupdate) {
+        if (!$MXBukkitLibConfiguration.configuration.update.autoupdate) {
             return;
         }
         Server sr = Bukkit.getServer();
