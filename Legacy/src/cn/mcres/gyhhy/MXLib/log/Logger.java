@@ -438,31 +438,31 @@ public class Logger extends BasicLogger implements IMessageFactory {
 
     @Override
     public String dump(LockInfo lockInfo) {
-        return null;
+        return factory.dump(lockInfo);
     }
 
     @Override
     public String dump(ThreadInfo inf, boolean fullFrames) {
-        return null;
+        return factory.dump(inf,fullFrames);
     }
 
     @Override
     public String CIRCULAR_REFERENCE(Throwable throwable) {
-        return null;
+        return factory.CIRCULAR_REFERENCE(throwable);
     }
 
     @Override
     public String dump(Throwable thr) {
-        return null;
+        return factory.dump(thr);
     }
 
     @Override
     public String excpre(String pre) {
-        return null;
+        return factory.excpre(pre);
     }
 
     @Override
     public String toConsole(String cons) {
-        return null;
+        return factory.toConsole(cons);
     }
 }

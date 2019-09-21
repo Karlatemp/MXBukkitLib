@@ -15,10 +15,9 @@ import cn.mcres.gyhhy.MXLib.ext.lookup.Looker;
 import cn.mcres.gyhhy.MXLib.io.LinePrintStream;
 import cn.mcres.gyhhy.MXLib.io.LinePrintWriter;
 import cn.mcres.gyhhy.MXLib.io.LineWritable;
-import cn.mcres.karlatemp.mxlib.logging.AbstractBaseLogger;
-import cn.mcres.karlatemp.mxlib.logging.BukkitMessageFactory;
-import cn.mcres.karlatemp.mxlib.logging.IMessageFactory;
+import cn.mcres.karlatemp.mxlib.logging.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -52,8 +51,8 @@ import java.util.regex.Pattern;
  * @author karlatemp
  */
 @Deprecated
-public class BasicLogger extends AbstractBaseLogger {
-    static IMessageFactory factory = new BukkitMessageFactory();
+public class BasicLogger extends PrintStreamLogger implements PrefixSupplier {
+    static IMessageFactory factory = new MessageFactoryAnsi();
 
     public static IMessageFactory getMessageFactory() {
         return factory;
@@ -155,7 +154,7 @@ public class BasicLogger extends AbstractBaseLogger {
 
     @SuppressWarnings("AssignmentToMethodParameter")
     public BasicLogger(IMessageFactory factory, String format, String errformat, String pname) {
-        super(factory);
+        super(null, factory, (PrefixSupplier) null, defaultOutput);
         if (format == null) {
             format = defaultFormat;
         }
@@ -168,7 +167,7 @@ public class BasicLogger extends AbstractBaseLogger {
 
     @SuppressWarnings("AssignmentToMethodParameter")
     public BasicLogger(IMessageFactory factory, String prefix, String errprefix) {
-        super(factory);
+        super(null, factory, (PrefixSupplier) null, defaultOutput);
         if (prefix == null) {
             prefix = defaultFormat;
         }
@@ -217,6 +216,15 @@ public class BasicLogger extends AbstractBaseLogger {
             pf = NonFormatter.getInstance();
         }
         return pf;
+    }
+
+    @NotNull
+    @Override
+    public String get(boolean error, @Nullable String line, @Nullable Level level, @Nullable LogRecord lr) {
+        if (error) {
+            return getErrorPrefix(line);
+        }
+        return getPrefix(line);
     }
 
     public BasicLogger setPrefixFormatter(PrefixFormatter pf) {
@@ -445,6 +453,11 @@ public class BasicLogger extends AbstractBaseLogger {
     @Override
     protected void writeLine(String pre, String message, boolean error) {
         write(this, pre + message);
+    }
+
+    public static void main(String[] args) {
+        BasicLogger bl = Logger.getOrCreateLogger(null,"fa ", "q ");
+        bl.error("ERR");
     }
 
     @NotNull
