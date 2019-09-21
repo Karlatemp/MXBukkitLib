@@ -18,6 +18,7 @@ import org.bukkit.plugin.Plugin;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -36,7 +37,7 @@ public class VersionInfo {
         F3c<HttpURLConnection, InputStream> func = (a, b, c) -> {
             VersionInfo fi = new VersionInfo();
             Map<String, List<String>> versions;
-            try (InputStreamReader reader = new InputStreamReader(c)) {
+            try (InputStreamReader reader = new InputStreamReader(c, StandardCharsets.UTF_8)) {
                 try (Scanner scanner = new Scanner(reader)) {
                     versions = fi.read(scanner);
                 }
