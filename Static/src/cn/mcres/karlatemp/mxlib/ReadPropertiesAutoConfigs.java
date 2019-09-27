@@ -12,7 +12,13 @@ import java.util.*;
 import java.util.function.Function;
 
 public class ReadPropertiesAutoConfigs {
-    public static List<Function<String, Collection<Reader>>> resourceLoaders = new ArrayList<>();
+    /**
+     * This field will be removed before 2.7
+     *
+     * @deprecated
+     */
+    @Deprecated
+    public static List<Function<String, Collection<InputStream>>> resourceLoaders = new ArrayList<>();
 
     public static void read(Reader reader, ClassLoader loader,
                             Collection<String> founded,
@@ -57,11 +63,11 @@ public class ReadPropertiesAutoConfigs {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        for (Function<String, Collection<Reader>> resourceLoader : resourceLoaders) {
-            Collection<Reader> readers = resourceLoader.apply(res);
+        for (Function<String, Collection<InputStream>> resourceLoader : resourceLoaders) {
+            Collection<InputStream> readers = resourceLoader.apply(res);
             if (readers != null) {
-                for (Reader reader : readers)
-                    try (Reader r = reader) {
+                for (InputStream reader : readers)
+                    try (Reader r = new InputStreamReader(reader, StandardCharsets.UTF_8)) {
                         read(r, loader, founded, configs);
                     } catch (IOException ioe) {
                         ioe.printStackTrace();

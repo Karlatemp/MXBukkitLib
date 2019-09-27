@@ -28,11 +28,11 @@ public class MXBukkitLibPluginStartup extends JavaPlugin {
 
     static {
         ReadPropertiesAutoConfigs.resourceLoaders.add(res -> {
-            List<Reader> readers = new ArrayList<>();
+            List<InputStream> readers = new ArrayList<>();
             for (Plugin p : Bukkit.getPluginManager().getPlugins()) {
                 final InputStream stream = p.getResource(res);
                 if (stream != null) {
-                    readers.add(new InputStreamReader(stream, StandardCharsets.UTF_8));
+                    readers.add(stream);
                 }
             }
             return readers;

@@ -7,11 +7,14 @@ package cn.mcres.karlatemp.mxlib;
 
 import cn.mcres.karlatemp.mxlib.annotations.ProhibitBean;
 import cn.mcres.karlatemp.mxlib.bean.IBeanManager;
+import cn.mcres.karlatemp.mxlib.event.core.MXLibBootEvent;
 import cn.mcres.karlatemp.mxlib.logging.ILogger;
 import cn.mcres.karlatemp.mxlib.logging.MessageFactoryAnsi;
 import cn.mcres.karlatemp.mxlib.logging.PrintStreamLogger;
+import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.logging.*;
 
@@ -21,6 +24,29 @@ import java.util.logging.*;
  */
 @ProhibitBean
 public class MXBukkitLib {
+    /**
+     * Unsafe value. Only run from your main(String[]) should change.
+     * Configurations with tags here will not be loaded
+     *
+     * @since 2.2.
+     */
+    @Deprecated
+    public static final List<String> disableConfigurations = new ArrayList<>();
+    /**
+     * A list of Bukkit System.
+     * <pre>{@code
+     *    MXBukkitLib.disableConfigurations.addAll(
+     *      MXBukkitLib.BukkitDisableConfigurations
+     *    );
+     * }</pre>
+     */
+    @Deprecated
+    public static final List<String> BukkitDisableConfigurations = Collections.unmodifiableList(
+            Arrays.asList(
+                    "cn.mcres.karlatemp.mxlib.share.PluginAutoConfig",
+                    "cn.mcres.karlatemp.mxlib.impl.ImplSetupAutoConfig",
+                    "cn.mcres.gyhhy.MXLib.legacy.LegacyAutoConfig")
+    );
     /**
      * Use this field to get the version you using
      * <p>
@@ -33,6 +59,45 @@ public class MXBukkitLib {
         return BUILD_VERSION;
     }
 
+    public static synchronized void boot() {
+        if (beanManager != null) return;
+        MXLibBootProvider provider = null;
+        try {
+            String s = System.getProperty("mxlib.provider");
+            if (s != null)
+                provider = Toolkit.Reflection.setAccess(Toolkit.Reflection.loadClassWith(
+                        s, Toolkit.Reflection.LOAD_CLASS_CALLER_CLASSLOADER | Toolkit.Reflection.LOAD_CLASS_THREAD_CONTENT
+                ).asSubclass(MXLibBootProvider.class).getDeclaredConstructor(), true).newInstance();
+        } catch (Throwable dump) {
+            dump.printStackTrace();
+        }
+        List<MXLibBootProvider> providerList = new ArrayList<>();
+        final ServiceLoader<MXLibBootProvider> service = ServiceLoader.load(MXLibBootProvider.class, MXBukkitLib.class.getClassLoader());
+        service.reload();
+        for (MXLibBootProvider p : service) {
+            providerList.add(p);
+        }
+        providerList.sort(Comparator.comparingInt(MXLibBootProvider::getPrioritySafe));
+        if (provider != null)
+            providerList.add(0, provider);
+        boot(providerList);
+    }
+
+    public static synchronized void boot(Collection<MXLibBootProvider> providers) {
+        if (beanManager != null) return;
+        providers = MXLibBootEvent.post(new MXLibBootEvent(providers)).getProviders();
+        for (MXLibBootProvider p : providers) {
+            if (p != null) {
+                if (beanManager == null)
+                    p.setBeanManager();
+                else break;
+            }
+        }
+        for (MXLibBootProvider p : providers) {
+            if (p != null) p.boot();
+        }
+    }
+
     public static void main(String[] args) {
         System.out.println("MXBukkitLib v" + getCurrentVersion());
         System.out.println("Copyright Karlatemp.");
@@ -42,6 +107,7 @@ public class MXBukkitLib {
 
     /**
      * 获取BeanManager, Lib核心
+     *
      * @return 管理核心
      */
     public static IBeanManager getBeanManager() {

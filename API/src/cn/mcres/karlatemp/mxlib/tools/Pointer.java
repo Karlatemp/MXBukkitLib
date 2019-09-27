@@ -6,6 +6,7 @@
 package cn.mcres.karlatemp.mxlib.tools;
 
 import cn.mcres.karlatemp.mxlib.annotations.ProhibitBean;
+import org.jetbrains.annotations.Contract;
 
 import java.lang.ref.Reference;
 import java.util.function.Supplier;
@@ -21,13 +22,34 @@ import java.util.function.Function;
 public class Pointer<T> implements Supplier<T>, Consumer<T>, Function<T, T> {
     private T value;
 
+    @Contract(pure = true)
     public T value() {
         return value;
     }
 
+    /**
+     * If you want to get the old value. please use {@link #replace(T)}
+     *
+     * @param val The value you want to set
+     * @return The input value
+     */
+    @Contract("null -> null; !null -> !null")
     public T value(T val) {
         value = val;
         return val;
+    }
+
+    /**
+     * Set up the value and return the old value.
+     *
+     * @param val The value you want to set
+     * @return The value before set
+     * @since 2.2
+     */
+    public T replace(T val) {
+        T o = value;
+        value = val;
+        return o;
     }
 
     public Pointer() {
@@ -39,6 +61,7 @@ public class Pointer<T> implements Supplier<T>, Consumer<T>, Function<T, T> {
     }
 
     @Override
+    @Contract(pure = true)
     public T get() {
         return value;
     }
@@ -58,5 +81,16 @@ public class Pointer<T> implements Supplier<T>, Consumer<T>, Function<T, T> {
     @Override
     public String toString() {
         return String.valueOf(value);
+    }
+
+    /**
+     * Check the current value not `null`
+     *
+     * @return value != null
+     * @since 2.2
+     */
+    @Contract(pure = true)
+    public boolean exists() {
+        return value != null;
     }
 }

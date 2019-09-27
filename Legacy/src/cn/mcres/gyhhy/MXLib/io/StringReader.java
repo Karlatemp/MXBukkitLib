@@ -5,6 +5,8 @@
 
 package cn.mcres.gyhhy.MXLib.io;
 
+import cn.mcres.karlatemp.mxlib.util.SafeStringReader;
+
 import java.io.IOError;
 import java.io.IOException;
 
@@ -13,12 +15,7 @@ import java.io.IOException;
  *
  * @author Karlatemp
  */
-public class StringReader extends java.io.Reader {
-
-    private String str;
-    private int length;
-    private int next = 0;
-    private int mark = 0;
+public class StringReader extends SafeStringReader {
 
     /**
      * Creates a new string reader.
@@ -26,38 +23,20 @@ public class StringReader extends java.io.Reader {
      * @param s String providing the character stream.
      */
     public StringReader(String s) {
-        this.str = s;
-        this.length = s.length();
+        super(s);
     }
 
     public boolean hasNext() {
-        if (str == null) {
-            return false;
-        }
-        if (next >= length) {
-            return false;
-        }
-        return true;
+        return super.hasNext();
     }
 
     public StringReader setString(String str) {
-        this.str = str;
-        this.length = str.length();
-        this.next = this.mark;
+        super.setString(str);
         return this;
     }
 
     public String getString() {
-        return str;
-    }
-
-    /**
-     * Check to make sure that the stream has not been closed
-     */
-    private void ensureOpen() {
-        if (str == null) {
-            throw new IOError(new IOException("Stream closed"));
-        }
+        return super.getString();
     }
 
     /**
@@ -67,13 +46,7 @@ public class StringReader extends java.io.Reader {
      * reached
      */
     public int read() {
-        synchronized (this) {
-            ensureOpen();
-            if (next >= length) {
-                return -1;
-            }
-            return str.charAt(next++);
-        }
+        return super.read();
     }
 
     /**
@@ -86,22 +59,7 @@ public class StringReader extends java.io.Reader {
      * been reached
      */
     public int read(char cbuf[], int off, int len) {
-        synchronized (this) {
-            ensureOpen();
-            if ((off < 0) || (off > cbuf.length) || (len < 0)
-                    || ((off + len) > cbuf.length) || ((off + len) < 0)) {
-                throw new IndexOutOfBoundsException();
-            } else if (len == 0) {
-                return 0;
-            }
-            if (next >= length) {
-                return -1;
-            }
-            int n = Math.min(length - next, len);
-            str.getChars(next, next + n, cbuf, off);
-            next += n;
-            return n;
-        }
+        return super.read(cbuf, off, len);
     }
 
     /**
@@ -121,17 +79,7 @@ public class StringReader extends java.io.Reader {
      * effect and always returns 0.
      */
     public long skip(long ns) {
-        synchronized (this) {
-            ensureOpen();
-            if (next >= length) {
-                return 0;
-            }
-            // Bound skip by beginning and end of the source
-            long n = Math.min(length - next, ns);
-            n = Math.max(-next, n);
-            next += n;
-            return n;
-        }
+        return super.skip(ns);
     }
 
     /**
@@ -140,17 +88,14 @@ public class StringReader extends java.io.Reader {
      * @return True if the next read() is guaranteed not to block for input
      */
     public boolean ready() {
-        synchronized (this) {
-            ensureOpen();
-            return true;
-        }
+        return super.ready();
     }
 
     /**
      * Tells whether this stream supports the mark() operation, which it does.
      */
     public boolean markSupported() {
-        return true;
+        return super.markSupported();
     }
 
     /**
@@ -164,13 +109,7 @@ public class StringReader extends java.io.Reader {
      * @throws IllegalArgumentException If {@code readAheadLimit < 0}
      */
     public void mark(int readAheadLimit) {
-        if (readAheadLimit < 0) {
-            throw new IllegalArgumentException("Read-ahead limit < 0");
-        }
-        synchronized (this) {
-            ensureOpen();
-            mark = next;
-        }
+        super.mark(readAheadLimit);
     }
 
     /**
@@ -178,10 +117,7 @@ public class StringReader extends java.io.Reader {
      * string if it has never been marked.
      */
     public void reset() {
-        synchronized (this) {
-            ensureOpen();
-            next = mark;
-        }
+        super.reset();
     }
 
     /**
@@ -191,6 +127,6 @@ public class StringReader extends java.io.Reader {
      * closed stream has no effect.
      */
     public void close() {
-        str = null;
+        super.close();
     }
 }

@@ -18,6 +18,7 @@ import cn.mcres.karlatemp.mxlib.impl.VersionInfo;
 import cn.mcres.karlatemp.mxlib.network.NetWorkManager;
 import cn.mcres.karlatemp.mxlib.share.MXBukkitLibPluginStartup;
 import cn.mcres.karlatemp.mxlib.share.$MXBukkitLibConfiguration;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
@@ -49,7 +50,7 @@ public class LegacyAutoConfig {
                     final Logger logger;
                     if (plugin == null) {
                         toString = name = "<unknown>";
-                        logger = MXBukkitLibPluginStartup.plugin.getLogger();
+                        logger = Bukkit.getLogger();
                     } else {
                         toString = plugin;
                         name = plugin.getName();

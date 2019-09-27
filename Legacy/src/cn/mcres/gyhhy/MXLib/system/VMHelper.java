@@ -41,7 +41,8 @@ public class VMHelper {
             try {
                 return new VMHelperImpl();
             } catch (Throwable thr) {
-                return new VMHelperImplAPP();
+                //return new VMHelperImplAPP();
+                return new VMHelper();
             }
         } catch (Error | RuntimeException thr) {
             if (thr instanceof java.security.AccessControlException

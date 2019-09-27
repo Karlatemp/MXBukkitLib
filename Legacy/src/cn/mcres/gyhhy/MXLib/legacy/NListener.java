@@ -6,6 +6,7 @@
 package cn.mcres.gyhhy.MXLib.legacy;
 
 import cn.mcres.gyhhy.MXLib.event.NetURIConnectEvent;
+import cn.mcres.gyhhy.MXLib.http.WebHelper;
 import cn.mcres.karlatemp.mxlib.MXBukkitLib;
 import cn.mcres.karlatemp.mxlib.network.NetWorkManager;
 import cn.mcres.karlatemp.mxlib.share.BukkitToolkit;
@@ -40,9 +41,16 @@ public class NListener implements NetWorkManager.NetWorkListener {
         }
 
         private Plugin getPlugin() {
-            return BukkitToolkit.getPluginByClass(
-                    Objects.requireNonNull(Toolkit.Reflection.getCallerClass(3))
-            );
+            Class[] context = Toolkit.StackTrace.getClassContext();
+            for (int i = 3; i < context.length; i++) {
+                Class c = context[i];
+                if (WebHelper.class.isAssignableFrom(c)) { // WebHelper not the real caller
+                    continue;
+                }
+                Plugin p = BukkitToolkit.getPluginByClass(c);
+                if (p != null) return p;// Return the first plugin
+            }
+            return null;
         }
 
         protected void post(URL url) throws IOException {

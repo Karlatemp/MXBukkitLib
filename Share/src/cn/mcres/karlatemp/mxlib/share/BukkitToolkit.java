@@ -44,6 +44,7 @@ public class BukkitToolkit {
 
     public static Plugin getPluginByClass(@NotNull final Class<?> clazz) {
         final ClassLoader cl = clazz.getClassLoader();
+        if (cl == null) return null;// is Java System class
         if (PluginClassLoader.isInstance(cl)) {
             try {
                 return (Plugin) pfield.get(cl);

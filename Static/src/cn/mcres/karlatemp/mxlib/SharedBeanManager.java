@@ -80,10 +80,12 @@ public class SharedBeanManager implements IBeanManager {
         ProhibitBean pb = c.getDeclaredAnnotation(ProhibitBean.class);
         if (pb != null) {
             if (c == source) {
+                System.out.println("C with Source, SKIP " + source);
                 return true;
             }
             switch (pb.value()) {
                 case ALL_WITH_SUBCLASS:
+                    System.out.println("C with ALL, SKIP " + source + ":" + c);
                     return true;
             }
         }

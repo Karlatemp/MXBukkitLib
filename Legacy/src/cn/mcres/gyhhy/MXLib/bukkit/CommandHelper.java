@@ -5,15 +5,10 @@
 
 package cn.mcres.gyhhy.MXLib.bukkit;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.List;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Server;
+import cn.mcres.karlatemp.mxlib.MXBukkitLib;
 import org.bukkit.command.CommandMap;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.SimplePluginManager;
 import cn.mcres.gyhhy.MXLib.StringHelper;
 
 /**
@@ -66,42 +61,24 @@ public class CommandHelper {
     }
 
     protected CommandMap cmap;
+    protected boolean unsupported = false;
 
     public CommandMap getCommandMap() {
-        if (cmap == null) {
+        if (cmap == null && !unsupported) {
             loadMap();
         }
         return cmap;
     }
 
     protected void loadMap() {
-        if (cmap != null) {
+        if (cmap != null || unsupported) {
             return;
         }
-        Server s = Bukkit.getServer();
-        try {
-            Method met = s.getClass().getMethod("getCommandMap");
-            met.setAccessible(true);
-            cmap = (CommandMap) met.invoke(s);
-        } catch (Throwable ex) {
-        }
-        if (cmap == null) {
-            PluginManager pm = Bukkit.getPluginManager();
-            if (pm instanceof SimplePluginManager) {
-                Class<?> cw = SimplePluginManager.class;
-                for (Field f : cw.getDeclaredFields()) {
-                    Class<?> type = f.getType();
-                    if (CommandMap.class.isAssignableFrom(type)) {
-                        f.setAccessible(true);
-                        try {
-                            cmap = (CommandMap) f.get(pm);
-                            break;
-                        } catch (IllegalArgumentException | IllegalAccessException ex) {
-                        }
-                    }
-                }
-            }
-        }
+        cmap = MXBukkitLib.getBeanManager().getOptional(CommandMap.class).orElseGet(() -> {
+            MXBukkitLib.getLogger().error("[Legacy][CommandHelper] Cannot get CommandMap of server.");
+            unsupported = true;
+            return null;
+        });
     }
 
     /*

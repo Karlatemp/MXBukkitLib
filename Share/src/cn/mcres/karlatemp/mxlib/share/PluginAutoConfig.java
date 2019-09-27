@@ -5,12 +5,26 @@
 
 package cn.mcres.karlatemp.mxlib.share;
 
+import cn.mcres.karlatemp.mxlib.MXBukkitLib;
 import cn.mcres.karlatemp.mxlib.annotations.Bean;
 import cn.mcres.karlatemp.mxlib.annotations.Configuration;
 import cn.mcres.karlatemp.mxlib.bean.IEnvironmentFactory;
 import cn.mcres.karlatemp.mxlib.bukkit.IBukkitConfigurationProcessor;
 import cn.mcres.karlatemp.mxlib.cmd.ICommandProcessor;
+import cn.mcres.karlatemp.mxlib.exceptions.ObjectCreateException;
 import cn.mcres.karlatemp.mxlib.logging.IMessageFactory;
+import cn.mcres.karlatemp.mxlib.tools.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Server;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandMap;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Configuration
 public class PluginAutoConfig {
@@ -25,10 +39,12 @@ public class PluginAutoConfig {
             }
         }
     }
+
     @Bean
-    IMessageFactory mf(){
+    IMessageFactory mf() {
         return new BukkitPluginMessageFactory();
     }
+
     @Bean
     IBukkitConfigurationProcessor bc() {
         return new BukkitConfigurationProcessor();
@@ -44,5 +60,75 @@ public class PluginAutoConfig {
     @Bean
     void zboot(IEnvironmentFactory factory, IBukkitConfigurationProcessor bc) {
         $MXBukkitLibConfiguration.load(factory, bc);
+    }
+
+    @Bean
+    CommandMap cm(IMemberScanner ms) {
+        final Server server = Bukkit.getServer();
+        try {
+            return (CommandMap) server.getClass().getMethod("getCommandMap").invoke(server);
+        } catch (Throwable ignored) {
+        }
+        try {
+            //noinspection OptionalGetWithoutIsPresent
+            return (CommandMap) ms.getAllMethod(server.getClass()).stream().filter(
+                    x -> CommandMap.class.isAssignableFrom(x.getReturnType())
+            ).findFirst().get().invoke(server);
+        } catch (Throwable ignored) {
+        }
+        try {
+            Field f = Command.class.getDeclaredField("commandMap");
+            f.setAccessible(true);
+            final Pointer<CommandMap> pointer = new Pointer<>();
+            Stream.of(server.getPluginManager().getPlugins())
+                    .map(
+                            Plugin::getDescription
+                    ).map(des -> {
+                String p = des.getName().toLowerCase() + ":";
+                return des.getCommands().keySet().stream().map(
+                        cn -> server.getPluginCommand(p + cn)
+                ).collect(Collectors.toList());
+            }).forEach(x -> {
+                if (pointer.exists()) {
+                    return;
+                }
+                x.forEach(c -> {
+                    if (pointer.exists()) {
+                        return;
+                    }
+                    try {
+                        pointer.value((CommandMap) f.get(c));
+                    } catch (Throwable ignore) {
+                    }
+                });
+            });
+            if (pointer.exists()) return pointer.value();
+        } catch (Throwable ignore) {
+        }
+        return null;
+    }
+
+    @Bean
+    DependChecker dependChecker() {
+        return new BukkitDependChecker();
+    }
+
+    @Bean
+    void onBoot(ServiceInstallers installers, final IObjectCreator creator) {
+        installers.add(listener -> {
+            Plugin p = BukkitToolkit.getPluginByClass(listener);
+            if (p == null) return false;
+            if (Listener.class.isAssignableFrom(listener)) {
+                try {
+                    Listener instance = creator.newInstance(listener.asSubclass(Listener.class));
+                    Bukkit.getPluginManager().registerEvents(instance, p);
+                    return true;
+                } catch (Exception e) {
+                    MXBukkitLib.getLogger().error("[ServiceInstaller] [Listener] Failed to create instance for " + listener);
+                    MXBukkitLib.getLogger().printStackTrace(e);
+                }
+            }
+            return false;
+        });
     }
 }

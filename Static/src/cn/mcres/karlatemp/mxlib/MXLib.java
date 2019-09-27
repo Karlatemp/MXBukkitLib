@@ -25,11 +25,11 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.*;
 
+/**
+ * @see SharedMXLibBootProvider
+ */
 public class MXLib {
     public static void test(String a, int b, Object c) {
         System.out.println(b + a + c);
@@ -54,20 +54,7 @@ public class MXLib {
     private static MXLib test;
 
     static {
-        SharedBeanManager bean = new SharedBeanManager();
-        MXBukkitLib.setBeanManager(bean);
-        bean.addBean(IInjector.class, new SharedInjector());
-        bean.addBean(IObjectCreator.class, new SharedObjectCreator());
-        bean.addBean(IMemberScanner.class, new SharedMemberScanner());
-        try {
-            ReadPropertiesAutoConfigs.load();
-        } catch (Throwable thr) {
-            MXBukkitLib.getLogger().printStackTrace(thr);
-        }
-        if (SharedConfigurationProcessor.DEBUG)
-            MXBukkitLib.getBeanManager().getBeans().forEach((k, v) -> {
-                MXBukkitLib.getLogger().printf("[BeanManager] " + k + " = " + v);
-            });
+        MXBukkitLib.boot();
     }
 
     public static void start(Class c) {
@@ -101,7 +88,7 @@ public class MXLib {
     public static void boot() {
         try {
             Class.forName("");
-        } catch (Throwable e) {
+        } catch (Throwable ignore) {
         }
     }
 }

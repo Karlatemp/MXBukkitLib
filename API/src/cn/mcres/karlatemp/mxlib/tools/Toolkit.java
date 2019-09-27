@@ -5,6 +5,7 @@
 
 package cn.mcres.karlatemp.mxlib.tools;
 
+import cn.mcres.karlatemp.mxlib.MXLibBootProvider;
 import cn.mcres.karlatemp.mxlib.cmd.ICommand;
 import cn.mcres.karlatemp.mxlib.cmd.ICommands;
 import org.jetbrains.annotations.Contract;
@@ -14,13 +15,13 @@ import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.security.ProtectionDomain;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 /**
  * 一个工具集合
@@ -28,12 +29,14 @@ import java.util.function.Function;
 @SuppressWarnings("JavadocReference")
 public class Toolkit {
     /**
+     * Get class's package name.<br>
      * 截取类名的包名字
      *
      * @param name 类的全名
      * @return 类的包名
      */
     @NotNull
+    @Contract(pure = true)
     public static String getPackageByClassName(String name) {
         if (name == null) return "";
         int x = name.lastIndexOf('.');
@@ -44,11 +47,13 @@ public class Toolkit {
     }
 
     /**
+     * Get class's simple name<br>
      * 获取类名的精简名
      *
      * @param name 类全名
      * @return 类精简名
      */
+    @Contract(pure = true)
     public static String getClassSimpleName(String name) {
         int last = name.lastIndexOf('.');
         if (last == -1) return name;
@@ -58,10 +63,23 @@ public class Toolkit {
     private static final Comparator<String> PACKAGE_COMPARATOR = Comparator.comparing(Toolkit::getPackageByClassName);
     private static final Function<String, String> PACKAGE_BY_CLASS_NAME = Toolkit::getPackageByClassName;
 
+    /**
+     * @return The function of {@link #getPackageByClassName(String)}
+     * @see #getPackageByClassName(String)
+     */
+    @Contract(pure = true)
     public static Function<String, String> getPackageByClassName() {
         return PACKAGE_BY_CLASS_NAME;
     }
 
+    /**
+     * Get the package name comparator.<br>
+     * 获取包名比较器
+     *
+     * @return The comparator of package.
+     * @see #getPackageByClassName(String)
+     */
+    @Contract(pure = true)
     public static Comparator<String> getPackageComparator() {
         return PACKAGE_COMPARATOR;
     }
@@ -78,6 +96,7 @@ public class Toolkit {
         return (Class<T>) obj.getClass();
     }
 
+    @Contract(pure = true)
     public static boolean isNum(String s) {
         if (s.isEmpty()) return false;
         for (char c : s.toCharArray()) {
@@ -88,6 +107,7 @@ public class Toolkit {
         return true;
     }
 
+    @Contract(pure = true)
     public static ICommands getRoot(ICommand command) {
         ICommands current;
         if (command instanceof ICommands) {
@@ -101,6 +121,25 @@ public class Toolkit {
             loop_ = loop_.getParent();
         }
         return current;
+    }
+
+    private static final Pattern CLASS_NAME_CHECKER = Pattern.compile(
+            "^[a-z_$][a-z_$0-9]*(\\.[a-z$_][a-z$_0-9]*)$", Pattern.CASE_INSENSITIVE | Pattern.UNIX_LINES);
+
+    /**
+     * Check if the given string is a valid class name<br>
+     * 检查给定的字符串是否是有效的类名
+     *
+     * @param check The name of check
+     * @return true if the class name valid
+     * @since 2.2
+     */
+    @Contract(value = "null -> false", pure = true)
+    public static boolean isClassName(String check) {
+        if (check != null) {
+            return CLASS_NAME_CHECKER.matcher(check).find();
+        }
+        return false;
     }
 
     /**
@@ -195,6 +234,68 @@ public class Toolkit {
             } catch (ClassNotFoundException e) {
                 throw new NoClassDefFoundError(e.toString());
             }
+        }
+
+        public static final int LOAD_CLASS_THREAD_CONTENT = 1,
+                LOAD_CLASS_CALLER_CLASSLOADER = 0b10;
+
+        /**
+         * Load class from class loaders
+         *
+         * @param name  The class name
+         * @param flags Loading flags
+         * @return The class loaded
+         * @throws ClassNotFoundException If class not found
+         * @since 2.2
+         */
+        @Contract("null,_ -> null; !null, _ -> !null")
+        @Nullable
+        public static Class<?> loadClassWith(String name, int flags) throws ClassNotFoundException {
+            if (name == null) return null;
+            try {
+                return Class.forName(name);
+            } catch (ClassNotFoundException ignore) {
+            }
+            if ((flags & LOAD_CLASS_THREAD_CONTENT) != 0) {
+                try {
+                    return Class.forName(name, false, Thread.currentThread().getContextClassLoader());
+                } catch (ClassNotFoundException ignore) {
+                }
+            }
+            if ((flags & LOAD_CLASS_THREAD_CONTENT) != 0) {
+                try {
+                    return Class.forName(name, false, Reflection.getCallerClass().getClassLoader());
+                } catch (ClassNotFoundException ignore) {
+                }
+            }
+            throw new ClassNotFoundException(name);
+        }
+
+        /**
+         * Load class from class loaders
+         *
+         * @param name    The name of class
+         * @param loaders Loaders
+         * @return The class loaded
+         * @throws ClassNotFoundException If class not found in any loader
+         * @since 2.2
+         */
+        @Contract("null,_ -> null;!null,_ -> !null")
+        public static Class<?> loadClassFrom(String name, @NotNull Collection<ClassLoader> loaders) throws ClassNotFoundException {
+            if (name == null) return null;
+            for (ClassLoader loader : loaders) {
+                try {
+                    return loader.loadClass(name);
+                } catch (ClassNotFoundException ignore) {
+                }
+            }
+            throw new ClassNotFoundException(name);
+        }
+
+        @Contract("null, _ -> null; !null, _ -> !null")
+        public static <T extends AccessibleObject> T setAccess(T accessibleObject, boolean b) {
+            if (accessibleObject != null) accessibleObject.setAccessible(b);
+            return accessibleObject;
         }
 
         protected abstract Class<?> defineClass0(
@@ -366,6 +467,7 @@ public class Toolkit {
         /**
          * 获取调用者的Class
          *
+         * @param point 指定的堆栈位置
          * @return 获取调用者的Class
          */
         @Nullable

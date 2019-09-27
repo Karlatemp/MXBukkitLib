@@ -47,7 +47,7 @@ public class KBStraightLine implements StraightLine {
         this(a.getXAsDouble(), a.getYAsDouble(), b.getXAsDouble(), b.getYAsDouble());
         double t = a.getZAsDouble();
         if (t != 0 || t != b.getZAsDouble()) {
-            throw new NumberFormatException("KB Straight Line unsupport 3D line.");
+            throw new NumberFormatException("KB Straight Line unsupported 3D line.");
         }
     }
 

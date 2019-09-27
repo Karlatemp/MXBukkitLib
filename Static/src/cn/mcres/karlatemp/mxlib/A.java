@@ -8,9 +8,6 @@ package cn.mcres.karlatemp.mxlib;
 import cn.mcres.karlatemp.mxlib.tools.IParamRule;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.util.*;
 
 class A {
     static class Insert {
@@ -21,4 +18,22 @@ class A {
     public MethodHandle s(MethodHandle mh, IParamRule... rules) {
         return null;
     }
+
+    static boolean c(String pt, String mt) {
+        if (pt == null || mt == null) return false;
+        if (pt.startsWith(JVM_Package)) {
+            return pt.substring(JVM_Package.length()).equals(mt);
+        }
+        if (pt.startsWith(JRE_Package)) {
+            return pt.substring(JRE_Package.length()).equals(mt);
+        }
+        return false;
+    }
+
+    static String
+            JVM_Package = "cn/mcres/karlatemp/mxlib/annotations/",
+            JRE_Package = "cn.mcres.karlatemp.mxlib.annotations.",
+            Resource = "Resource",
+            Depend = "Depend",
+            AutoInstall = "AutoInstall";
 }
