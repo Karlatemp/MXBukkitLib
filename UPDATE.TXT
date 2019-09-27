@@ -1,3 +1,7 @@
+2.2
+    加入内置事件系统
+    加入 ServiceInstaller, ClassResourceLoader, ResourceLoader 等
+    完善Javadoc
 2.1.3
     修复自动更新乱码
 2.1.2
