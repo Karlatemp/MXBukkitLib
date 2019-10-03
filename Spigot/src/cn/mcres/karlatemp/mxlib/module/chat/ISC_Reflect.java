@@ -16,7 +16,7 @@ import java.lang.reflect.Modifier;
 @SuppressWarnings("deprecation")
 public class ISC_Reflect extends RawISC {
     private static MethodHandle
-            CS$a, asNMSCopy;
+            CS$a, asNMSCopy, toComponent;
 
     private static String ChatSerializer$a(Object ChatM) {
         try {
@@ -58,6 +58,26 @@ public class ISC_Reflect extends RawISC {
         }
     }
 
+    private static Object ItemStack$toComponent(Object nmsItem) {
+        try {
+            if (toComponent == null) {
+                Class c = RFT.N("ItemStack");
+                //noinspection ConstantConditions
+                for (Method m : c.getMethods()) {
+                    if (m.getParameterCount() == 0) {
+                        if (m.getReturnType().getName().endsWith(".IChatBaseComponent")) {
+                            toComponent = Toolkit.Reflection.getRoot().unreflect(m);
+                            break;
+                        }
+                    }
+                }
+            }
+            return toComponent.invoke(nmsItem);
+        } catch (Throwable throwable) {
+            return ThrowHelper.thrown(throwable);
+        }
+    }
+
     private static Object ItemStack$asNMSCopy(ItemStack stack) {
         try {
             if (asNMSCopy == null) {
@@ -86,7 +106,7 @@ public class ISC_Reflect extends RawISC {
 
     @Override
     protected String toJson(ItemStack stack) {
-        return ChatSerializer$a(ItemStack$asNMSCopy(stack));
+        return ChatSerializer$a(ItemStack$toComponent(ItemStack$asNMSCopy(stack)));
     }
 
     static class Power implements CCR {
