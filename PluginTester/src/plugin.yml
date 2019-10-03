@@ -5,3 +5,5 @@ website: https://karlatemp.github.io.MXBukkitLib
 name: MXLibPluginTester
 depend:
   - MXBukkitLib
+commands:
+  mxtest: {}

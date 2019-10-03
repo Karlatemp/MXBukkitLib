@@ -1,3 +1,6 @@
+2.3
+    Add Remote Module
+    Add ItemStackComponent
 2.2
     加入内置事件系统
     加入 ServiceInstaller, ClassResourceLoader, ResourceLoader 等

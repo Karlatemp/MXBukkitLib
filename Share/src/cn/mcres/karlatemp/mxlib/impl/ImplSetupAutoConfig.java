@@ -11,8 +11,10 @@ import cn.mcres.karlatemp.mxlib.annotations.Configuration;
 import cn.mcres.karlatemp.mxlib.annotations.Resource;
 import cn.mcres.karlatemp.mxlib.bean.IInjector;
 import cn.mcres.karlatemp.mxlib.bukkit.TitleAPI;
+import cn.mcres.karlatemp.mxlib.impl.titleapi.TitleAPI_Reflect;
 import cn.mcres.karlatemp.mxlib.logging.BukkitMessageFactory;
 import cn.mcres.karlatemp.mxlib.logging.IMessageFactory;
+import cn.mcres.karlatemp.mxlib.module.chat.ItemStackComponent;
 import cn.mcres.karlatemp.mxlib.share.MXBukkitLibPluginStartup;
 import cn.mcres.karlatemp.mxlib.tools.IObjectCreator;
 import cn.mcres.karlatemp.mxlib.tools.Toolkit;
@@ -78,12 +80,29 @@ public class ImplSetupAutoConfig {
 
     private static TitleAPI titleapi;
 
+    private static Class<?> by(String pre, String nms, String end) throws ClassNotFoundException {
+        try {
+            return Class.forName(pre + nms + end);
+        } catch (ClassNotFoundException e) {
+            return Class.forName(pre + "Reflect" + end);
+        }
+    }
+
     private void load(String nmsl) {
-        String s = "cn.mcres.karlatemp.mxlib.impl.titleapi.TitleAPI_";
         try {
             MXBukkitLib.debug("Loading TitleAPI");
-            titleapi = (TitleAPI) creator.newInstance(Class.forName(s + nmsl));
+            titleapi = (TitleAPI) creator.newInstance(by(
+                    "cn.mcres.karlatemp.mxlib.impl.titleapi.TitleAPI_", nmsl,
+                    ""));
             MXBukkitLib.debug("Loaded " + titleapi);
+            Object p = creator.newInstance(by(
+                    "cn.mcres.karlatemp.mxlib.module.chat.ISC_",
+                    nmsl, "$Power"
+            ));
+            Class<?> tok = ItemStackComponent.getPowerClass();
+            if (tok == null) throw new NullPointerException("Cannot get The ItemStackComponent Power class Token.");
+            ItemStackComponent.setPower(tok, tok.cast(p));
+            MXBukkitLib.debug(() -> "[ItemStackComponent] Loaded with provider [" + p + "]");
         } catch (Exception e) {
             MXBukkitLibPluginStartup.plugin.getLogger().log(Level.SEVERE, null, e);
         }

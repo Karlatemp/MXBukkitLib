@@ -73,7 +73,7 @@ public class UpdateModule {
                     .response(fc).onCatch((w) -> {
                 WebHelper.http("https://github.com/Karlatemp/MXBukkitLib/raw/master/dist/MXBukkitLib.jar")
                         .response(fc).onCatch((wx) -> {
-                    MXBukkitLib.getLogger().error("Download lastest version failed");
+                    MXBukkitLib.getLogger().error("Download latest version failed");
                 }).connect();
             }).connect();
         });

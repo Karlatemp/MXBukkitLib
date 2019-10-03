@@ -31,11 +31,19 @@ public class SharedConfigurationCommandProcessor extends SharedConfigurationProc
         for (String s : classes) {
 //            System.out.println("< " + s);
             if (s.endsWith("CommandConfig")) {
+                if (DEBUG) {
+                    MXBukkitLib.getLogger().printf("[CommandProcessor] Found CommandConfig: " + s);
+                }
                 String pck = Toolkit.getPackageByClassName(s);
                 if (pcks.contains(pck)) continue;
                 pcks.add(pck);
                 String sd = pck + '.';
                 String[] subs = classes.stream().filter(a -> a.startsWith(sd)).toArray(String[]::new);
+                if (DEBUG) {
+                    for (String sb : subs) {
+                        MXBukkitLib.getLogger().printf("    SubClass: " + sb);
+                    }
+                }
                 try {
                     Class<?> c = Class.forName(s, true, loader);
                     if (ICommandConfig.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers())) {

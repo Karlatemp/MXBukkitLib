@@ -12,6 +12,7 @@ import cn.mcres.karlatemp.mxlib.bean.IEnvironmentFactory;
 import cn.mcres.karlatemp.mxlib.bukkit.IBukkitConfigurationProcessor;
 import cn.mcres.karlatemp.mxlib.cmd.ICommandProcessor;
 import cn.mcres.karlatemp.mxlib.exceptions.ObjectCreateException;
+import cn.mcres.karlatemp.mxlib.logging.Ansi;
 import cn.mcres.karlatemp.mxlib.logging.IMessageFactory;
 import cn.mcres.karlatemp.mxlib.tools.*;
 import org.bukkit.Bukkit;
@@ -130,5 +131,13 @@ public class PluginAutoConfig {
             }
             return false;
         });
+    }
+
+    @Bean
+    void classLoad() {
+        Plugin p = BukkitToolkit.getPluginByClass(getClass());
+        if (p == null) {
+            MXBukkitLibPluginStartup.plugin.getLogger().severe("[BukkitToolkit] [getPluginByCLass]" + Ansi._C + " This should not happen" + Ansi.RESET);
+        }
     }
 }

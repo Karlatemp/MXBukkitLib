@@ -51,7 +51,7 @@ public class VersionInfo {
                         .append(
                                 ""
                                         + "This lib is out of style.\n"
-                                        + "Please download the lastest from https://dev.tencent.com/u/GYHHY/p/MXBukkitLib/git/blob/master/dist/MXBukkitLib.jar\n"
+                                        + "Please download the latest from https://dev.tencent.com/u/GYHHY/p/MXBukkitLib/git/blob/master/dist/MXBukkitLib.jar\n"
                                         + "or https://github.com/GYHHY/MXBukkitLib/blob/master/dist/MXBukkitLib.jar\n"
                                         + "Current version: ")
                         .append(MXAPI.getVersion()).append("\nLastest version: ").append(lastest).append('\n');
@@ -83,7 +83,7 @@ public class VersionInfo {
                 }, pl);
                 updates.forEach(x -> x.accept(lastest));
             } else {
-                write("This lib is the lastest version with " + lastest + " [" + compare + "]");
+                write("This lib is the latest version with " + lastest + " [" + compare + "]");
             }
         };
         WebHelper.http(
