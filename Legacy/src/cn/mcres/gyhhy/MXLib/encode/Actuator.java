@@ -10,21 +10,26 @@
  */
 package cn.mcres.gyhhy.MXLib.encode;
 
+import cn.mcres.karlatemp.mxlib.encrypt.Encryptor;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * 加密器
+ *
  * @author 32798
  */
-public interface Actuator {
+public interface Actuator extends Encryptor {
 
-    public static interface Encoder {
-        default String encodeToString(byte[] b) throws EncodeException{
-            return new String(encode(b),UTF_8);
+    interface Encoder extends Encryptor.Encoder {
+        default String encodeToString(byte[] b) throws EncodeException {
+            return new String(encode(b), UTF_8);
         }
-        default String encodeToString(String b) throws EncodeException{
-            return new String(encode(b),UTF_8);
+
+        default String encodeToString(String b) throws EncodeException {
+            return new String(encode(b), UTF_8);
         }
+
         byte[] encode(byte[] b) throws EncodeException;
 
         default byte[] encode(String b) throws EncodeException {
@@ -32,7 +37,7 @@ public interface Actuator {
         }
     }
 
-    public static interface Decoder {
+    interface Decoder extends Encryptor.Decoder {
 
 
         byte[] decode(byte[] b) throws DecodeException;
@@ -40,11 +45,13 @@ public interface Actuator {
         default byte[] decode(String data) throws DecodeException {
             return decode(data.getBytes(UTF_8));
         }
-        default String decodeToString(String data) throws DecodeException{
-            return new String(decode(data),UTF_8);
+
+        default String decodeToString(String data) throws DecodeException {
+            return new String(decode(data), UTF_8);
         }
-        default String decodeToString(byte[] data) throws DecodeException{
-            return new String(decode(data),UTF_8);
+
+        default String decodeToString(byte[] data) throws DecodeException {
+            return new String(decode(data), UTF_8);
         }
 
     }

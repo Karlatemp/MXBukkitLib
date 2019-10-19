@@ -10,10 +10,13 @@
  */
 package cn.mcres.gyhhy.MXLib.encode;
 
+import cn.mcres.karlatemp.mxlib.encrypt.SymmetricEncryptor;
+
 /**
  * 对称加密器
+ *
  * @author 32798
  */
-public interface SymmetricActuator extends Actuator{
-    
+public interface SymmetricActuator extends Actuator, SymmetricEncryptor {
+
 }

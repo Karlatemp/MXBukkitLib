@@ -10,11 +10,13 @@
  */
 package cn.mcres.gyhhy.MXLib.encode;
 
+import cn.mcres.gyhhy.MXLib.encryption.EncryptionException;
+
 /**
  *
  * @author 32798
  */
-public class EncodeException extends ActuatorException {
+public class EncodeException extends EncryptionException {
 
     public EncodeException(String message, Throwable cause) {
         super(message, cause);

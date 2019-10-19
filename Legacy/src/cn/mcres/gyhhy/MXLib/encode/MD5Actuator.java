@@ -31,7 +31,7 @@ public class MD5Actuator implements HashActuator, Actuator.Encoder {
     }
 
     @Override
-    public Decoder getDecoder() {
+    public Actuator.Decoder getDecoder() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

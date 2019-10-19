@@ -10,10 +10,12 @@
  */
 package cn.mcres.gyhhy.MXLib.encode;
 
+import cn.mcres.karlatemp.mxlib.encrypt.AsymmetricEncryptor;
+
 /**
  * 非对称加密器
  * @author 32798
  */
-public interface AsymmetricActuator extends Actuator{
+public interface AsymmetricActuator extends Actuator, AsymmetricEncryptor {
     
 }

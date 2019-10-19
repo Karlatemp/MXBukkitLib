@@ -10,17 +10,20 @@ import cn.mcres.karlatemp.mxlib.cmd.ICommand;
 import cn.mcres.karlatemp.mxlib.cmd.ICommands;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.*;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.ProtectionDomain;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 /**
@@ -140,6 +143,71 @@ public class Toolkit {
             return CLASS_NAME_CHECKER.matcher(check).find();
         }
         return false;
+    }
+
+    /**
+     * fill the array, 填充数组
+     *
+     * @param args     The array 数组
+     * @param supplier The supplier 获取器
+     * @param <T>      The type of array.
+     * @since 2.4
+     */
+    public static <T> void fill(@NotNull T[] args, @NotNull Supplier<T> supplier) {
+        fill(args, 0, args.length, supplier);
+    }
+
+    /**
+     * Fill the array 填充数组
+     *
+     * @param args     The array 数组
+     * @param off      The start 起始点
+     * @param length   length 长度限制
+     * @param supplier The supplier 获取器
+     * @param <T>      The type of array
+     * @since 2.4
+     */
+    public static <T> void fill(@NotNull T[] args, int off, int length, @NotNull Supplier<T> supplier) {
+        for (int i = off; i < args.length && length-- > 0; i++) {
+            args[i] = supplier.get();
+        }
+    }
+
+    public static <T> void fill(@NotNull T[] args, @Nullable T o) {
+        for (int i = 0; i < args.length; i++) {
+            args[i] = o;
+        }
+    }
+
+    /**
+     * File the array with same value. 使用同一个值填充数组
+     *
+     * @param args   The array 数组
+     * @param off    start position 起始点
+     * @param length The fill size of array 填充的数组长度
+     * @param o      The value 填充值
+     * @param <T>    The type of array
+     * @since 2.4
+     */
+    public static <T> void fill(@NotNull T[] args, int off, int length, @Nullable T o) {
+        for (int i = off; i < args.length && length-- > 0; i++) {
+            args[i] = o;
+        }
+    }
+
+    /**
+     * 把字符串转为 ByteBuffer(UTF_8)
+     *
+     * @param x 字符串
+     * @return 编码后的ByteBuffer, 如果需要附加字符串长度请使用 position(0)
+     * @since 2.4
+     */
+    @Contract(pure = true)
+    public static ByteBuffer ofUTF8ByteBuffer(String x) {
+        final ByteBuffer encode = StandardCharsets.UTF_8.encode(x);
+        ByteBuffer cp = ByteBuffer.allocateDirect(encode.remaining() + Short.BYTES);
+        cp.putShort((short) encode.remaining()).put(encode).flip().position(Short.BYTES);
+        return cp;
     }
 
     /**

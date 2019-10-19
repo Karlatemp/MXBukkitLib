@@ -6,6 +6,7 @@
 package cn.mcres.karlatemp.mxlib.tools;
 
 import cn.mcres.karlatemp.mxlib.exceptions.CompeteException;
+import cn.mcres.karlatemp.mxlib.exceptions.EvalProcessorInvokingException;
 
 import java.util.Map;
 
@@ -14,7 +15,21 @@ import java.util.Map;
  */
 public interface IEvalProcessor {
     interface CompetedCode {
-        <T> T invoke(Map<String, Object> variables);
+        <T> T invoke(Map<String, Object> variables) throws EvalProcessorInvokingException;
+    }
+
+    interface Function {
+        interface Lambda extends Function {
+            Object inv(Object this_, Object... args) throws EvalProcessorInvokingException;
+
+            @SuppressWarnings("unchecked")
+            @Override
+            default <T> T invoke(Object this_, Object... args) throws EvalProcessorInvokingException {
+                return (T) inv(this_, args);
+            }
+        }
+
+        <T> T invoke(Object this_, Object... args) throws EvalProcessorInvokingException;
     }
 
     void clearCache();
@@ -23,7 +38,7 @@ public interface IEvalProcessor {
 
     CompetedCode compete(String command, boolean allowInvoking, boolean allowField) throws CompeteException;
 
-    default <T> T eval(String command, Map<String, Object> variables, boolean allowInvoking, boolean allowField) throws CompeteException {
+    default <T> T eval(String command, Map<String, Object> variables, boolean allowInvoking, boolean allowField) throws CompeteException, EvalProcessorInvokingException {
         return compete(command, allowInvoking, allowField).invoke(variables);
     }
 }

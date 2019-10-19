@@ -10,10 +10,16 @@
  */
 package cn.mcres.gyhhy.MXLib.encode;
 
-/**
- *
- * @author 32798
- */
-public interface HashActuator extends Actuator{
-    
+import cn.mcres.karlatemp.mxlib.encrypt.HashEncryptor;
+
+public interface HashActuator extends Actuator, HashEncryptor {
+    @Override
+    default boolean isSupportDecoder() {
+        return false;
+    }
+
+    @Override
+    default Actuator.Decoder getDecoder() {
+        throw new UnsupportedOperationException();
+    }
 }
