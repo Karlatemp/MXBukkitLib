@@ -14,6 +14,7 @@ import cn.mcres.karlatemp.mxlib.cmd.ICommandProcessor;
 import cn.mcres.karlatemp.mxlib.exceptions.ObjectCreateException;
 import cn.mcres.karlatemp.mxlib.logging.Ansi;
 import cn.mcres.karlatemp.mxlib.logging.IMessageFactory;
+import cn.mcres.karlatemp.mxlib.scheduler.MXScheduler;
 import cn.mcres.karlatemp.mxlib.tools.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
@@ -139,5 +140,10 @@ public class PluginAutoConfig {
         if (p == null) {
             MXBukkitLibPluginStartup.plugin.getLogger().severe("[BukkitToolkit] [getPluginByCLass]" + Ansi._C + " This should not happen" + Ansi.RESET);
         }
+    }
+
+    @Bean
+    MXScheduler mxScheduler() {
+        return new BukkitWrapScheduler();
     }
 }

@@ -22,6 +22,7 @@ import java.security.ProtectionDomain;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -31,6 +32,44 @@ import java.util.regex.Pattern;
  */
 @SuppressWarnings("JavadocReference")
 public class Toolkit {
+    /**
+     * @param cb  The function to invoke.
+     * @param <T> The type of the callable
+     * @return The callable need check
+     * @since 2.5
+     */
+    @SuppressWarnings("unchecked")
+    @Contract(pure = true, value = "null -> null")
+    public static <T> Callable<T> toCallable(Object cb) {
+        if (cb == null) return null;
+        if (cb instanceof Callable) {
+            return (Callable) cb;
+        }
+        if (cb instanceof Runnable) {
+            return () -> {
+                ((Runnable) cb).run();
+                return null;
+            };
+        }
+        if (cb instanceof Supplier) {
+            return ((Supplier<T>) cb)::get;
+        }
+        if (cb instanceof Throwable) {
+            if (cb instanceof Exception) {
+                return () -> {
+                    throw (Exception) cb;
+                };
+            } else if (cb instanceof Error) {
+                return () -> {
+                    throw (Error) cb;
+                };
+            } else {
+                return toCallable(new RuntimeException((Throwable) cb));
+            }
+        }
+        throw new UnsupportedOperationException("Unsupported " + cb);
+    }
+
     /**
      * Get class's package name.<br>
      * 截取类名的包名字
@@ -208,6 +247,30 @@ public class Toolkit {
         ByteBuffer cp = ByteBuffer.allocateDirect(encode.remaining() + Short.BYTES);
         cp.putShort((short) encode.remaining()).put(encode).flip().position(Short.BYTES);
         return cp;
+    }
+
+    /**
+     * return value's boolean value
+     *
+     * @param o The value
+     * @return The boolean match
+     * @since 2.5
+     */
+    @Contract(value = "null -> false", pure = true)
+    public static boolean asBoolean(Object o) {
+        if (o == null) return false;
+        if (o instanceof String) {
+            String s = String.valueOf(o);
+            return !s.trim().isEmpty();
+        }
+        if (o instanceof Number) {
+            if (o instanceof Double) {
+                return Double.doubleToRawLongBits((Double) o) != 0;
+            }
+            return ((Number) o).intValue() != 0;
+        }
+        if (o instanceof Boolean) return (Boolean) o;
+        return false;
     }
 
     /**
@@ -526,6 +589,7 @@ public class Toolkit {
          * @return 获取调用者的Class
          * @throws ArrayIndexOutOfBoundsException 在程序main入口调用时抛出
          */
+        @NotNull
         @Contract(pure = true)
         public static Class<?> getCallerClass() {
             final Class[] ct = StackTrace.kit.ct();

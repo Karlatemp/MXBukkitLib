@@ -9,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.DataInput;
 import java.io.DataOutput;
-import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +17,7 @@ import java.util.function.Function;
 
 /**
  * A DataInput/Output as ByteBuffer 使用ByteBuffer的数据流
+ *
  * @since 2.4
  */
 @SuppressWarnings("RedundantCast")
@@ -43,73 +43,73 @@ public class DataByteBuffer implements DataInput, DataOutput, Function<Consumer<
     }
 
     @Override
-    public void readFully(@NotNull byte[] b) throws IOException {
+    public void readFully(@NotNull byte[] b) {
         readFully(b, 0, b.length);
     }
 
     @Override
-    public void readFully(@NotNull byte[] b, int off, int len) throws IOException {
+    public void readFully(@NotNull byte[] b, int off, int len) {
         buffer.get(b, off, len);
     }
 
     @Override
-    public int skipBytes(int n) throws IOException {
+    public int skipBytes(int n) {
         buffer.position(buffer.position() + n);
         return n;
     }
 
     @Override
-    public boolean readBoolean() throws IOException {
+    public boolean readBoolean() {
         return Byte.toUnsignedInt(buffer.get()) != 0;
     }
 
     @Override
-    public byte readByte() throws IOException {
+    public byte readByte() {
         return buffer.get();
     }
 
     @Override
-    public int readUnsignedByte() throws IOException {
+    public int readUnsignedByte() {
         return Byte.toUnsignedInt(readByte());
     }
 
     @Override
-    public short readShort() throws IOException {
+    public short readShort() {
         return buffer.getShort();
     }
 
     @Override
-    public int readUnsignedShort() throws IOException {
+    public int readUnsignedShort() {
         return Short.toUnsignedInt(readShort());
     }
 
     @Override
-    public char readChar() throws IOException {
+    public char readChar() {
         return buffer.getChar();
     }
 
     @Override
-    public int readInt() throws IOException {
+    public int readInt() {
         return buffer.getInt();
     }
 
     @Override
-    public long readLong() throws IOException {
+    public long readLong() {
         return buffer.getLong();
     }
 
     @Override
-    public float readFloat() throws IOException {
+    public float readFloat() {
         return buffer.getFloat();
     }
 
     @Override
-    public double readDouble() throws IOException {
+    public double readDouble() {
         return buffer.getDouble();
     }
 
     @Override
-    public String readLine() throws IOException {
+    public String readLine() {
         int pos = buffer.position();
         int end = buffer.limit();
         while (buffer.hasRemaining()) {
@@ -127,7 +127,7 @@ public class DataByteBuffer implements DataInput, DataOutput, Function<Consumer<
 
     @NotNull
     @Override
-    public String readUTF() throws IOException {
+    public String readUTF() {
         int length = readUnsignedShort();
         return StandardCharsets.UTF_8.decode((ByteBuffer) buffer.duplicate().limit(buffer.position() + length))
                 .toString();
@@ -135,74 +135,74 @@ public class DataByteBuffer implements DataInput, DataOutput, Function<Consumer<
     }
 
     @Override
-    public void write(int b) throws IOException {
+    public void write(int b) {
         buffer.put((byte) b);
     }
 
     @Override
-    public void write(@NotNull byte[] b) throws IOException {
+    public void write(@NotNull byte[] b) {
         buffer.put(b);
     }
 
     @Override
-    public void write(@NotNull byte[] b, int off, int len) throws IOException {
+    public void write(@NotNull byte[] b, int off, int len) {
         buffer.put(b, off, len);
     }
 
     @Override
-    public void writeBoolean(boolean v) throws IOException {
+    public void writeBoolean(boolean v) {
         buffer.put((byte) (v ? 1 : 0));
     }
 
     @Override
-    public void writeByte(int v) throws IOException {
+    public void writeByte(int v) {
         write(v);
     }
 
     @Override
-    public void writeShort(int v) throws IOException {
+    public void writeShort(int v) {
         buffer.putShort((short) v);
     }
 
     @Override
-    public void writeChar(int v) throws IOException {
+    public void writeChar(int v) {
         buffer.putChar((char) v);
     }
 
     @Override
-    public void writeInt(int v) throws IOException {
+    public void writeInt(int v) {
         buffer.putInt(v);
     }
 
     @Override
-    public void writeLong(long v) throws IOException {
+    public void writeLong(long v) {
         buffer.putLong(v);
     }
 
     @Override
-    public void writeFloat(float v) throws IOException {
+    public void writeFloat(float v) {
         buffer.putFloat(v);
     }
 
     @Override
-    public void writeDouble(double v) throws IOException {
+    public void writeDouble(double v) {
         buffer.putDouble(v);
     }
 
     @Override
-    public void writeBytes(@NotNull String s) throws IOException {
+    public void writeBytes(@NotNull String s) {
         for (char c : s.toCharArray())
             buffer.put((byte) c);
     }
 
     @Override
-    public void writeChars(@NotNull String s) throws IOException {
+    public void writeChars(@NotNull String s) {
         for (char c : s.toCharArray())
             buffer.putChar(c);
     }
 
     @Override
-    public void writeUTF(@NotNull String s) throws IOException {
+    public void writeUTF(@NotNull String s) {
         final ByteBuffer encode = StandardCharsets.UTF_8.encode(s);
         buffer.putShort((short) encode.remaining());
         buffer.put(encode);

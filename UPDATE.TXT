@@ -1,3 +1,7 @@
+2.5
+    Add NBT Edit System
+    Add scheduler
+    Add LineWriter
 2.4
     Add compilationEvalProcessor 加入汇编执行器
     Add Actuator 加入数据加密器

@@ -11,9 +11,13 @@
 package cn.mcres.gyhhy.MXLib.http;
 
 /**
- *
  * @author 32798
  */
 public interface ContextType {
     public static String application_json = "application/json; charset=utf-8";
+    /**
+     * <b>NO <pre>{@code ;charset=utf8}</pre></b>
+     * @since 2.5
+     */
+    String application_x_www_form_urlencoded = "application/x-www-form-urlencoded";
 }

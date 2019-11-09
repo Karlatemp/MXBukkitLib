@@ -27,9 +27,15 @@ public class HandlerList<E extends Event> {
     public void forEach(Consumer<EventHandler<E>> c) {
         if (n != null) {
             synchronized (this) {
+                /*
+                 * Remove handler support
+                 */
+                ArrayList<EventHandler<E>> handlers = new ArrayList<>();
                 ND<E> cur = n;
                 while (cur != null) {
-                    cur.handlers.forEach(c);
+                    handlers.clear();
+                    handlers.addAll(cur.handlers);
+                    handlers.forEach(c);
                     cur = cur.next;
                 }
             }

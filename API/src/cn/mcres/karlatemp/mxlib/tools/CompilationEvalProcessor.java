@@ -7,6 +7,7 @@ package cn.mcres.karlatemp.mxlib.tools;
 
 import cn.mcres.karlatemp.mxlib.exceptions.CompeteException;
 import cn.mcres.karlatemp.mxlib.exceptions.EvalProcessorInvokingException;
+import cn.mcres.karlatemp.mxlib.exceptions.MessageDump;
 import cn.mcres.karlatemp.mxlib.util.DataByteBuffer;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,8 +27,17 @@ public class CompilationEvalProcessor implements IEvalProcessor {
             0x7fac_66ea;
 
     public static CompilationEvalProcessor open() {
+        return open(0);
+    }
+
+    /**
+     * @param level The level
+     * @return Registered CEP
+     * @since 2.5
+     */
+    public static CompilationEvalProcessor open(long level) {
         CompilationEvalProcessor cp = new CompilationEvalProcessor();
-        $init_instance(cp);
+        $init_instance(cp, level);
         return cp;
     }
 
@@ -54,6 +64,7 @@ public class CompilationEvalProcessor implements IEvalProcessor {
         Map<String, Object> context;
         int pos;
         boolean end;
+        List<Command> invoking;
 
         public Map<String, Object> getContext() {
             return context;
@@ -105,6 +116,7 @@ public class CompilationEvalProcessor implements IEvalProcessor {
 
         @SuppressWarnings("unchecked")
         private <T> T run(StackTrace st) {
+            st.invoking = c;
             while (!st.end) {
                 if (st.pos < 0 || st.pos >= c.size()) break;
                 try {
@@ -198,32 +210,41 @@ public class CompilationEvalProcessor implements IEvalProcessor {
         List<Command> commands = new ArrayList<>();
         boolean setted = false;
         int stacks = 0, locals = 0;
-        while (scanner.hasNextLine()) {
-            String next = ct(scanner.nextLine());
-            if (!next.isEmpty()) {
-                if (!setted) {
-                    int cw = next.indexOf(' ');
-                    stacks = Short.toUnsignedInt(Short.parseShort(next.substring(0, cw)));
-                    locals = Short.toUnsignedInt(Short.parseShort(next.substring(cw + 1)));
-                    setted = true;
-                    continue;
+        String parsing = null;
+        int loc = 0;
+        try {
+            while (scanner.hasNextLine()) {
+                String next = ct(scanner.nextLine());
+                parsing = next;
+                loc++;
+                if (!next.isEmpty()) {
+                    if (!setted) {
+                        int cw = next.indexOf(' ');
+                        stacks = Short.toUnsignedInt(Short.parseShort(next.substring(0, cw)));
+                        locals = Short.toUnsignedInt(Short.parseShort(next.substring(cw + 1)));
+                        setted = true;
+                        continue;
+                    }
+                    int fw = next.indexOf(' ');
+                    String ed;
+                    String ok;
+                    if (fw == -1) {
+                        ed = "";
+                        ok = next;
+                    } else {
+                        ed = next.substring(fw + 1);
+                        ok = next.substring(0, fw);
+                    }
+                    int at = mnemonic.indexOf(ok);
+                    if (at < 0 || at > mnemonic.size()) {
+                        throw new CompeteException("Unknown mnemonic[" + ok + "]");
+                    }
+                    commands.add(factories.get(at).make(factories0.get(at).make(ed)));
                 }
-                int fw = next.indexOf(' ');
-                String ed;
-                String ok;
-                if (fw == -1) {
-                    ed = "";
-                    ok = next;
-                } else {
-                    ed = next.substring(fw + 1);
-                    ok = next.substring(0, fw);
-                }
-                int at = mnemonic.indexOf(ok);
-                if (at < 0 || at > mnemonic.size()) {
-                    throw new CompeteException("Unknown mnemonic[" + ok + "]");
-                }
-                commands.add(factories.get(at).make(factories0.get(at).make(ed)));
             }
+        } catch (Throwable thr) {
+            thr.addSuppressed(MessageDump.create("Stacks[" + stacks + "] Variables[" + locals + "]"));
+            thr.addSuppressed(MessageDump.create("At line [" + parsing + "] [" + loc + "]"));
         }
         return new InvokeCode(commands, stacks, locals);
     }
@@ -298,487 +319,629 @@ public class CompilationEvalProcessor implements IEvalProcessor {
     }
 
     @SuppressWarnings("RedundantCast")
-    protected static void $init_instance(@NotNull CompilationEvalProcessor p) {
+    protected static void $init_instance(@NotNull CompilationEvalProcessor p, long level) {
         CommandMnemonicFactory ts = x -> {
             ByteBuffer bb = ByteBuffer.allocate(Short.BYTES);
             bb.putShort(Short.parseShort(x.trim()));
             bb.flip();
             return DataByteBuffer.open(bb);
         };
-        p
-                .register("put_null", CommandFactory.make(s -> s.putStack(null)), CommandMnemonicFactory.EMPTY)
-                .register("put_NaN", CommandFactory.make(s -> s.putStack(Double.NaN)), CommandMnemonicFactory.EMPTY)
-                .register("put_Infinity", CommandFactory.make(s -> s.putStack(Double.POSITIVE_INFINITY)), CommandMnemonicFactory.EMPTY)
-                .register("put_NInfinity", CommandFactory.make(s -> s.putStack(Double.NEGATIVE_INFINITY)), CommandMnemonicFactory.EMPTY)
-                .register("put_int", inp -> {
-                    int v = inp.readInt();
-                    return s -> s.putStack(v);
-                }, o -> new DataByteBuffer((ByteBuffer) ByteBuffer.allocate(Integer.BYTES).putInt(Integer.parseInt(o)).flip()))
-                .register("put_long", inp -> {
-                    long v = inp.readLong();
-                    return s -> s.putStack(v);
-                }, o -> new DataByteBuffer((ByteBuffer) ByteBuffer.allocate(Long.BYTES).putLong(Long.parseLong(o)).flip())).register("put_double", inp -> {
-            double v = inp.readDouble();
-            return s -> s.putStack(v);
-        }, o -> new DataByteBuffer((ByteBuffer) ByteBuffer.allocate(Double.BYTES).putDouble(Double.parseDouble(o)).flip()))
-                .register("put_short", inp -> {
-                    short v = inp.readShort();
-                    return s -> s.putStack(v);
-                }, o -> new DataByteBuffer((ByteBuffer) ByteBuffer.allocate(Short.BYTES).putShort(Short.parseShort(o)).flip()))
-                .register("put_bool", inp -> {
-                    boolean v = inp.readBoolean();
-                    return s -> s.putStack(v);
-                }, o -> new DataByteBuffer((ByteBuffer) ByteBuffer.allocate(1).put((byte) (Boolean.parseBoolean(o) ? 1 : 0)).flip()))
-                .register("put_string", inp -> {
-                    String str = inp.readUTF();
-                    return stack -> stack.putStack(str);
-                }, x -> new DataByteBuffer(Toolkit.ofUTF8ByteBuffer(x).position(0)))
-                .register("get_context", inp -> {
-                    String key = inp.readUTF();
-                    return stack -> stack.putStack(stack.context.get(key));
-                }, x -> new DataByteBuffer(Toolkit.ofUTF8ByteBuffer(x).position(0)))
-                .register("get_var", inp -> {
-                    short at = inp.readShort();
-                    return stack -> stack.putStack(stack.variables[at]);
-                }, ts)
-                .register("set_var", inp -> {
-                    short at = inp.readShort();
-                    return stack -> stack.variables[at] = stack.getStack();
-                }, ts)
-                .register("xor", CommandFactory.make(s -> {
-                    Object a = s.getStack(), w = s.getStack();
-                    checknum(a);
-                    checknum(w);
-                    if (a instanceof BigInteger) {
-                        BigInteger bi = (BigInteger) a;
-                        if (w instanceof BigInteger) {
-                            s.putStack(bi.xor((BigInteger) w));
-                        } else if (w instanceof Long) {
-                            s.putStack(bi.xor(BigInteger.valueOf((Long) w)));
+        {
+            p
+                    .register("put_null", CommandFactory.make(s -> s.putStack(null)), CommandMnemonicFactory.EMPTY)
+                    .register("put_NaN", CommandFactory.make(s -> s.putStack(Double.NaN)), CommandMnemonicFactory.EMPTY)
+                    .register("put_Infinity", CommandFactory.make(s -> s.putStack(Double.POSITIVE_INFINITY)), CommandMnemonicFactory.EMPTY)
+                    .register("put_NInfinity", CommandFactory.make(s -> s.putStack(Double.NEGATIVE_INFINITY)), CommandMnemonicFactory.EMPTY)
+                    .register("put_int", inp -> {
+                        int v = inp.readInt();
+                        return s -> s.putStack(v);
+                    }, o -> new DataByteBuffer((ByteBuffer) ByteBuffer.allocate(Integer.BYTES).putInt(Integer.parseInt(o)).flip()))
+                    .register("put_long", inp -> {
+                        long v = inp.readLong();
+                        return s -> s.putStack(v);
+                    }, o -> new DataByteBuffer((ByteBuffer) ByteBuffer.allocate(Long.BYTES).putLong(Long.parseLong(o)).flip())).register("put_double", inp -> {
+                double v = inp.readDouble();
+                return s -> s.putStack(v);
+            }, o -> new DataByteBuffer((ByteBuffer) ByteBuffer.allocate(Double.BYTES).putDouble(Double.parseDouble(o)).flip()))
+                    .register("put_short", inp -> {
+                        short v = inp.readShort();
+                        return s -> s.putStack(v);
+                    }, o -> new DataByteBuffer((ByteBuffer) ByteBuffer.allocate(Short.BYTES).putShort(Short.parseShort(o)).flip()))
+                    .register("put_bool", inp -> {
+                        boolean v = inp.readBoolean();
+                        return s -> s.putStack(v);
+                    }, o -> new DataByteBuffer((ByteBuffer) ByteBuffer.allocate(1).put((byte) (Boolean.parseBoolean(o) ? 1 : 0)).flip()))
+                    .register("put_string", inp -> {
+                        String str = inp.readUTF();
+                        return stack -> stack.putStack(str);
+                    }, x -> new DataByteBuffer(Toolkit.ofUTF8ByteBuffer(x).position(0)))
+                    .register("get_context", inp -> {
+                        String key = inp.readUTF();
+                        return stack -> stack.putStack(stack.context.get(key));
+                    }, x -> new DataByteBuffer(Toolkit.ofUTF8ByteBuffer(x).position(0)))
+                    .register("get_var", inp -> {
+                        short at = inp.readShort();
+                        return stack -> stack.putStack(stack.variables[at]);
+                    }, ts)
+                    .register("set_var", inp -> {
+                        short at = inp.readShort();
+                        return stack -> stack.variables[at] = stack.getStack();
+                    }, ts)
+                    .register("xor", CommandFactory.make(s -> {
+                        Object a = s.getStack(), w = s.getStack();
+                        checknum(a);
+                        checknum(w);
+                        if (a instanceof BigInteger) {
+                            BigInteger bi = (BigInteger) a;
+                            if (w instanceof BigInteger) {
+                                s.putStack(bi.xor((BigInteger) w));
+                            } else if (w instanceof Long) {
+                                s.putStack(bi.xor(BigInteger.valueOf((Long) w)));
+                            } else {
+                                s.putStack(bi.xor(BigInteger.valueOf(((Number) w).longValue())));
+                            }
+                        } else if (a instanceof Long) {
+                            s.putStack(((Long) a) ^ ((Number) w).longValue());
+                        } else if (a instanceof Integer) {
+                            if (w instanceof Integer) {
+                                s.putStack(((Integer) a) ^ (Integer) w);
+                            } else if (w instanceof Long) {
+                                s.putStack(((Integer) a) ^ (Long) w);
+                            } else {
+                                s.putStack((Integer) a ^ ((Number) w).intValue());
+                            }
                         } else {
-                            s.putStack(bi.xor(BigInteger.valueOf(((Number) w).longValue())));
+                            throw new EvalProcessorInvokingException("failed to xor " + a + " and " + w);
                         }
-                    } else if (a instanceof Long) {
-                        s.putStack(((Long) a) ^ ((Number) w).longValue());
-                    } else if (a instanceof Integer) {
-                        if (w instanceof Integer) {
-                            s.putStack(((Integer) a) ^ (Integer) w);
-                        } else if (w instanceof Long) {
-                            s.putStack(((Integer) a) ^ (Long) w);
+                    }), CommandMnemonicFactory.EMPTY)
+                    .register("add", CommandFactory.make(s -> {
+                        Object a = s.getStack(), b = s.getStack();
+                        if (a instanceof String || b instanceof String) {
+                            s.putStack(String.valueOf(b) + a);
+                            return;
+                        }
+                        checknum(a);
+                        checknum(b);
+                        if (a instanceof BigInteger) {
+                            BigInteger bi = (BigInteger) a;
+                            if (b instanceof BigInteger) {
+                                s.putStack(bi.add((BigInteger) b));
+                            } else if (b instanceof Long) {
+                                s.putStack(bi.add(BigInteger.valueOf((Long) b)));
+                            } else {
+                                s.putStack(bi.add(BigInteger.valueOf(((Number) b).longValue())));
+                            }
+                        } else if (a instanceof Long) {
+                            s.putStack(((Long) a) + ((Number) b).longValue());
+                        } else if (a instanceof Integer) {
+                            if (b instanceof Integer) {
+                                s.putStack(((Integer) a) + (Integer) b);
+                            } else if (b instanceof Long) {
+                                s.putStack(((Integer) a) + (Long) b);
+                            } else if (b instanceof Double) {
+                                s.putStack((Integer) a + ((Double) b));
+                            } else {
+                                s.putStack((Integer) a + ((Number) b).intValue());
+                            }
+                        } else if (a instanceof Double) {
+                            s.putStack((Double) a + ((Number) b).doubleValue());
                         } else {
-                            s.putStack((Integer) a ^ ((Number) w).intValue());
+                            throw new EvalProcessorInvokingException("failed to add " + a + " and " + b);
                         }
-                    } else {
-                        throw new EvalProcessorInvokingException("failed to xor " + a + " and " + w);
-                    }
-                }), CommandMnemonicFactory.EMPTY)
-                .register("add", CommandFactory.make(s -> {
-                    Object a = s.getStack(), b = s.getStack();
-                    if (a instanceof String || b instanceof String) {
-                        s.putStack(String.valueOf(b) + a);
-                        return;
-                    }
-                    checknum(a);
-                    checknum(b);
-                    if (a instanceof BigInteger) {
-                        BigInteger bi = (BigInteger) a;
-                        if (b instanceof BigInteger) {
-                            s.putStack(bi.add((BigInteger) b));
-                        } else if (b instanceof Long) {
-                            s.putStack(bi.add(BigInteger.valueOf((Long) b)));
+                    }), CommandMnemonicFactory.EMPTY)
+                    .register("subtract", CommandFactory.make(s -> {
+                        Object b = s.getStack(), a = s.getStack();
+                        checknum(a);
+                        checknum(b);
+                        if (a instanceof BigInteger) {
+                            BigInteger bi = (BigInteger) a;
+                            if (b instanceof BigInteger) {
+                                s.putStack(bi.subtract((BigInteger) b));
+                            } else if (b instanceof Long) {
+                                s.putStack(bi.subtract(BigInteger.valueOf((Long) b)));
+                            } else {
+                                s.putStack(bi.subtract(BigInteger.valueOf(((Number) b).longValue())));
+                            }
+                        } else if (a instanceof Long) {
+                            s.putStack(((Long) a) - ((Number) b).longValue());
+                        } else if (a instanceof Integer) {
+                            if (b instanceof Integer) {
+                                s.putStack(((Integer) a) - (Integer) b);
+                            } else if (b instanceof Long) {
+                                s.putStack(((Integer) a) - (Long) b);
+                            } else if (b instanceof Double) {
+                                s.putStack((Integer) a - ((Double) b));
+                            } else {
+                                s.putStack((Integer) a - ((Number) b).intValue());
+                            }
+                        } else if (a instanceof Double) {
+                            s.putStack((Double) a - ((Number) b).doubleValue());
                         } else {
-                            s.putStack(bi.add(BigInteger.valueOf(((Number) b).longValue())));
+                            throw new EvalProcessorInvokingException("failed to subtract " + a + " and " + b);
                         }
-                    } else if (a instanceof Long) {
-                        s.putStack(((Long) a) + ((Number) b).longValue());
-                    } else if (a instanceof Integer) {
-                        if (b instanceof Integer) {
-                            s.putStack(((Integer) a) + (Integer) b);
-                        } else if (b instanceof Long) {
-                            s.putStack(((Integer) a) + (Long) b);
-                        } else if (b instanceof Double) {
-                            s.putStack((Integer) a + ((Double) b));
+                    }), CommandMnemonicFactory.EMPTY)
+                    .register("multiply", CommandFactory.make(s -> {
+                        Object a = s.getStack(), b = s.getStack();
+                        checknum(a);
+                        checknum(b);
+                        if (a instanceof BigInteger) {
+                            BigInteger bi = (BigInteger) a;
+                            if (b instanceof BigInteger) {
+                                s.putStack(bi.multiply((BigInteger) b));
+                            } else if (b instanceof Long) {
+                                s.putStack(bi.multiply(BigInteger.valueOf((Long) b)));
+                            } else {
+                                s.putStack(bi.multiply(BigInteger.valueOf(((Number) b).longValue())));
+                            }
+                        } else if (a instanceof Long) {
+                            s.putStack(((Long) a) * ((Number) b).longValue());
+                        } else if (a instanceof Integer) {
+                            if (b instanceof Integer) {
+                                s.putStack(((Integer) a) * (Integer) b);
+                            } else if (b instanceof Long) {
+                                s.putStack(((Integer) a) * (Long) b);
+                            } else {
+                                s.putStack((Integer) a * ((Number) b).intValue());
+                            }
                         } else {
-                            s.putStack((Integer) a + ((Number) b).intValue());
+                            throw new EvalProcessorInvokingException("failed to multiply " + a + " and " + b);
                         }
-                    } else if (a instanceof Double) {
-                        s.putStack((Double) a + ((Number) b).doubleValue());
-                    } else {
-                        throw new EvalProcessorInvokingException("failed to add " + a + " and " + b);
-                    }
-                }), CommandMnemonicFactory.EMPTY)
-                .register("subtract", CommandFactory.make(s -> {
-                    Object b = s.getStack(), a = s.getStack();
-                    checknum(a);
-                    checknum(b);
-                    if (a instanceof BigInteger) {
-                        BigInteger bi = (BigInteger) a;
-                        if (b instanceof BigInteger) {
-                            s.putStack(bi.subtract((BigInteger) b));
-                        } else if (b instanceof Long) {
-                            s.putStack(bi.subtract(BigInteger.valueOf((Long) b)));
+                    }), CommandMnemonicFactory.EMPTY)
+                    .register("divide", CommandFactory.make(s -> {
+                        Object b = s.getStack(), a = s.getStack();
+                        checknum(a);
+                        checknum(b);
+                        if (a instanceof BigInteger) {
+                            BigInteger bi = (BigInteger) a;
+                            if (b instanceof BigInteger) {
+                                s.putStack(bi.divide((BigInteger) b));
+                            } else if (b instanceof Long) {
+                                s.putStack(bi.divide(BigInteger.valueOf((Long) b)));
+                            } else {
+                                s.putStack(bi.divide(BigInteger.valueOf(((Number) b).longValue())));
+                            }
+                        } else if (a instanceof Long) {
+                            s.putStack(((Long) a) / ((Number) b).longValue());
+                        } else if (a instanceof Integer) {
+                            if (b instanceof Integer) {
+                                s.putStack(((Integer) a) / (Integer) b);
+                            } else if (b instanceof Long) {
+                                s.putStack(((Integer) a) / (Long) b);
+                            } else {
+                                s.putStack((Integer) a / ((Number) b).intValue());
+                            }
                         } else {
-                            s.putStack(bi.subtract(BigInteger.valueOf(((Number) b).longValue())));
+                            throw new EvalProcessorInvokingException("failed to divide " + a + " and " + b);
                         }
-                    } else if (a instanceof Long) {
-                        s.putStack(((Long) a) - ((Number) b).longValue());
-                    } else if (a instanceof Integer) {
-                        if (b instanceof Integer) {
-                            s.putStack(((Integer) a) - (Integer) b);
-                        } else if (b instanceof Long) {
-                            s.putStack(((Integer) a) - (Long) b);
-                        } else if (b instanceof Double) {
-                            s.putStack((Integer) a - ((Double) b));
+                    }), CommandMnemonicFactory.EMPTY)
+                    .register("remainder", CommandFactory.make(s -> {
+                        Object b = s.getStack(), a = s.getStack();
+                        checknum(a);
+                        checknum(b);
+                        if (a instanceof BigInteger) {
+                            BigInteger bi = (BigInteger) a;
+                            if (b instanceof BigInteger) {
+                                s.putStack(bi.remainder((BigInteger) b));
+                            } else if (b instanceof Long) {
+                                s.putStack(bi.remainder(BigInteger.valueOf((Long) b)));
+                            } else {
+                                s.putStack(bi.remainder(BigInteger.valueOf(((Number) b).longValue())));
+                            }
+                        } else if (a instanceof Long) {
+                            s.putStack(((Long) a) % ((Number) b).longValue());
+                        } else if (a instanceof Integer) {
+                            if (b instanceof Integer) {
+                                s.putStack(((Integer) a) % (Integer) b);
+                            } else if (b instanceof Long) {
+                                s.putStack(((Integer) a) % (Long) b);
+                            } else {
+                                s.putStack((Integer) a % ((Number) b).intValue());
+                            }
                         } else {
-                            s.putStack((Integer) a - ((Number) b).intValue());
+                            throw new EvalProcessorInvokingException("failed to remainder " + a + " and " + b);
                         }
-                    } else if (a instanceof Double) {
-                        s.putStack((Double) a - ((Number) b).doubleValue());
-                    } else {
-                        throw new EvalProcessorInvokingException("failed to subtract " + a + " and " + b);
-                    }
-                }), CommandMnemonicFactory.EMPTY)
-                .register("multiply", CommandFactory.make(s -> {
-                    Object a = s.getStack(), b = s.getStack();
-                    checknum(a);
-                    checknum(b);
-                    if (a instanceof BigInteger) {
-                        BigInteger bi = (BigInteger) a;
-                        if (b instanceof BigInteger) {
-                            s.putStack(bi.multiply((BigInteger) b));
-                        } else if (b instanceof Long) {
-                            s.putStack(bi.multiply(BigInteger.valueOf((Long) b)));
+                    }), CommandMnemonicFactory.EMPTY)
+                    .register("compare", CommandFactory.make(s -> {
+                        Object b = s.getStack(), a = s.getStack();
+                        checknum(a);
+                        checknum(b);
+                        if (a instanceof BigInteger) {
+                            BigInteger bi = (BigInteger) a;
+                            if (b instanceof BigInteger) {
+                                s.putStack(bi.compareTo((BigInteger) b));
+                            } else if (b instanceof Long) {
+                                s.putStack(bi.compareTo(BigInteger.valueOf((Long) b)));
+                            } else {
+                                s.putStack(bi.compareTo(BigInteger.valueOf(((Number) b).longValue())));
+                            }
+                        } else if (a instanceof Long) {
+                            s.putStack(Long.compare(((Long) a), ((Number) b).longValue()));
+                        } else if (a instanceof Integer) {
+                            if (b instanceof Integer) {
+                                s.putStack(Integer.compare((Integer) a, (Integer) b));
+                            } else if (b instanceof Long) {
+                                s.putStack(Long.compare(((Integer) a).longValue(), (Long) b));
+                            } else {
+                                s.putStack(Integer.compare((Integer) a, ((Number) b).intValue()));
+                            }
+                        } else if (a instanceof Double) {
+                            s.putStack(Double.compare((Double) a, ((Number) b).doubleValue()));
                         } else {
-                            s.putStack(bi.multiply(BigInteger.valueOf(((Number) b).longValue())));
+                            throw new EvalProcessorInvokingException("failed to remainder " + a + " and " + b);
                         }
-                    } else if (a instanceof Long) {
-                        s.putStack(((Long) a) * ((Number) b).longValue());
-                    } else if (a instanceof Integer) {
-                        if (b instanceof Integer) {
-                            s.putStack(((Integer) a) * (Integer) b);
-                        } else if (b instanceof Long) {
-                            s.putStack(((Integer) a) * (Long) b);
+                    }), CommandMnemonicFactory.EMPTY)
+                    .register("pow", CommandFactory.make(s -> {
+                        Object b = s.getStack(), a = s.getStack();
+                        checknum(a);
+                        checknum(b);
+                        if (a instanceof BigInteger) {
+                            BigInteger bi = (BigInteger) a;
+                            s.putStack(bi.pow(((Number) b).intValue()));
                         } else {
-                            s.putStack((Integer) a * ((Number) b).intValue());
+                            s.putStack(Math.pow(((Number) a).doubleValue(), ((Number) b).doubleValue()));
                         }
-                    } else {
-                        throw new EvalProcessorInvokingException("failed to multiply " + a + " and " + b);
-                    }
-                }), CommandMnemonicFactory.EMPTY)
-                .register("divide", CommandFactory.make(s -> {
-                    Object b = s.getStack(), a = s.getStack();
-                    checknum(a);
-                    checknum(b);
-                    if (a instanceof BigInteger) {
-                        BigInteger bi = (BigInteger) a;
-                        if (b instanceof BigInteger) {
-                            s.putStack(bi.divide((BigInteger) b));
-                        } else if (b instanceof Long) {
-                            s.putStack(bi.divide(BigInteger.valueOf((Long) b)));
+                    }), CommandMnemonicFactory.EMPTY)
+                    .register("abs", CommandFactory.make(s -> {
+                        Object a = s.getStack();
+                        checknum(a);
+                        if (a instanceof BigInteger) {
+                            BigInteger bi = (BigInteger) a;
+                            s.putStack(bi.abs());
+                        } else if (a instanceof Integer) {
+                            s.putStack(Math.abs((Integer) a));
+                        } else if (a instanceof Long) {
+                            s.putStack(Math.abs((Long) a));
+                        } else if (a instanceof Float) {
+                            s.putStack(Math.abs((Float) a));
                         } else {
-                            s.putStack(bi.divide(BigInteger.valueOf(((Number) b).longValue())));
+                            s.putStack(Math.abs(((Number) a).doubleValue()));
                         }
-                    } else if (a instanceof Long) {
-                        s.putStack(((Long) a) / ((Number) b).longValue());
-                    } else if (a instanceof Integer) {
-                        if (b instanceof Integer) {
-                            s.putStack(((Integer) a) / (Integer) b);
-                        } else if (b instanceof Long) {
-                            s.putStack(((Integer) a) / (Long) b);
+                    }), CommandMnemonicFactory.EMPTY)
+                    .register("or", CommandFactory.make(s -> {
+                        Object a = s.getStack(), b = s.getStack();
+                        checknum(a);
+                        checknum(b);
+                        if (a instanceof BigInteger) {
+                            BigInteger bi = (BigInteger) a;
+                            if (b instanceof BigInteger) {
+                                s.putStack(bi.or((BigInteger) b));
+                            } else if (b instanceof Long) {
+                                s.putStack(bi.or(BigInteger.valueOf((Long) b)));
+                            } else {
+                                s.putStack(bi.or(BigInteger.valueOf(((Number) b).longValue())));
+                            }
+                        } else if (a instanceof Long) {
+                            s.putStack(((Long) a) | ((Number) b).longValue());
+                        } else if (a instanceof Integer) {
+                            if (b instanceof Integer) {
+                                s.putStack(((Integer) a) | (Integer) b);
+                            } else if (b instanceof Long) {
+                                s.putStack(((Integer) a) | (Long) b);
+                            } else {
+                                s.putStack((Integer) a | ((Number) b).intValue());
+                            }
                         } else {
-                            s.putStack((Integer) a / ((Number) b).intValue());
+                            throw new EvalProcessorInvokingException("failed to or " + a + " and " + b);
                         }
-                    } else {
-                        throw new EvalProcessorInvokingException("failed to divide " + a + " and " + b);
-                    }
-                }), CommandMnemonicFactory.EMPTY)
-                .register("remainder", CommandFactory.make(s -> {
-                    Object b = s.getStack(), a = s.getStack();
-                    checknum(a);
-                    checknum(b);
-                    if (a instanceof BigInteger) {
-                        BigInteger bi = (BigInteger) a;
-                        if (b instanceof BigInteger) {
-                            s.putStack(bi.remainder((BigInteger) b));
-                        } else if (b instanceof Long) {
-                            s.putStack(bi.remainder(BigInteger.valueOf((Long) b)));
+                    }), CommandMnemonicFactory.EMPTY)
+                    .register("and", CommandFactory.make(s -> {
+                        Object a = s.getStack(), b = s.getStack();
+                        checknum(a);
+                        checknum(b);
+                        if (a instanceof BigInteger) {
+                            BigInteger bi = (BigInteger) a;
+                            if (b instanceof BigInteger) {
+                                s.putStack(bi.and((BigInteger) b));
+                            } else if (b instanceof Long) {
+                                s.putStack(bi.and(BigInteger.valueOf((Long) b)));
+                            } else {
+                                s.putStack(bi.and(BigInteger.valueOf(((Number) b).longValue())));
+                            }
+                        } else if (a instanceof Long) {
+                            s.putStack(((Long) a) & ((Number) b).longValue());
+                        } else if (a instanceof Integer) {
+                            if (b instanceof Integer) {
+                                s.putStack(((Integer) a) & (Integer) b);
+                            } else if (b instanceof Long) {
+                                s.putStack(((Integer) a) & (Long) b);
+                            } else {
+                                s.putStack((Integer) a & ((Number) b).intValue());
+                            }
                         } else {
-                            s.putStack(bi.remainder(BigInteger.valueOf(((Number) b).longValue())));
+                            throw new EvalProcessorInvokingException("failed to and " + a + " and " + b);
                         }
-                    } else if (a instanceof Long) {
-                        s.putStack(((Long) a) % ((Number) b).longValue());
-                    } else if (a instanceof Integer) {
-                        if (b instanceof Integer) {
-                            s.putStack(((Integer) a) % (Integer) b);
-                        } else if (b instanceof Long) {
-                            s.putStack(((Integer) a) % (Long) b);
+                    }), CommandMnemonicFactory.EMPTY)
+                    .register("shiftLeft", CommandFactory.make(s -> {
+                        Object b = s.getStack(), a = s.getStack();
+                        checknum(a);
+                        checknum(b);
+                        if (a instanceof BigInteger) {
+                            BigInteger bi = (BigInteger) a;
+                            s.putStack(bi.shiftLeft(((Number) b).intValue()));
+                        } else if (a instanceof Long) {
+                            s.putStack(((Long) a) << ((Number) b).intValue());
+                        } else if (a instanceof Integer) {
+                            s.putStack(((Integer) a) << ((Number) b).intValue());
                         } else {
-                            s.putStack((Integer) a % ((Number) b).intValue());
+                            throw new EvalProcessorInvokingException("failed to shiftLeft " + a + " with " + b);
                         }
-                    } else {
-                        throw new EvalProcessorInvokingException("failed to remainder " + a + " and " + b);
-                    }
-                }), CommandMnemonicFactory.EMPTY)
-                .register("compare", CommandFactory.make(s -> {
-                    Object b = s.getStack(), a = s.getStack();
-                    checknum(a);
-                    checknum(b);
-                    if (a instanceof BigInteger) {
-                        BigInteger bi = (BigInteger) a;
-                        if (b instanceof BigInteger) {
-                            s.putStack(bi.compareTo((BigInteger) b));
-                        } else if (b instanceof Long) {
-                            s.putStack(bi.compareTo(BigInteger.valueOf((Long) b)));
+                    }), CommandMnemonicFactory.EMPTY)
+                    .register("shiftRight", CommandFactory.make(s -> {
+                        Object b = s.getStack(), a = s.getStack();
+                        checknum(a);
+                        checknum(b);
+                        if (a instanceof BigInteger) {
+                            BigInteger bi = (BigInteger) a;
+                            s.putStack(bi.shiftRight(((Number) b).intValue()));
+                        } else if (a instanceof Long) {
+                            s.putStack(((Long) a) >> ((Number) b).intValue());
+                        } else if (a instanceof Integer) {
+                            s.putStack(((Integer) a) >> ((Number) b).intValue());
                         } else {
-                            s.putStack(bi.compareTo(BigInteger.valueOf(((Number) b).longValue())));
+                            throw new EvalProcessorInvokingException("failed to shiftLeft " + a + " with " + b);
                         }
-                    } else if (a instanceof Long) {
-                        s.putStack(Long.compare(((Long) a), ((Number) b).longValue()));
-                    } else if (a instanceof Integer) {
-                        if (b instanceof Integer) {
-                            s.putStack(Integer.compare((Integer) a, (Integer) b));
-                        } else if (b instanceof Long) {
-                            s.putStack(Long.compare(((Integer) a).longValue(), (Long) b));
+                    }), CommandMnemonicFactory.EMPTY)
+                    .register("negate", CommandFactory.make(s -> {
+                        Object a = s.getStack();
+                        checknum(a);
+                        if (a instanceof BigInteger) {
+                            BigInteger bi = (BigInteger) a;
+                            s.putStack(bi.negate());
+                        } else if (a instanceof Long) {
+                            s.putStack(~((Long) a));
+                        } else if (a instanceof Integer) {
+                            s.putStack(~((Integer) a));
+                        } else if (a instanceof Short) {
+                            s.putStack(~((Short) a));
                         } else {
-                            s.putStack(Integer.compare((Integer) a, ((Number) b).intValue()));
+                            throw new EvalProcessorInvokingException("failed to negate " + a);
                         }
-                    } else if (a instanceof Double) {
-                        s.putStack(Double.compare((Double) a, ((Number) b).doubleValue()));
-                    } else {
-                        throw new EvalProcessorInvokingException("failed to remainder " + a + " and " + b);
-                    }
-                }), CommandMnemonicFactory.EMPTY)
-                .register("pow", CommandFactory.make(s -> {
-                    Object b = s.getStack(), a = s.getStack();
-                    checknum(a);
-                    checknum(b);
-                    if (a instanceof BigInteger) {
-                        BigInteger bi = (BigInteger) a;
-                        s.putStack(bi.pow(((Number) b).intValue()));
-                    } else {
-                        s.putStack(Math.pow(((Number) a).doubleValue(), ((Number) b).doubleValue()));
-                    }
-                }), CommandMnemonicFactory.EMPTY)
-                .register("abs", CommandFactory.make(s -> {
-                    Object a = s.getStack();
-                    checknum(a);
-                    if (a instanceof BigInteger) {
-                        BigInteger bi = (BigInteger) a;
-                        s.putStack(bi.abs());
-                    } else if (a instanceof Integer) {
-                        s.putStack(Math.abs((Integer) a));
-                    } else if (a instanceof Long) {
-                        s.putStack(Math.abs((Long) a));
-                    } else if (a instanceof Float) {
-                        s.putStack(Math.abs((Float) a));
-                    } else {
-                        s.putStack(Math.abs(((Number) a).doubleValue()));
-                    }
-                }), CommandMnemonicFactory.EMPTY)
-                .register("or", CommandFactory.make(s -> {
-                    Object a = s.getStack(), b = s.getStack();
-                    checknum(a);
-                    checknum(b);
-                    if (a instanceof BigInteger) {
-                        BigInteger bi = (BigInteger) a;
-                        if (b instanceof BigInteger) {
-                            s.putStack(bi.or((BigInteger) b));
-                        } else if (b instanceof Long) {
-                            s.putStack(bi.or(BigInteger.valueOf((Long) b)));
+                    }), CommandMnemonicFactory.EMPTY)
+                    .register("invoke", ip -> {
+                        short ln = ip.readShort();
+                        return s -> {
+                            Object[] args = new Object[ln];
+                            for (int i = args.length - 1; i >= 0; i--) {
+                                args[i] = s.getStack();
+                            }
+                            Object thiz = s.getStack();
+                            Object func = s.getStack();
+                            if (!(func instanceof IEvalProcessor.Function)) {
+                                throw new EvalProcessorInvokingException(func + " is not a function.");
+                            }
+                            s.putStack(((IEvalProcessor.Function) func).invoke(thiz, args));
+                        };
+                    }, ts)
+                    .register("return", CommandFactory.make(s -> s.end = true), CommandMnemonicFactory.EMPTY)
+                    .register("goto", st -> {
+                        short pointer = st.readShort();
+                        return x -> x.pos += pointer;
+                    }, ts)
+                    .register("goto_r", st -> {
+                        short pointer = st.readShort();
+                        return x -> x.pos -= pointer;
+                    }, ts)
+                    .register("random", CommandFactory.make(s -> s.putStack(Math.random())), CommandMnemonicFactory.EMPTY)
+                    .register("floor", CommandFactory.make(x -> x.putStack(Math.floor((Double) x.getStack()))), CommandMnemonicFactory.EMPTY)
+                    .register("max", CommandFactory.make(s -> {
+                        Object b = s.getStack(), a = s.getStack();
+                        checknum(a);
+                        checknum(b);
+                        if (a instanceof BigInteger) {
+                            BigInteger bi = (BigInteger) a;
+                            if (b instanceof BigInteger) {
+                                s.putStack(bi.max((BigInteger) b));
+                            } else if (b instanceof Long) {
+                                s.putStack(bi.max(BigInteger.valueOf((Long) b)));
+                            } else {
+                                s.putStack(bi.max(BigInteger.valueOf(((Number) b).longValue())));
+                            }
+                        } else if (a instanceof Long) {
+                            s.putStack(Math.max(((Long) a), ((Number) b).longValue()));
+                        } else if (a instanceof Integer) {
+                            if (b instanceof Integer) {
+                                s.putStack(Math.max((Integer) a, (Integer) b));
+                            } else if (b instanceof Long) {
+                                s.putStack(Math.max(((Integer) a).longValue(), (Long) b));
+                            } else if (b instanceof Double) {
+                                s.putStack(Math.max((Integer) a, (Double) b));
+                            } else {
+                                s.putStack(Math.max((Integer) a, ((Number) b).intValue()));
+                            }
+                        } else if (a instanceof Double) {
+                            s.putStack(Math.max((Double) a, ((Number) b).doubleValue()));
                         } else {
-                            s.putStack(bi.or(BigInteger.valueOf(((Number) b).longValue())));
+                            throw new EvalProcessorInvokingException("failed to get max value of " + a + " and " + b);
                         }
-                    } else if (a instanceof Long) {
-                        s.putStack(((Long) a) | ((Number) b).longValue());
-                    } else if (a instanceof Integer) {
-                        if (b instanceof Integer) {
-                            s.putStack(((Integer) a) | (Integer) b);
-                        } else if (b instanceof Long) {
-                            s.putStack(((Integer) a) | (Long) b);
+                    }), CommandMnemonicFactory.EMPTY)
+                    .register("min", CommandFactory.make(s -> {
+                        Object a = s.getStack(), b = s.getStack();
+                        checknum(a);
+                        checknum(b);
+                        if (a instanceof BigInteger) {
+                            BigInteger bi = (BigInteger) a;
+                            if (b instanceof BigInteger) {
+                                s.putStack(bi.min((BigInteger) b));
+                            } else if (b instanceof Long) {
+                                s.putStack(bi.min(BigInteger.valueOf((Long) b)));
+                            } else {
+                                s.putStack(bi.min(BigInteger.valueOf(((Number) b).longValue())));
+                            }
+                        } else if (a instanceof Long) {
+                            s.putStack(Math.min(((Long) a), ((Number) b).longValue()));
+                        } else if (a instanceof Integer) {
+                            if (b instanceof Integer) {
+                                s.putStack(Math.min((Integer) a, (Integer) b));
+                            } else if (b instanceof Long) {
+                                s.putStack(Math.min(((Integer) a).longValue(), (Long) b));
+                            } else if (b instanceof Double) {
+                                s.putStack(Math.min((Integer) a, (Double) b));
+                            } else {
+                                s.putStack(Math.min((Integer) a, ((Number) b).intValue()));
+                            }
+                        } else if (a instanceof Double) {
+                            s.putStack(Math.min((Double) a, ((Number) b).doubleValue()));
                         } else {
-                            s.putStack((Integer) a | ((Number) b).intValue());
+                            throw new EvalProcessorInvokingException("failed to get min value of " + a + " and " + b);
                         }
-                    } else {
-                        throw new EvalProcessorInvokingException("failed to or " + a + " and " + b);
-                    }
-                }), CommandMnemonicFactory.EMPTY)
-                .register("and", CommandFactory.make(s -> {
-                    Object a = s.getStack(), b = s.getStack();
-                    checknum(a);
-                    checknum(b);
-                    if (a instanceof BigInteger) {
-                        BigInteger bi = (BigInteger) a;
-                        if (b instanceof BigInteger) {
-                            s.putStack(bi.and((BigInteger) b));
-                        } else if (b instanceof Long) {
-                            s.putStack(bi.and(BigInteger.valueOf((Long) b)));
+                    }), CommandMnemonicFactory.EMPTY)
+                    .register("sqrt", CommandFactory.make(s -> s.putStack(Math.sqrt((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
+                    .register("log", CommandFactory.make(s -> s.putStack(Math.log((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
+                    .register("acos", CommandFactory.make(s -> s.putStack(Math.acos((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
+                    .register("cos", CommandFactory.make(s -> s.putStack(Math.cos((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
+                    .register("cosh", CommandFactory.make(s -> s.putStack(Math.cosh((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
+                    .register("asin", CommandFactory.make(s -> s.putStack(Math.asin((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
+                    .register("sin", CommandFactory.make(s -> s.putStack(Math.sin((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
+                    .register("sinh", CommandFactory.make(s -> s.putStack(Math.sinh((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
+                    .register("tan", CommandFactory.make(s -> s.putStack(Math.tan((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
+                    .register("tanh", CommandFactory.make(s -> s.putStack(Math.tanh((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
+                    .register("atan", CommandFactory.make(s -> s.putStack(Math.atan((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
+                    .register("ceil", CommandFactory.make(s -> s.putStack(Math.ceil((Double) s.getStack()))), CommandMnemonicFactory.EMPTY);
+        }
+        if (level >= 1) {
+            p
+                    .register("mark", Mark.inst, Mark.inst)
+                    .register("into", Mark.Gotox.inst, Mark.Gotox.inst)
+                    .register("if", x -> {
+                        boolean b = x.readBoolean();
+                        if (b) {
+                            String mk = x.readUTF();
+                            return ws -> {
+                                if (Toolkit.asBoolean(ws.getStack())) {
+                                    Mark.goto_(mk, ws);
+                                }
+                            };
                         } else {
-                            s.putStack(bi.and(BigInteger.valueOf(((Number) b).longValue())));
+                            return ww -> {
+                                String mkk = String.valueOf(ww.getStack());
+                                if (Toolkit.asBoolean(ww.getStack())) {
+                                    Mark.goto_(mkk, ww);
+                                }
+                            };
                         }
-                    } else if (a instanceof Long) {
-                        s.putStack(((Long) a) & ((Number) b).longValue());
-                    } else if (a instanceof Integer) {
-                        if (b instanceof Integer) {
-                            s.putStack(((Integer) a) & (Integer) b);
-                        } else if (b instanceof Long) {
-                            s.putStack(((Integer) a) & (Long) b);
-                        } else {
-                            s.putStack((Integer) a & ((Number) b).intValue());
+                    }, x -> {
+                        if (x == null || x.isEmpty()) {
+                            return new DataByteBuffer(ByteBuffer.allocate(1));
                         }
-                    } else {
-                        throw new EvalProcessorInvokingException("failed to and " + a + " and " + b);
-                    }
-                }), CommandMnemonicFactory.EMPTY)
-                .register("shiftLeft", CommandFactory.make(s -> {
-                    Object b = s.getStack(), a = s.getStack();
-                    checknum(a);
-                    checknum(b);
-                    if (a instanceof BigInteger) {
-                        BigInteger bi = (BigInteger) a;
-                        s.putStack(bi.shiftLeft(((Number) b).intValue()));
-                    } else if (a instanceof Long) {
-                        s.putStack(((Long) a) << ((Number) b).intValue());
-                    } else if (a instanceof Integer) {
-                        s.putStack(((Integer) a) << ((Number) b).intValue());
-                    } else {
-                        throw new EvalProcessorInvokingException("failed to shiftLeft " + a + " with " + b);
-                    }
-                }), CommandMnemonicFactory.EMPTY)
-                .register("shiftRight", CommandFactory.make(s -> {
-                    Object b = s.getStack(), a = s.getStack();
-                    checknum(a);
-                    checknum(b);
-                    if (a instanceof BigInteger) {
-                        BigInteger bi = (BigInteger) a;
-                        s.putStack(bi.shiftRight(((Number) b).intValue()));
-                    } else if (a instanceof Long) {
-                        s.putStack(((Long) a) >> ((Number) b).intValue());
-                    } else if (a instanceof Integer) {
-                        s.putStack(((Integer) a) >> ((Number) b).intValue());
-                    } else {
-                        throw new EvalProcessorInvokingException("failed to shiftLeft " + a + " with " + b);
-                    }
-                }), CommandMnemonicFactory.EMPTY)
-                .register("negate", CommandFactory.make(s -> {
-                    Object a = s.getStack();
-                    checknum(a);
-                    if (a instanceof BigInteger) {
-                        BigInteger bi = (BigInteger) a;
-                        s.putStack(bi.negate());
-                    } else if (a instanceof Long) {
-                        s.putStack(~((Long) a));
-                    } else if (a instanceof Integer) {
-                        s.putStack(~((Integer) a));
-                    } else if (a instanceof Short) {
-                        s.putStack(~((Short) a));
-                    } else {
-                        throw new EvalProcessorInvokingException("failed to negate " + a);
-                    }
-                }), CommandMnemonicFactory.EMPTY)
-                .register("invoke", ip -> {
-                    short ln = ip.readShort();
-                    return s -> {
-                        Object[] args = new Object[ln];
-                        for (int i = args.length - 1; i >= 0; i--) {
-                            args[i] = s.getStack();
-                        }
-                        Object thiz = s.getStack();
-                        Object func = s.getStack();
-                        if (!(func instanceof IEvalProcessor.Function)) {
-                            throw new EvalProcessorInvokingException(func + " is not a function.");
-                        }
-                        s.putStack(((IEvalProcessor.Function) func).invoke(thiz, args));
-                    };
-                }, ts)
-                .register("return", CommandFactory.make(s -> s.end = true), CommandMnemonicFactory.EMPTY)
-                .register("goto", st -> {
-                    short pointer = st.readShort();
-                    return x -> x.pos += pointer;
-                }, ts)
-                .register("goto_r", st -> {
-                    short pointer = st.readShort();
-                    return x -> x.pos -= pointer;
-                }, ts)
-                .register("random", CommandFactory.make(s -> s.putStack(Math.random())), CommandMnemonicFactory.EMPTY)
-                .register("floor", CommandFactory.make(x -> x.putStack(Math.floor((Double) x.getStack()))), CommandMnemonicFactory.EMPTY)
-                .register("max", CommandFactory.make(s -> {
-                    Object b = s.getStack(), a = s.getStack();
-                    checknum(a);
-                    checknum(b);
-                    if (a instanceof BigInteger) {
-                        BigInteger bi = (BigInteger) a;
-                        if (b instanceof BigInteger) {
-                            s.putStack(bi.max((BigInteger) b));
-                        } else if (b instanceof Long) {
-                            s.putStack(bi.max(BigInteger.valueOf((Long) b)));
-                        } else {
-                            s.putStack(bi.max(BigInteger.valueOf(((Number) b).longValue())));
-                        }
-                    } else if (a instanceof Long) {
-                        s.putStack(Math.max(((Long) a), ((Number) b).longValue()));
-                    } else if (a instanceof Integer) {
-                        if (b instanceof Integer) {
-                            s.putStack(Math.max((Integer) a, (Integer) b));
-                        } else if (b instanceof Long) {
-                            s.putStack(Math.max(((Integer) a).longValue(), (Long) b));
-                        } else if (b instanceof Double) {
-                            s.putStack(Math.max((Integer) a, (Double) b));
-                        } else {
-                            s.putStack(Math.max((Integer) a, ((Number) b).intValue()));
-                        }
-                    } else if (a instanceof Double) {
-                        s.putStack(Math.max((Double) a, ((Number) b).doubleValue()));
-                    } else {
-                        throw new EvalProcessorInvokingException("failed to get max value of " + a + " and " + b);
-                    }
-                }), CommandMnemonicFactory.EMPTY)
-                .register("min", CommandFactory.make(s -> {
-                    Object a = s.getStack(), b = s.getStack();
-                    checknum(a);
-                    checknum(b);
-                    if (a instanceof BigInteger) {
-                        BigInteger bi = (BigInteger) a;
-                        if (b instanceof BigInteger) {
-                            s.putStack(bi.min((BigInteger) b));
-                        } else if (b instanceof Long) {
-                            s.putStack(bi.min(BigInteger.valueOf((Long) b)));
-                        } else {
-                            s.putStack(bi.min(BigInteger.valueOf(((Number) b).longValue())));
-                        }
-                    } else if (a instanceof Long) {
-                        s.putStack(Math.min(((Long) a), ((Number) b).longValue()));
-                    } else if (a instanceof Integer) {
-                        if (b instanceof Integer) {
-                            s.putStack(Math.min((Integer) a, (Integer) b));
-                        } else if (b instanceof Long) {
-                            s.putStack(Math.min(((Integer) a).longValue(), (Long) b));
-                        } else if (b instanceof Double) {
-                            s.putStack(Math.min((Integer) a, (Double) b));
-                        } else {
-                            s.putStack(Math.min((Integer) a, ((Number) b).intValue()));
-                        }
-                    } else if (a instanceof Double) {
-                        s.putStack(Math.min((Double) a, ((Number) b).doubleValue()));
-                    } else {
-                        throw new EvalProcessorInvokingException("failed to get min value of " + a + " and " + b);
-                    }
-                }), CommandMnemonicFactory.EMPTY)
-                .register("sqrt", CommandFactory.make(s -> s.putStack(Math.sqrt((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
-                .register("log", CommandFactory.make(s -> s.putStack(Math.log((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
-                .register("acos", CommandFactory.make(s -> s.putStack(Math.acos((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
-                .register("cos", CommandFactory.make(s -> s.putStack(Math.cos((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
-                .register("cosh", CommandFactory.make(s -> s.putStack(Math.cosh((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
-                .register("asin", CommandFactory.make(s -> s.putStack(Math.asin((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
-                .register("sin", CommandFactory.make(s -> s.putStack(Math.sin((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
-                .register("sinh", CommandFactory.make(s -> s.putStack(Math.sinh((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
-                .register("tan", CommandFactory.make(s -> s.putStack(Math.tan((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
-                .register("tanh", CommandFactory.make(s -> s.putStack(Math.tanh((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
-                .register("atan", CommandFactory.make(s -> s.putStack(Math.atan((Double) s.getStack()))), CommandMnemonicFactory.EMPTY)
-                .register("ceil", CommandFactory.make(s -> s.putStack(Math.ceil((Double) s.getStack()))), CommandMnemonicFactory.EMPTY);
+                        ByteBuffer b = Toolkit.ofUTF8ByteBuffer(x);
+                        b.position(0);
+                        ByteBuffer c = ByteBuffer.allocate(b.remaining() + 1);
+                        c.put((byte) 1).put(b);
+                        c.flip();
+                        return new DataByteBuffer(c);
+                    });
+        }
     }
 
     private static void checknum(Object a) throws EvalProcessorInvokingException {
         if (a instanceof Number) return;
         throw new EvalProcessorInvokingException(a + " is not a number.");
+    }
+
+    private static class Mark implements CommandFactory, CommandMnemonicFactory {
+        private static final Mark inst = new Mark();
+
+        private static class Gotox implements CommandFactory, CommandMnemonicFactory {
+            private static final Gotox inst = new Gotox();
+
+            private static class GX implements Command {
+                private static final GX inst = new GX();
+
+                @Override
+                public void invoke(StackTrace stack) throws Throwable {
+                    goto_(String.valueOf(stack.getStack()), stack);
+                }
+            }
+
+            private static class GG implements Command {
+                private final String m;
+
+                GG(String mk) {
+                    this.m = mk;
+                }
+
+                @Override
+                public void invoke(StackTrace stack) throws Throwable {
+                    goto_(m, stack);
+                }
+            }
+
+            @NotNull
+            @Override
+            public Command make(DataInput input) throws IOException, CompeteException {
+                boolean b = input.readBoolean();
+                if (b) {
+                } else {
+                    return GX.inst;
+                }
+                return new GG(input.readUTF());
+            }
+
+            @NotNull
+            @Override
+            public DataInput make(String line) throws CompeteException {
+                if (line == null || line.isEmpty()) {
+                    return new DataByteBuffer(ByteBuffer.allocate(1));
+                }
+                ByteBuffer bb = Toolkit.ofUTF8ByteBuffer(line);
+                bb.position(0);
+                ByteBuffer mk = ByteBuffer.allocate(bb.remaining() + 1);
+
+                DataByteBuffer bx = new DataByteBuffer(mk);
+                bx.writeBoolean(true);
+                mk.put(bb);
+                mk.flip();
+                return bx;
+            }
+        }
+
+        static int sr(String to, StackTrace ic) {
+            List<Command> icx = ic.invoking;
+            if (icx == null || icx.isEmpty()) return -1;
+            int x = 0;
+            for (Command c : icx) {
+                if (c instanceof Market) {
+                    if (((Market) c).mark.equals(to)) {
+                        return x;
+                    }
+                }
+                x++;
+            }
+            return -1;
+        }
+
+        static void goto_(String to, StackTrace ic) throws Throwable {
+            int search = sr(to, ic);
+            if (search == -1) {
+                throw new EvalProcessorInvokingException("Unknown mark[" + to + "]");
+            }
+            ic.pos = search;
+        }
+
+        private static class Market implements Command {
+            private final String mark;
+
+            Market(String mark) {
+                this.mark = mark;
+            }
+
+            @Override
+            public void invoke(StackTrace stack) throws Throwable {
+            }
+        }
+
+        @NotNull
+        @Override
+        public Command make(DataInput input) throws IOException, CompeteException {
+            return new Market(input.readUTF());
+        }
+
+        @NotNull
+        @Override
+        public DataInput make(String line) throws CompeteException {
+            ByteBuffer bb = Toolkit.ofUTF8ByteBuffer(line);
+            bb.position(0);
+            return new DataByteBuffer(bb);
+        }
     }
 }
