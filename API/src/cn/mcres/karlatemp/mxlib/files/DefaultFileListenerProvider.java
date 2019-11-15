@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DefaultFileListenerProvider implements FileListenerProvider {
     public static final Supplier<Map<Path, ?>> DEFAULT_MAP_CONSTRUCTOR = ConcurrentHashMap::new;
     public static final Supplier<Set<?>> DEFAULT_SET_CONSTRUCTOR = () -> new MapKeySet<>(new ConcurrentHashMap<>());
+    public static final Consumer<Runnable> DEFAULT_TASK_RUNNER = Runnable::run;
 
     private final Map<Path, Set<FileListener>> listeners;
     private final Supplier<Set<?>> ss;
@@ -31,13 +32,22 @@ public class DefaultFileListenerProvider implements FileListenerProvider {
     private final Map<Path, Set<Path>> subModifys;
     private final Map<Path, Long> sizes;
     private final Consumer<Throwable> errorCatch;
+    private final Consumer<Runnable> task_runner;
     private final Object removeToken;
 
     public DefaultFileListenerProvider(
             @NotNull Supplier<Map<Path, ?>> mapSupplier,
             @NotNull Supplier<Set<?>> setSupplier,
             @Nullable Consumer<Throwable> errorCatch) {
-        this(mapSupplier, setSupplier, errorCatch, null);
+        this(mapSupplier, setSupplier, errorCatch, null, null);
+    }
+
+    public DefaultFileListenerProvider(
+            @NotNull Supplier<Map<Path, ?>> mapSupplier,
+            @NotNull Supplier<Set<?>> setSupplier,
+            @Nullable Consumer<Throwable> errorCatch,
+            Object removeToken) {
+        this(mapSupplier, setSupplier, errorCatch, null, removeToken);
     }
 
     @SuppressWarnings("unchecked")
@@ -45,7 +55,10 @@ public class DefaultFileListenerProvider implements FileListenerProvider {
             @NotNull Supplier<Map<Path, ?>> mapSupplier,
             @NotNull Supplier<Set<?>> setSupplier,
             @Nullable Consumer<Throwable> errorCatch,
+            @Nullable Consumer<Runnable> task_runner,
             Object removeToken) {
+        if (task_runner == null) this.task_runner = DEFAULT_TASK_RUNNER;
+        else this.task_runner = task_runner;
         this.removeToken = removeToken;
         listeners = (Map<Path, Set<FileListener>>) mapSupplier.get();
         exists = (Map<Path, FileTime>) mapSupplier.get();
@@ -67,8 +80,12 @@ public class DefaultFileListenerProvider implements FileListenerProvider {
         this(DEFAULT_MAP_CONSTRUCTOR, null);
     }
 
-    public DefaultFileListenerProvider(Consumer<Throwable> errorCatch) {
-        this(ConcurrentHashMap::new, errorCatch);
+    public DefaultFileListenerProvider(@Nullable Consumer<Throwable> errorCatch) {
+        this(DEFAULT_MAP_CONSTRUCTOR, errorCatch);
+    }
+
+    public DefaultFileListenerProvider(@Nullable Consumer<Throwable> errorCatch, @Nullable Consumer<Runnable> taskRunner) {
+        this(DEFAULT_MAP_CONSTRUCTOR, DEFAULT_SET_CONSTRUCTOR, errorCatch, taskRunner, null);
     }
 
     public DefaultFileListenerProvider(@NotNull Supplier<Map<Path, ?>> mapSupplier) {
@@ -172,13 +189,15 @@ public class DefaultFileListenerProvider implements FileListenerProvider {
                             exists.remove(p);
                             subModifys.remove(p);
                             sizes.remove(p);
-                            for (FileListener fl : listeners) {
-                                try {
-                                    fl.onDelete(p);
-                                } catch (Throwable thr) {
-                                    errorCatch.accept(thr);
+                            task_runner.accept(() -> {
+                                for (FileListener fl : listeners) {
+                                    try {
+                                        fl.onDelete(p);
+                                    } catch (Throwable thr) {
+                                        errorCatch.accept(thr);
+                                    }
                                 }
-                            }
+                            });
                         }
                     } else {
                         final FileTime modifiedTime = Files.getLastModifiedTime(p);
@@ -187,7 +206,7 @@ public class DefaultFileListenerProvider implements FileListenerProvider {
                         if (oldTime == null) {
                             exists.put(p, Files.getLastModifiedTime(p));
                             sizes.put(p, 0L);
-                            if (isDir)
+                            if (isDir) task_runner.accept(() -> {
                                 for (FileListener fl : listeners) {
                                     try {
                                         fl.onDirCreate(p);
@@ -195,26 +214,31 @@ public class DefaultFileListenerProvider implements FileListenerProvider {
                                         errorCatch.accept(thr);
                                     }
                                 }
-                            else for (FileListener fl : listeners) {
-                                try {
-                                    fl.onFileCreate(p);
-                                } catch (Throwable thr) {
-                                    errorCatch.accept(thr);
+                            });
+                            else task_runner.accept(() -> {
+                                for (FileListener fl : listeners) {
+                                    try {
+                                        fl.onFileCreate(p);
+                                    } catch (Throwable thr) {
+                                        errorCatch.accept(thr);
+                                    }
                                 }
-                            }
+                            });
                         } else if (!modifiedTime.equals(oldTime)) {
                             exists.put(p, modifiedTime);
                             if (!isDir) {
                                 long osize = sizes.get(p);
                                 long nsize = Files.size(p);
                                 sizes.put(p, nsize);
-                                for (FileListener fl : listeners) {
-                                    try {
-                                        fl.onFileChange(p, osize, nsize);
-                                    } catch (Throwable thr) {
-                                        errorCatch.accept(thr);
+                                task_runner.accept(() -> {
+                                    for (FileListener fl : listeners) {
+                                        try {
+                                            fl.onFileChange(p, osize, nsize);
+                                        } catch (Throwable thr) {
+                                            errorCatch.accept(thr);
+                                        }
                                     }
-                                }
+                                });
                             }
                         }
                         if (isDir) {
@@ -228,23 +252,25 @@ public class DefaultFileListenerProvider implements FileListenerProvider {
                                 if (!subExists.contains(w)) {
                                     subExists.add(w);
                                     boolean id = Files.isDirectory(w);
-                                    if (id) {
-                                        for (FileListener fl : listeners) {
-                                            try {
-                                                fl.onSubDirCreate(p, w);
-                                            } catch (Throwable thr) {
-                                                errorCatch.accept(thr);
+                                    task_runner.accept(() -> {
+                                        if (id) {
+                                            for (FileListener fl : listeners) {
+                                                try {
+                                                    fl.onSubDirCreate(p, w);
+                                                } catch (Throwable thr) {
+                                                    errorCatch.accept(thr);
+                                                }
+                                            }
+                                        } else {
+                                            for (FileListener fl : listeners) {
+                                                try {
+                                                    fl.onSubFileCreate(p, w);
+                                                } catch (Throwable thr) {
+                                                    errorCatch.accept(thr);
+                                                }
                                             }
                                         }
-                                    } else {
-                                        for (FileListener fl : listeners) {
-                                            try {
-                                                fl.onSubFileCreate(p, w);
-                                            } catch (Throwable thr) {
-                                                errorCatch.accept(thr);
-                                            }
-                                        }
-                                    }
+                                    });
                                 }
                             });
                             final Iterator<Path> pathIterator = subExists.iterator();
@@ -252,13 +278,15 @@ public class DefaultFileListenerProvider implements FileListenerProvider {
                                 final Path sub = pathIterator.next();
                                 if (!Files.exists(sub)) {
                                     pathIterator.remove();
-                                    for (FileListener fl : listeners) {
-                                        try {
-                                            fl.onSubFileDelete(p, sub);
-                                        } catch (Throwable thr) {
-                                            errorCatch.accept(thr);
+                                    task_runner.accept(() -> {
+                                        for (FileListener fl : listeners) {
+                                            try {
+                                                fl.onSubFileDelete(p, sub);
+                                            } catch (Throwable thr) {
+                                                errorCatch.accept(thr);
+                                            }
                                         }
-                                    }
+                                    });
                                 }
                             }
                         }
