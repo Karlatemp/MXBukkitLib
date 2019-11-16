@@ -9,6 +9,8 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public interface IConfigurationProcessor {
     /**
      * The global matcher.
@@ -16,6 +18,8 @@ public interface IConfigurationProcessor {
     ConfigurationProcessorPostLoadingMatcher GLOBAL = new ConfigurationProcessorPostLoadingMatcher();
 
     void load(Class boot);
+
+    void load(List<String> classes);
 
     /**
      * Get the matcher of this processor.

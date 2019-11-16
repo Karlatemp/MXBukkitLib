@@ -9,6 +9,7 @@ import cn.mcres.gyhhy.MXLib.bukkit.MXAPI;
 import cn.mcres.gyhhy.MXLib.fcs.F3c;
 import cn.mcres.gyhhy.MXLib.http.WebHelper;
 import cn.mcres.karlatemp.mxlib.MXBukkitLib;
+import cn.mcres.karlatemp.mxlib.share.BukkitToolkit;
 import cn.mcres.karlatemp.mxlib.share.MXBukkitLibPluginStartup;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
@@ -67,7 +68,7 @@ public class VersionInfo {
                 final String st = sb.toString().trim();
                 write(st);
                 Server s = Bukkit.getServer();
-                s.getOnlinePlayers().stream()
+                BukkitToolkit.getOnlinePlayers().stream()
                         .filter((x) -> x.hasPermission("mxlib.update"))
                         .forEach((w) -> {
                             w.sendMessage(st);

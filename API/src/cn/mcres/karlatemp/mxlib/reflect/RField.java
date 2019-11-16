@@ -18,6 +18,8 @@ public interface RField<O, R> extends Supplier<R> {
         return Reflect.ofObject(get());
     }
 
+    boolean isStatic();
+
     Reflect<O> set(R value);
 
     Class<R> getType();

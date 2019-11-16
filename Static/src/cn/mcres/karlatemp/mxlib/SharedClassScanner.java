@@ -8,12 +8,12 @@ package cn.mcres.karlatemp.mxlib;
 import cn.mcres.karlatemp.mxlib.exceptions.ScanException;
 import cn.mcres.karlatemp.mxlib.tools.CharCompiler;
 import cn.mcres.karlatemp.mxlib.tools.IClassScanner;
+import cn.mcres.karlatemp.mxlib.tools.UnclosedInputStream;
+import javassist.bytecode.ClassFile;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassReader;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -44,8 +44,10 @@ public class SharedClassScanner implements IClassScanner {
         if (file.isFile()) {
             try {
                 try (FileInputStream clazz = new FileInputStream(file)) {
-                    ClassReader reader = new ClassReader(clazz);
-                    list.add(replace(reader.getClassName(), false));
+                    try (DataInputStream dis = new DataInputStream(clazz)) {
+                        ClassFile cf = new ClassFile(dis);
+                        list.add(replace(cf.getName(), false));
+                    }
                 } catch (Exception ioe0) {
                     try (FileInputStream fis = new FileInputStream(file)) {
                         try (ZipInputStream zip = new ZipInputStream(fis)) {
@@ -156,13 +158,15 @@ public class SharedClassScanner implements IClassScanner {
                     if (jar.isFile()) {
                         try (FileInputStream fis = new FileInputStream(jar)) {
                             try (ZipInputStream zis = new ZipInputStream(fis)) {
-                                ZipEntry ze;
-                                while ((ze = zis.getNextEntry()) != null) {
-                                    if (ze.isDirectory()) continue;
-                                    String name = ze.getName();
-                                    if (name.endsWith(".class")) {
-                                        if (dump(name).startsWith(pck)) {
-                                            list.add(replace(new ClassReader(zis).getClassName(), false));
+                                try (DataInputStream bin = new DataInputStream(new UnclosedInputStream(zis))) {
+                                    ZipEntry ze;
+                                    while ((ze = zis.getNextEntry()) != null) {
+                                        if (ze.isDirectory()) continue;
+                                        String name = ze.getName();
+                                        if (name.endsWith(".class")) {
+                                            if (dump(name).startsWith(pck)) {
+                                                list.add(replace(new ClassFile(bin).getName(), false));
+                                            }
                                         }
                                     }
                                 }

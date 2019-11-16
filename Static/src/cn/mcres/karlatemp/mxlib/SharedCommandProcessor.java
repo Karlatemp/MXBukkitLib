@@ -127,7 +127,7 @@ public class SharedCommandProcessor implements ICommandProcessor {
                                 } else if (!ICommandConfig.class.isAssignableFrom(x)) {
                                     cs.add(x);
                                 }
-                        } catch (Exception e) {
+                        } catch (Throwable e) {
                             re = SharedConfigurationProcessor.a(re, e);
                         }
                     }
@@ -165,7 +165,7 @@ public class SharedCommandProcessor implements ICommandProcessor {
             if (config.test(c))
                 try {
                     cmds.register(parse(config, c));
-                } catch (Exception ex) {
+                } catch (Throwable ex) {
                     re = SharedConfigurationProcessor.a(re, ex);
                     ex.addSuppressed(MessageDump.create("ClassInvokingDump: " + cs));
                     ex.addSuppressed(MessageDump.create("Class Parsing: " + c));

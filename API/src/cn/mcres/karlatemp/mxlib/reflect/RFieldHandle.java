@@ -40,6 +40,11 @@ public class RFieldHandle<O, R> implements RField<O, R> {
         return new ObjectReflect<>(val, root == null ? null : getType());
     }
 
+    @Override
+    public boolean isStatic() {
+        return isStatic;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public R get() {

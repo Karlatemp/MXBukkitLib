@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
  * @author Administrator
  */
 public class StringHelper {
@@ -33,7 +32,7 @@ public class StringHelper {
      * A table of hex digits
      */
     public static final char[] hexDigit = {
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
     };
 
     public static String time(long l) {
@@ -417,10 +416,15 @@ public class StringHelper {
         }
         return new String(list);
     }
+
     private String str;
 
     public StringHelper(String str) {
         this.str = str;
+    }
+
+    public static boolean isEmpty(String s) {
+        return s.trim().isEmpty();
     }
 
     public String nocolor() {

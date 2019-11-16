@@ -41,6 +41,11 @@ public class RFieldImpl<O, R> implements RField<O, R> {
     }
 
     @Override
+    public boolean isStatic() {
+        return Modifier.isStatic(field.getModifiers());
+    }
+
+    @Override
     public R get() {
         try {
             return (R) field.get(thiz);

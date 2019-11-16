@@ -12,12 +12,15 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.*;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.Permission;
 import java.security.ProtectionDomain;
 import java.util.Collection;
 import java.util.Comparator;
@@ -638,6 +641,114 @@ public class Toolkit {
         }
 
         static class $ToolKit extends SecurityManager {
+            @Override
+            public void checkPermission(Permission perm, Object context) {
+            }
+
+            @Override
+            public void checkPermission(Permission perm) {
+            }
+
+            @Override
+            public void checkCreateClassLoader() {
+            }
+
+            @Override
+            public void checkAccess(Thread t) {
+            }
+
+            @Override
+            public void checkAccess(ThreadGroup g) {
+            }
+
+            @Override
+            public void checkExit(int status) {
+            }
+
+            @Override
+            public void checkExec(String cmd) {
+            }
+
+            @Override
+            public void checkLink(String lib) {
+            }
+
+            @Override
+            public void checkRead(FileDescriptor fd) {
+            }
+
+            @Override
+            public void checkRead(String file) {
+            }
+
+            @Override
+            public void checkRead(String file, Object context) {
+            }
+
+            @Override
+            public void checkWrite(FileDescriptor fd) {
+            }
+
+            @Override
+            public void checkWrite(String file) {
+            }
+
+            @Override
+            public void checkDelete(String file) {
+            }
+
+            @Override
+            public void checkConnect(String host, int port) {
+            }
+
+            @Override
+            public void checkConnect(String host, int port, Object context) {
+            }
+
+            @Override
+            public void checkListen(int port) {
+            }
+
+            @Override
+            public void checkAccept(String host, int port) {
+            }
+
+            @Override
+            public void checkMulticast(InetAddress maddr) {
+            }
+
+            @Override
+            @Deprecated
+            public void checkMulticast(InetAddress maddr, byte ttl) {
+            }
+
+            @Override
+            public void checkPropertiesAccess() {
+            }
+
+            @Override
+            public void checkPropertyAccess(String key) {
+            }
+
+            @Override
+            public void checkPrintJobAccess() {
+            }
+
+            @Override
+            public void checkPackageAccess(String pkg) {
+            }
+
+            @Override
+            public void checkPackageDefinition(String pkg) {
+            }
+
+            @Override
+            public void checkSetFactory() {
+            }
+
+            @Override
+            public void checkSecurityAccess(String target) {
+            }
 
             StackTrace[] classes() {
                 Class[] classes = getClassContext();
@@ -679,10 +790,14 @@ public class Toolkit {
             SecurityManager old = System.getSecurityManager();
             $ToolKit tk;
             try {
-                MethodHandle mh = lk.findStaticSetter(System.class, "security", SecurityManager.class);
-                mh.invoke((Object) null);
-                tk = new $ToolKit();
-                mh.invoke(old);
+                try {
+                    tk = new $ToolKit();
+                } catch (Throwable thr) {
+                    MethodHandle mh = lk.findStaticSetter(System.class, "security", SecurityManager.class);
+                    mh.invoke((Object) null);
+                    tk = new $ToolKit();
+                    mh.invoke(old);
+                }
             } catch (Throwable thr) {
                 try {
                     for (Field f : System.class.getDeclaredFields()) {
@@ -727,5 +842,45 @@ public class Toolkit {
             System.arraycopy(cc, 2, nw, 0, x);
             return nw;
         }
+    }
+
+    public static class IO {
+        public static long writeTo(@NotNull InputStream is, @NotNull OutputStream os) throws IOException {
+            return writeTo(is, os, null);
+        }
+
+        public static long writeTo(@NotNull InputStream is, @NotNull OutputStream os, @Nullable byte[] buffer) throws IOException {
+            return writeTo(is, os, buffer, 0);
+        }
+
+        public static long writeTo(@NotNull InputStream is, @NotNull OutputStream os, @Nullable byte[] buffer, long length) throws IOException {
+            long buf = 0;
+            if (buffer == null) {
+                buffer = new byte[1024];
+            }
+            if (length == 0) {
+                while (true) {
+                    int leng = is.read(buffer);
+                    if (leng == -1) {
+                        break;
+                    }
+                    os.write(buffer, 0, leng);
+                    buf += leng;
+                }
+            } else {
+                final int bl = buffer.length;
+                while (length > 0) {
+                    int leng = is.read(buffer, 0, Math.max(0, Math.min((int) length, bl)));
+                    if (leng == -1) {
+                        break;
+                    }
+                    os.write(buffer, 0, leng);
+                    buf += leng;
+                    length -= leng;
+                }
+            }
+            return buf;
+        }
+
     }
 }

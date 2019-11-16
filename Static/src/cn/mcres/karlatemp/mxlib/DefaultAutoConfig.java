@@ -10,6 +10,7 @@ import cn.mcres.karlatemp.mxlib.annotations.Configuration;
 import cn.mcres.karlatemp.mxlib.bean.IEnvironmentFactory;
 import cn.mcres.karlatemp.mxlib.cmd.ICommandProcessor;
 import cn.mcres.karlatemp.mxlib.configuration.IConfigurationProcessor;
+import cn.mcres.karlatemp.mxlib.impl.installers.MXEventListenerInstaller;
 import cn.mcres.karlatemp.mxlib.logging.IMessageFactory;
 import cn.mcres.karlatemp.mxlib.logging.MessageFactoryAnsi;
 import cn.mcres.karlatemp.mxlib.tools.*;
@@ -52,5 +53,10 @@ public class DefaultAutoConfig {
     @Bean
     IMessageFactory factory() {
         return new MessageFactoryAnsi();
+    }
+
+    @Bean
+    void boot(ServiceInstallers installers) {
+        installers.add(new MXEventListenerInstaller());
     }
 }

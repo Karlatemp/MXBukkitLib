@@ -194,7 +194,7 @@ public class LoggerInject extends PrintStreamLogger implements Listener, EventEx
     @Override
     protected String getPrefix(boolean error, String line, Level lv, LogRecord lr) {
         if (lr == null) {
-            return "§r[§b" + pne(Thread.currentThread().getName()) + "§r] §b";
+            return "§r[" + pne("§6" + Thread.currentThread().getName()) + "§r] §b";
         }
         if (lv == null) {
             return "§r[" + pne(map(lr)) + "§r] §b";

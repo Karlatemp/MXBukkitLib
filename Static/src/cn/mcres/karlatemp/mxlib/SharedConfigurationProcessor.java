@@ -20,7 +20,6 @@ import javassist.bytecode.ClassFile;
 import javassist.bytecode.FieldInfo;
 import javassist.bytecode.annotation.Annotation;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -29,12 +28,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 
 public class SharedConfigurationProcessor implements IConfigurationProcessor {
     public static final boolean DEBUG = System.getProperty("mxlib.debug") != null;
     private final ConfigurationProcessorPostLoadingMatcher matcher = new ConfigurationProcessorPostLoadingMatcher();
+    private static Collection<String> loadedConfigurations = new ConcurrentLinkedQueue<>();
 
     @NotNull
     @Override
@@ -54,12 +57,13 @@ public class SharedConfigurationProcessor implements IConfigurationProcessor {
         return re;
     }
 
+    @SuppressWarnings("deprecation")
     protected void load(Class boot, ClassLoader loader,
                         List<String> classes, RuntimeException re,
                         IBeanManager beans) {
         for (String c : classes) {
-            //noinspection deprecation
-            if (c.endsWith("AutoConfig") && !MXBukkitLib.disableConfigurations.contains(c)) {
+            if (c.endsWith("AutoConfig") && !MXBukkitLib.disableConfigurations.contains(c) && !loadedConfigurations.contains(c)) {
+                loadedConfigurations.add(c);
                 try {
                     Class<?> conf = Class.forName(c, true, loader);
                     Configuration co = conf.getAnnotation(Configuration.class);
@@ -103,13 +107,18 @@ public class SharedConfigurationProcessor implements IConfigurationProcessor {
                             }
                         }
                     }
-                } catch (ClassNotFoundException | NoClassDefFoundError e) {
-                    //e.printStackTrace();
+                } catch (Throwable e) {
+                    re = a(re, e);
                 }
             }
         }
         re = post_load(boot, loader, classes, re, beans);
         if (re != null) throw re;
+    }
+
+    @Override
+    public void load(List<String> classes) {
+        load(Toolkit.Reflection.getCallerClass(), Toolkit.Reflection.getCallerClass().getClassLoader(), classes, null, MXBukkitLib.getBeanManager());
     }
 
     @Override
@@ -226,6 +235,7 @@ public class SharedConfigurationProcessor implements IConfigurationProcessor {
     protected RuntimeException post_load(Class boot,
                                          ClassLoader loader, List<String> classes,
                                          RuntimeException errors, IBeanManager beans) {
+        MXBukkitLib.debug("[SharedConfigurationProcessor] Processing PostLoad");
         IInjector injector = beans.getBean(IInjector.class);
         // We using a loader set to find the bytecode.
         ClassResourceLoader bytecode_loader = beans.getBean(ClassResourceLoaders.class);

@@ -6,16 +6,24 @@
 package cn.mcres.karlatemp.mxlib.share;
 
 import cn.mcres.karlatemp.mxlib.module.chat.RFT;
+import cn.mcres.karlatemp.mxlib.reflect.Reflect;
 import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.messaging.ChannelNameTooLongException;
+import org.bukkit.plugin.messaging.Messenger;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Locale;
 
 @SuppressWarnings("deprecation")
 public class BukkitToolkit {
@@ -67,10 +75,31 @@ public class BukkitToolkit {
         RFT.obc = BukkitToolkit::getCraftBukkitPackage;
     }
 
+    @SuppressWarnings("unchecked")
+    public static Collection<Player> getOnlinePlayers() {
+        try {
+            return (Collection<Player>) Bukkit.getOnlinePlayers();
+        } catch (Error methodNotFoundError) {
+            return Reflect.ofClass(Bukkit.class).getMethod("getOnlinePlayers", new Class[0])
+                    .invoke().cast(Object.class).toOptional()
+                    .map(array -> {
+                        if (array instanceof Collection) {
+                            return (Collection<Player>) array;
+                        }
+                        Collection<Player> ps = new ArrayList<>();
+                        int length = Array.getLength(array);
+                        for (int i = 0; i < length; i++) {
+                            ps.add((Player) Array.get(array, i));
+                        }
+                        return ps;
+                    }).orElse(null);
+        }
+    }
+
     /**
      * Get Minecraft NMS Version.
      * <p>
-     * net.minecraft.server.<b>v1_14_R1</b>.MinecraftServer
+     * net.minecraft.server.<writeVarLong>v1_14_R1</writeVarLong>.MinecraftServer
      *
      * @return Minecraft Server Version
      */
@@ -82,7 +111,7 @@ public class BukkitToolkit {
     /**
      * Get CraftBukkit Package.
      * <p>
-     * <b>org.bukkit.craftserver.v_1_14_R1</b>.CraftServer
+     * <writeVarLong>org.bukkit.craftserver.v_1_14_R1</writeVarLong>.CraftServer
      *
      * @return CraftBukkit Package.
      */
@@ -94,7 +123,7 @@ public class BukkitToolkit {
     /**
      * Get NMS Package.
      * <p>
-     * <b>net.minecraft.server.v1_14_R1</b>.MinecraftServer
+     * <writeVarLong>net.minecraft.server.v1_14_R1</writeVarLong>.MinecraftServer
      *
      * @return NMS Package.
      */
@@ -222,4 +251,52 @@ public class BukkitToolkit {
         return null;
     }
 
+    /**
+     * @param key The key
+     * @return The minecraft key
+     * @since 2.6
+     */
+    public static MinecraftKey toMinecraftKey(String key) {
+        return MinecraftKey.valueOf(key);
+    }
+
+    /**
+     * Validates and corrects a Plugin Channel name. Method is not reentrant / idempotent.
+     *
+     * @param channel Channel name to validate.
+     * @return corrected channel name
+     */
+    @NotNull
+    public static String validateAndCorrectChannel(@NotNull String channel) {
+        /*
+        if (channel == null) {
+            throw new IllegalArgumentException("Channel cannot be null");
+        }
+        */
+        // This will correct registrations / outgoing messages
+        // It is not legal to send "BungeeCord" incoming anymore so we are fine there,
+        // but we must make sure that none of the API methods repeatedly call validate
+        if (channel.equals("BungeeCord")) {
+            return "bungeecord:main";
+        }
+        // And this will correct incoming messages.
+        if (channel.equals("bungeecord:main")) {
+            return "BungeeCord";
+        }
+        if (channel.length() > Messenger.MAX_CHANNEL_SIZE) {
+            throw new ChannelNameTooLongException(channel);
+        }
+        if (channel.indexOf(':') == -1) {
+            throw new IllegalArgumentException("Channel must contain : separator (attempted to use " + channel + ")");
+        }
+        if (!channel.toLowerCase(Locale.ROOT).equals(channel)) {
+            // TODO: use NamespacedKey validation here
+            throw new IllegalArgumentException("Channel must be entirely lowercase (attempted to use " + channel + ")");
+        }
+        return channel;
+    }
+
+    public static Plugin getPlugin() {
+        return getCallerPlugin();
+    }
 }

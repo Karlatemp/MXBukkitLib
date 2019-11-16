@@ -20,6 +20,7 @@ import java.nio.channels.WritableByteChannel;
 
 /**
  * 一个完全空的IO流
+ *
  * @author Karlatemp
  */
 public class EmptyStream extends Writer implements ReadableByteChannel, WritableByteChannel, Appendable {
@@ -36,6 +37,19 @@ public class EmptyStream extends Writer implements ReadableByteChannel, Writable
     private EmptyStream() {
         this.i = new EmptyInputStream();
         this.o = new EmptyOutputStream();
+        ps = new InlinePrintStream(o) {
+            @Override
+            public void print(String s) {
+            }
+
+            @Override
+            public void println() {
+            }
+
+            @Override
+            public void println(String x) {
+            }
+        };
     }
 
     @Override
@@ -108,6 +122,12 @@ public class EmptyStream extends Writer implements ReadableByteChannel, Writable
 
     @Override
     public void write(String str, int off, int len) throws IOException {
+    }
+
+    private static PrintStream ps;
+
+    public PrintStream asPrintStream() {
+        return ps;
     }
 
     private static final class EmptyInputStream extends InputStream {

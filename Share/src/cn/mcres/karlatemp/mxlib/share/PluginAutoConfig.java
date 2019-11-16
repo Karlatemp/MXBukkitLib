@@ -47,10 +47,6 @@ public class PluginAutoConfig {
         return new BukkitPluginMessageFactory();
     }
 
-    @Bean
-    IBukkitConfigurationProcessor bc() {
-        return new BukkitConfigurationProcessor();
-    }
 
     @Bean
     ICommandProcessor processor(ICommandProcessor p) {
@@ -60,7 +56,9 @@ public class PluginAutoConfig {
     }
 
     @Bean
-    void zboot(IEnvironmentFactory factory, IBukkitConfigurationProcessor bc) {
+    void zboot(IEnvironmentFactory factory) {
+        IBukkitConfigurationProcessor bc = new BukkitConfigurationProcessor();
+        MXBukkitLib.getBeanManager().addBean(IBukkitConfigurationProcessor.class, bc);
         $MXBukkitLibConfiguration.load(factory, bc);
     }
 

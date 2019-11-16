@@ -17,7 +17,7 @@ import org.bukkit.entity.Player;
 /**
  * @version 1.12
  */
-public class BungeeChatAPI implements BCAPI {
+public class BungeeChatAPI implements BCAPI, cn.mcres.karlatemp.mxlib.module.chat.BungeeChatAPI {
     public static final BungeeChatAPI api = new BungeeChatAPI();
     private static final BCAPI api_impl;
 

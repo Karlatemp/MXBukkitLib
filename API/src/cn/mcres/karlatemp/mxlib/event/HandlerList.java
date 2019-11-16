@@ -5,9 +5,12 @@
 
 package cn.mcres.karlatemp.mxlib.event;
 
+import cn.mcres.karlatemp.mxlib.MXBukkitLib;
+import cn.mcres.karlatemp.mxlib.tools.ThrowHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -16,6 +19,45 @@ import java.util.function.Consumer;
  * @since 2.2
  */
 public class HandlerList<E extends Event> {
+    public interface ErrorCatch {
+        void accept(@NotNull Event posing, @NotNull EventHandler invoking, @NotNull Throwable error);
+    }
+
+    private ErrorCatch errorCatch;
+    public static final ErrorCatch THROW = (posing, eh, thr) -> ThrowHelper.thrown(thr),
+            PRINT = (posing, invoking, error) -> {
+                MXBukkitLib.getLogger().error("Error in posing event " + posing.getClass() + " when running handler " + invoking);
+                MXBukkitLib.getLogger().printStackTrace(error);
+            };
+    private static ErrorCatch DEFAULT_ERROR_CATCH = PRINT;
+
+    public static ErrorCatch getDefaultErrorCatch() {
+        return DEFAULT_ERROR_CATCH;
+    }
+
+    public ErrorCatch getErrorCatch() {
+        return errorCatch;
+    }
+
+    public static void setDefaultErrorCatch(ErrorCatch defaultErrorCatch) {
+        DEFAULT_ERROR_CATCH = defaultErrorCatch;
+    }
+
+    public void setErrorCatch(ErrorCatch errorCatch) {
+        this.errorCatch = errorCatch;
+    }
+
+    @NotNull
+    public final ErrorCatch getErrorCatchRunnable() {
+        final ErrorCatch consumer = getErrorCatch();
+        if (consumer != null) return consumer;
+        final ErrorCatch def = getDefaultErrorCatch();
+        if (def != null) {
+            return def;
+        }
+        return THROW;
+    }
+
     private static class ND<E extends Event> {
         final ArrayList<EventHandler<E>> handlers = new ArrayList<>();
         ND<E> next, last;
@@ -102,7 +144,13 @@ public class HandlerList<E extends Event> {
     }
 
     public void post(E event) {
-        forEach(h -> h.post(event));
+        forEach(h -> {
+            try {
+                h.post(event);
+            } catch (Throwable thr) {
+                getErrorCatchRunnable().accept(event, h, thr);
+            }
+        });
     }
 
     public synchronized void clear() {

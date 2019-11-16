@@ -13,11 +13,15 @@ import cn.mcres.karlatemp.mxlib.MXBukkitLib;
 import cn.mcres.karlatemp.mxlib.annotations.Bean;
 import cn.mcres.karlatemp.mxlib.annotations.Configuration;
 import cn.mcres.karlatemp.mxlib.bean.IEnvironmentFactory;
+import cn.mcres.karlatemp.mxlib.files.DefaultFileListenerProvider;
+import cn.mcres.karlatemp.mxlib.files.FileListenerProvider;
 import cn.mcres.karlatemp.mxlib.impl.UpdateModule;
 import cn.mcres.karlatemp.mxlib.impl.VersionInfo;
+import cn.mcres.karlatemp.mxlib.module.chat.BungeeChatAPI;
 import cn.mcres.karlatemp.mxlib.network.NetWorkManager;
 import cn.mcres.karlatemp.mxlib.share.MXBukkitLibPluginStartup;
 import cn.mcres.karlatemp.mxlib.share.$MXBukkitLibConfiguration;
+import cn.mcres.karlatemp.mxlib.tools.Pointer;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -27,6 +31,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 
 import java.lang.instrument.Instrumentation;
 import java.net.URL;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Configuration
@@ -93,5 +98,59 @@ public class LegacyAutoConfig {
     @Bean
     Yggdrasil yggdrasil() {
         return Yggdrasil.getServerYggdrasil();
+    }
+
+    @Bean
+    BungeeChatAPI bungeeChatAPI() {
+        return cn.mcres.gyhhy.MXLib.chat.BungeeChatAPI.api;
+    }
+
+    @Bean
+    FileListenerProvider fileListenerProvider(FileListenerProvider provider) {
+        if (provider != null) return provider;
+        final Object token = new Object();
+        final DefaultFileListenerProvider fileListenerProvider = new DefaultFileListenerProvider(
+                DefaultFileListenerProvider.DEFAULT_MAP_CONSTRUCTOR,
+                DefaultFileListenerProvider.DEFAULT_SET_CONSTRUCTOR,
+                error -> MXBukkitLibPluginStartup.plugin.getLogger().log(
+                        Level.SEVERE, "[FileListenerProvider] Error in checking update.",
+                        error
+                ),
+                task -> Bukkit.getScheduler().runTaskAsynchronously(MXBukkitLibPluginStartup.plugin, task),
+                token
+        );
+        final Runnable task = () -> {
+            while (true) {
+                fileListenerProvider.doTick();
+                try {
+                    Thread.sleep(100L);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+        };
+        String name = "MXLib - FileListenerProvider Thread";
+        final Pointer<Thread> thread = new Pointer<>(new Thread(task, name));
+        thread.value().setDaemon(true);
+        thread.value().start();
+        MXBukkitLibPluginStartup.hooks.add(isEnable -> {
+            if (isEnable) {
+                if (thread.exists()) {
+                    if (thread.value().getState() == Thread.State.RUNNABLE) {
+                        return;
+                    }
+                }
+                Thread tt = new Thread(task, name);
+                tt.setDaemon(true);
+                thread.value(tt).start();
+            } else {
+                if (thread.exists()) {
+                    if (thread.value().getState() == Thread.State.RUNNABLE) {
+                        thread.apply(null).interrupt();
+                    }
+                }
+            }
+        });
+        return fileListenerProvider;
     }
 }

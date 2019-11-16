@@ -5,6 +5,7 @@
 
 package cn.mcres.gyhhy.MXLib.io;
 
+import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,40 +14,15 @@ import java.io.*;
 public class IOHelper {
 
     public static long writeTo(@NotNull InputStream is, @NotNull OutputStream os) throws IOException {
-        return writeTo(is, os, null);
+        return Toolkit.IO.writeTo(is, os);
     }
 
     public static long writeTo(@NotNull InputStream is, @NotNull OutputStream os, @Nullable byte[] buffer) throws IOException {
-        return writeTo(is, os, buffer, 0);
+        return Toolkit.IO.writeTo(is, os, buffer);
     }
 
     public static long writeTo(@NotNull InputStream is, @NotNull OutputStream os, @Nullable byte[] buffer, long length) throws IOException {
-        long buf = 0;
-        if (buffer == null) {
-            buffer = new byte[1024];
-        }
-        if (length == 0) {
-            while (true) {
-                int leng = is.read(buffer);
-                if (leng == -1) {
-                    break;
-                }
-                os.write(buffer, 0, leng);
-                buf += leng;
-            }
-        } else {
-            final int bl = buffer.length;
-            while (length > 0) {
-                int leng = is.read(buffer, 0, Math.max(0, Math.min((int) length, bl)));
-                if (leng == -1) {
-                    break;
-                }
-                os.write(buffer, 0, leng);
-                buf += leng;
-                length -= leng;
-            }
-        }
-        return buf;
+        return Toolkit.IO.writeTo(is, os, buffer, length);
     }
 
 }
