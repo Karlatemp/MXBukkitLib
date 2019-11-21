@@ -844,6 +844,11 @@ public class Toolkit {
         }
     }
 
+    /**
+     * IO 数据操作
+     *
+     * @since 2.5
+     */
     public static class IO {
         public static long writeTo(@NotNull InputStream is, @NotNull OutputStream os) throws IOException {
             return writeTo(is, os, null);
@@ -882,5 +887,34 @@ public class Toolkit {
             return buf;
         }
 
+        /**
+         * get bytes from bits
+         *
+         * @param bits  Bits of cut
+         * @param bytes byte array size
+         * @return The array of bits
+         * @see #toBytes(long, int)
+         * @since 2.7
+         */
+        public static byte[] toBytes(int bits, int bytes) {
+            return toBytes(Integer.toUnsignedLong(bits), bytes);
+        }
+
+        /**
+         * get bytes from bits
+         *
+         * @param bits  Bits of cut
+         * @param bytes byte array size
+         * @return The array of bits
+         * @since 2.7
+         */
+        public static byte[] toBytes(long bits, int bytes) {
+            byte[] ref = new byte[bytes];
+            for (int i = 0; i < bytes; i++) {
+                ref[i] = (byte) ((bits >> (i * Byte.SIZE)) & 0xFF);
+            }
+            return ref;
+
+        }
     }
 }
