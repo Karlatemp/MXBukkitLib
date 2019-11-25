@@ -91,7 +91,7 @@ public class ObjectReflect<T> implements Reflect<T> {
                 }
             }
             return new RFieldImpl<>(f, rt(), val);
-        } catch (NoSuchFieldException ignore) {
+        } catch (Throwable ignore) {
         }
         if (watching.isArray())
             return null;
@@ -99,9 +99,8 @@ public class ObjectReflect<T> implements Reflect<T> {
             try {
                 Field f = watching.getDeclaredField(name);
                 if (type != null && f.getType() != type) throw breakUpField;
-                f.setAccessible(true);
                 return new RFieldImpl<>(f, rt(), val);
-            } catch (NoSuchFieldException ignore) {
+            } catch (Throwable ignore) {
             }
             watching = watching.getSuperclass();
         }
@@ -111,11 +110,11 @@ public class ObjectReflect<T> implements Reflect<T> {
             while (watching != null) {
                 try {
 //                    return new ObjectReflect(root.findGetter(watching, name, type).invoke(get()));
-                    return new RFieldHandle<>(
+                    return new RFieldHandle<T, V>(
                             root.findGetter(watching, name, type),
                             root.findSetter(watching, name, type),
                             false, rt()
-                    );
+                    ).self(val);
                 } catch (Throwable ignore) {
                 }
                 try {
@@ -155,6 +154,9 @@ public class ObjectReflect<T> implements Reflect<T> {
             } catch (NoSuchMethodException | IllegalAccessException ignore) {
             } catch (InvocationTargetException e) {
                 ThrowHelper.thrown(e.getTargetException());
+            } catch (Exception e) {
+                if (!e.getClass().getName().equals("java.lang.reflect.InaccessibleObjectException"))
+                    ThrowHelper.thrown(e);
             }
             Class<?> c1 = watching;
             if (!c1.isArray())
@@ -166,6 +168,9 @@ public class ObjectReflect<T> implements Reflect<T> {
                     } catch (NoSuchMethodException | IllegalAccessException ignore) {
                     } catch (InvocationTargetException e) {
                         ThrowHelper.thrown(e.getTargetException());
+                    } catch (Exception e) {
+                        if (!e.getClass().getName().equals("java.lang.reflect.InaccessibleObjectException"))
+                            ThrowHelper.thrown(e);
                     }
                     c1 = c1.getSuperclass();
                 }
@@ -255,7 +260,7 @@ public class ObjectReflect<T> implements Reflect<T> {
             if (returnType != null && m.getReturnType() != returnType) {
                 throw breakUp;
             }
-            return new RMethodImpl(m);
+            return new RMethodImpl(m).self(val);
         } catch (NoSuchMethodException ignore) {
         }
         Class<?> mat = matching;
@@ -266,7 +271,7 @@ public class ObjectReflect<T> implements Reflect<T> {
                     throw breakUp;
                 }
                 method.setAccessible(true);
-                return new RMethodImpl(method);
+                return new RMethodImpl(method).self(val);
             } catch (NoSuchMethodException ignore) {
             }
             mat = mat.getSuperclass();
@@ -285,7 +290,7 @@ public class ObjectReflect<T> implements Reflect<T> {
                 try {
                     return new RMethodHandle(
                             false, mat, root.findVirtual(mat, name, type)
-                    );
+                    ).self(val);
                 } catch (Throwable ignore) {
                 }
                 mat = mat.getSuperclass();
