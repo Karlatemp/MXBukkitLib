@@ -5,12 +5,15 @@
 
 package cn.mcres.karlatemp.mxlib.share;
 
+import cn.mcres.karlatemp.mxlib.impl.InternalClasses;
 import cn.mcres.karlatemp.mxlib.module.chat.RFT;
 import cn.mcres.karlatemp.mxlib.reflect.Reflect;
 import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.ChannelNameTooLongException;
@@ -21,15 +24,19 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.function.Function;
 
 @SuppressWarnings("deprecation")
 public class BukkitToolkit {
     private static final Class<?> PluginClassLoader;
     private static final Field pfield;
     private static final String NMS_ver, nms_start, craft_start;
+    private static final Function<ItemStack, Material> itemToMaterial;
 
     static {
         try {
@@ -73,6 +80,31 @@ public class BukkitToolkit {
         RFT.nms = BukkitToolkit::getNMSPackage;
         //noinspection deprecation
         RFT.obc = BukkitToolkit::getCraftBukkitPackage;
+        {
+            byte[] code = Base64.getDecoder().decode(InternalClasses.MaterialGetter());
+            try {
+                //noinspection unchecked
+                itemToMaterial = Toolkit.Reflection.defineClass(
+                        BukkitToolkit.class.getClassLoader(), null,
+                        code, 0, code.length, BukkitToolkit.class.getProtectionDomain())
+                        .asSubclass(Function.class)
+                        .getConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                throw new ExceptionInInitializerError(e);
+            }
+        }
+    }
+
+    /**
+     * For 1.13+ Server.
+     *
+     * @param stack The source ItemStack
+     * @return The real material of item stack
+     * @since 2.7
+     */
+    @NotNull
+    public static Material getMaterial(ItemStack stack) {
+        return itemToMaterial.apply(stack);
     }
 
     @SuppressWarnings("unchecked")
@@ -99,7 +131,7 @@ public class BukkitToolkit {
     /**
      * Get Minecraft NMS Version.
      * <p>
-     * net.minecraft.server.<writeVarLong>v1_14_R1</writeVarLong>.MinecraftServer
+     * net.minecraft.server.<b>v1_14_R1</b>.MinecraftServer
      *
      * @return Minecraft Server Version
      */
@@ -111,7 +143,7 @@ public class BukkitToolkit {
     /**
      * Get CraftBukkit Package.
      * <p>
-     * <writeVarLong>org.bukkit.craftserver.v_1_14_R1</writeVarLong>.CraftServer
+     * <b>org.bukkit.craftserver.v_1_14_R1</b>.CraftServer
      *
      * @return CraftBukkit Package.
      */
@@ -123,7 +155,7 @@ public class BukkitToolkit {
     /**
      * Get NMS Package.
      * <p>
-     * <writeVarLong>net.minecraft.server.v1_14_R1</writeVarLong>.MinecraftServer
+     * <b>net.minecraft.server.v1_14_R1</b>.MinecraftServer
      *
      * @return NMS Package.
      */

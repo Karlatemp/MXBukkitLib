@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="MXLibWork">
+    <target name="sign">
+        <echo message="Start sign" level="info"/>
+        <exec executable="cmd" failonerror="true" logerror="true">
+            <redirector alwayslog="true"/>
+            <arg value="/c"/>
+            <arg value="G:\IDEAProjects\MXBukkitLibRebuild\src\enc.bat"/>
+            <arg value="${artifact.output.path}\${sign.file}"/>
+        </exec>
+    </target>
+</project>

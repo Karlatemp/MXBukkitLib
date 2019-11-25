@@ -15,6 +15,8 @@ import cn.mcres.karlatemp.mxlib.impl.titleapi.TitleAPI_Reflect;
 import cn.mcres.karlatemp.mxlib.logging.BukkitMessageFactory;
 import cn.mcres.karlatemp.mxlib.logging.IMessageFactory;
 import cn.mcres.karlatemp.mxlib.module.chat.ItemStackComponent;
+import cn.mcres.karlatemp.mxlib.module.namespace.NamespaceToolkit;
+import cn.mcres.karlatemp.mxlib.module.namespace.NamespaceToolkitInternal;
 import cn.mcres.karlatemp.mxlib.share.MXBukkitLibPluginStartup;
 import cn.mcres.karlatemp.mxlib.tools.IObjectCreator;
 import cn.mcres.karlatemp.mxlib.tools.Toolkit;
@@ -103,6 +105,13 @@ public class ImplSetupAutoConfig {
             if (tok == null) throw new NullPointerException("Cannot get The ItemStackComponent Power class Token.");
             ItemStackComponent.setPower(tok, tok.cast(p));
             MXBukkitLib.debug(() -> "[ItemStackComponent] Loaded with provider [" + p + "]");
+            MXBukkitLib.getBeanManager().addBean(NamespaceToolkit.class,
+                    NamespaceToolkitInternal.wrap(
+                            creator.newInstance(by(
+                                    "cn.mcres.karlatemp.mxlib.module.namespace.NT_",
+                                    nmsl, ""
+                            ))
+                    ));
         } catch (Exception e) {
             MXBukkitLibPluginStartup.plugin.getLogger().log(Level.SEVERE, null, e);
         }

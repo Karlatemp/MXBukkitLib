@@ -1,3 +1,16 @@
+2.7
+    Add UnsafeTool System. Use with cn.mcres.karlatemp.mxlib.tools.Unsafe.getUnsafe();
+    Add Toolkit.IO.insertData Method.
+    Fix Reflect's BUG:
+        No set value of self.
+        Add Java9 Module Exception Catch
+    Add SystemTranslate instance. Used to get the system(minecraft) translate.
+    Add ModuleClassLoader. (Untested)
+2.6
+    Add EventListener Installer
+    Add unclosed stream
+    Add FilterIterator
+    Add CustomPacket Writer
 2.5
     Add NBT Edit System
     Add scheduler

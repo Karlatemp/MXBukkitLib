@@ -16,6 +16,7 @@ import cn.mcres.karlatemp.mxlib.logging.Ansi;
 import cn.mcres.karlatemp.mxlib.logging.IMessageFactory;
 import cn.mcres.karlatemp.mxlib.scheduler.MXScheduler;
 import cn.mcres.karlatemp.mxlib.tools.*;
+import cn.mcres.karlatemp.mxlib.translate.SystemTranslate;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
@@ -143,5 +144,10 @@ public class PluginAutoConfig {
     @Bean
     MXScheduler mxScheduler() {
         return new BukkitWrapScheduler();
+    }
+
+    @Bean
+    SystemTranslate systemTranslate() {
+        return new BukkitTranslate();
     }
 }
