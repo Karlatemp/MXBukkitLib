@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018-2019 Karlatemp. All rights reserved.
- * Reserved.FileName: PacketDataSerializer.java@author: karlatemp@vip.qq.com: 19-11-10 下午2:27@version: 2.0
+ * Reserved.FileName: PacketDataSerializer.java@author: karlatemp@vip.qq.com: 19-11-17 上午12:09@version: 2.0
  */
 
 package cn.mcres.karlatemp.mxlib.module.packet;
@@ -12,19 +12,21 @@ import cn.mcres.karlatemp.mxlib.share.MinecraftKey;
 import io.netty.buffer.*;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
+import io.netty.util.ByteProcessor;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
 import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.UUID;
-import javax.annotation.Nullable;
 
 public class PacketDataSerializer extends ByteBuf {
 
@@ -326,11 +328,13 @@ public class PacketDataSerializer extends ByteBuf {
         return a.alloc();
     }
 
+    @Deprecated
     @Override
     public ByteOrder order() {
         return a.order();
     }
 
+    @Deprecated
     @Override
     public ByteBuf order(ByteOrder byteOrder) {
         return a.order(byteOrder);
@@ -344,6 +348,16 @@ public class PacketDataSerializer extends ByteBuf {
     @Override
     public boolean isDirect() {
         return a.isDirect();
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return a.isReadOnly();
+    }
+
+    @Override
+    public PacketDataSerializer asReadOnly() {
+        return new PacketDataSerializer(a.asReadOnly());
     }
 
     @Override
@@ -384,6 +398,11 @@ public class PacketDataSerializer extends ByteBuf {
     @Override
     public int maxWritableBytes() {
         return a.maxWritableBytes();
+    }
+
+    @Override
+    public int maxFastWritableBytes() {
+        return a.maxFastWritableBytes();
     }
 
     @Override
@@ -472,8 +491,18 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public short getShortLE(int index) {
+        return a.getShortLE(index);
+    }
+
+    @Override
     public int getUnsignedShort(int i) {
         return a.getUnsignedShort(i);
+    }
+
+    @Override
+    public int getUnsignedShortLE(int index) {
+        return a.getUnsignedShortLE(index);
     }
 
     @Override
@@ -482,8 +511,18 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public int getMediumLE(int index) {
+        return a.getMediumLE(index);
+    }
+
+    @Override
     public int getUnsignedMedium(int i) {
         return a.getUnsignedMedium(i);
+    }
+
+    @Override
+    public int getUnsignedMediumLE(int index) {
+        return a.getUnsignedMediumLE(index);
     }
 
     @Override
@@ -492,13 +531,28 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public int getIntLE(int index) {
+        return a.getIntLE(index);
+    }
+
+    @Override
     public long getUnsignedInt(int i) {
         return a.getUnsignedInt(i);
     }
 
     @Override
+    public long getUnsignedIntLE(int index) {
+        return a.getUnsignedIntLE(index);
+    }
+
+    @Override
     public long getLong(int i) {
         return a.getLong(i);
+    }
+
+    @Override
+    public long getLongLE(int index) {
+        return a.getLongLE(index);
     }
 
     @Override
@@ -512,8 +566,18 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public float getFloatLE(int index) {
+        return a.getFloatLE(index);
+    }
+
+    @Override
     public double getDouble(int i) {
         return a.getDouble(i);
+    }
+
+    @Override
+    public double getDoubleLE(int index) {
+        return a.getDoubleLE(index);
     }
 
     @Override
@@ -557,6 +621,16 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public int getBytes(int index, FileChannel out, long position, int length) throws IOException {
+        return a.getBytes(index, out, position, length);
+    }
+
+    @Override
+    public CharSequence getCharSequence(int index, int length, Charset charset) {
+        return a.getCharSequence(index, length, charset);
+    }
+
+    @Override
     public ByteBuf setBoolean(int i, boolean b) {
         return a.setBoolean(i, b);
     }
@@ -572,8 +646,18 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public ByteBuf setShortLE(int index, int value) {
+        return a.setShortLE(index, value);
+    }
+
+    @Override
     public ByteBuf setMedium(int i, int i1) {
         return a.setMedium(i, i1);
+    }
+
+    @Override
+    public ByteBuf setMediumLE(int index, int value) {
+        return a.setMediumLE(index, value);
     }
 
     @Override
@@ -582,8 +666,18 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public ByteBuf setIntLE(int index, int value) {
+        return a.setIntLE(index, value);
+    }
+
+    @Override
     public ByteBuf setLong(int i, long l) {
         return a.setLong(i, l);
+    }
+
+    @Override
+    public ByteBuf setLongLE(int index, long value) {
+        return a.setLongLE(index, value);
     }
 
     @Override
@@ -597,8 +691,18 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public ByteBuf setFloatLE(int index, float value) {
+        return a.setFloatLE(index, value);
+    }
+
+    @Override
     public ByteBuf setDouble(int i, double v) {
         return a.setDouble(i, v);
+    }
+
+    @Override
+    public ByteBuf setDoubleLE(int index, double value) {
+        return a.setDoubleLE(index, value);
     }
 
     @Override
@@ -642,8 +746,18 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public int setBytes(int index, FileChannel in, long position, int length) throws IOException {
+        return a.setBytes(index, in, position, length);
+    }
+
+    @Override
     public ByteBuf setZero(int i, int i1) {
         return a.setZero(i, i1);
+    }
+
+    @Override
+    public int setCharSequence(int index, CharSequence sequence, Charset charset) {
+        return a.setCharSequence(index, sequence, charset);
     }
 
     @Override
@@ -667,8 +781,18 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public short readShortLE() {
+        return a.readShortLE();
+    }
+
+    @Override
     public int readUnsignedShort() {
         return a.readUnsignedShort();
+    }
+
+    @Override
+    public int readUnsignedShortLE() {
+        return a.readUnsignedShortLE();
     }
 
     @Override
@@ -677,8 +801,18 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public int readMediumLE() {
+        return a.readMediumLE();
+    }
+
+    @Override
     public int readUnsignedMedium() {
         return a.readUnsignedMedium();
+    }
+
+    @Override
+    public int readUnsignedMediumLE() {
+        return a.readUnsignedMediumLE();
     }
 
     @Override
@@ -687,13 +821,28 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public int readIntLE() {
+        return a.readIntLE();
+    }
+
+    @Override
     public long readUnsignedInt() {
         return a.readUnsignedInt();
     }
 
     @Override
+    public long readUnsignedIntLE() {
+        return a.readUnsignedIntLE();
+    }
+
+    @Override
     public long readLong() {
         return a.readLong();
+    }
+
+    @Override
+    public long readLongLE() {
+        return a.readLongLE();
     }
 
     @Override
@@ -707,8 +856,18 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public float readFloatLE() {
+        return a.readFloatLE();
+    }
+
+    @Override
     public double readDouble() {
         return a.readDouble();
+    }
+
+    @Override
+    public double readDoubleLE() {
+        return a.readDoubleLE();
     }
 
     @Override
@@ -719,6 +878,11 @@ public class PacketDataSerializer extends ByteBuf {
     @Override
     public ByteBuf readSlice(int i) {
         return a.readSlice(i);
+    }
+
+    @Override
+    public ByteBuf readRetainedSlice(int length) {
+        return a.readRetainedSlice(length);
     }
 
     @Override
@@ -762,6 +926,16 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public CharSequence readCharSequence(int length, Charset charset) {
+        return a.readCharSequence(length, charset);
+    }
+
+    @Override
+    public int readBytes(FileChannel out, long position, int length) throws IOException {
+        return a.readBytes(out, position, length);
+    }
+
+    @Override
     public ByteBuf skipBytes(int i) {
         return a.skipBytes(i);
     }
@@ -782,8 +956,18 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public ByteBuf writeShortLE(int value) {
+        return a.writeShortLE(value);
+    }
+
+    @Override
     public ByteBuf writeMedium(int i) {
         return a.writeMedium(i);
+    }
+
+    @Override
+    public ByteBuf writeMediumLE(int value) {
+        return a.writeMediumLE(value);
     }
 
     @Override
@@ -792,8 +976,18 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public ByteBuf writeIntLE(int value) {
+        return a.writeIntLE(value);
+    }
+
+    @Override
     public ByteBuf writeLong(long l) {
         return a.writeLong(l);
+    }
+
+    @Override
+    public ByteBuf writeLongLE(long value) {
+        return a.writeLongLE(value);
     }
 
     @Override
@@ -807,8 +1001,18 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public ByteBuf writeFloatLE(float value) {
+        return a.writeFloatLE(value);
+    }
+
+    @Override
     public ByteBuf writeDouble(double v) {
         return a.writeDouble(v);
+    }
+
+    @Override
+    public ByteBuf writeDoubleLE(double value) {
+        return a.writeDoubleLE(value);
     }
 
     @Override
@@ -852,8 +1056,18 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public int writeBytes(FileChannel in, long position, int length) throws IOException {
+        return a.writeBytes(in, position, length);
+    }
+
+    @Override
     public ByteBuf writeZero(int i) {
         return a.writeZero(i);
+    }
+
+    @Override
+    public int writeCharSequence(CharSequence sequence, Charset charset) {
+        return a.writeCharSequence(sequence, charset);
     }
 
     @Override
@@ -877,23 +1091,23 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
-    public int forEachByte(ByteBufProcessor byteBufProcessor) {
-        return a.forEachByte(byteBufProcessor);
+    public int forEachByte(ByteProcessor processor) {
+        return a.forEachByte(processor);
     }
 
     @Override
-    public int forEachByte(int i, int i1, ByteBufProcessor byteBufProcessor) {
-        return a.forEachByte(i, i1, byteBufProcessor);
+    public int forEachByte(int index, int length, ByteProcessor processor) {
+        return a.forEachByte(index, length, processor);
     }
 
     @Override
-    public int forEachByteDesc(ByteBufProcessor byteBufProcessor) {
-        return a.forEachByteDesc(byteBufProcessor);
+    public int forEachByteDesc(ByteProcessor processor) {
+        return a.forEachByteDesc(processor);
     }
 
     @Override
-    public int forEachByteDesc(int i, int i1, ByteBufProcessor byteBufProcessor) {
-        return a.forEachByteDesc(i, i1, byteBufProcessor);
+    public int forEachByteDesc(int index, int length, ByteProcessor processor) {
+        return a.forEachByteDesc(index, length, processor);
     }
 
     @Override
@@ -912,13 +1126,28 @@ public class PacketDataSerializer extends ByteBuf {
     }
 
     @Override
+    public ByteBuf retainedSlice() {
+        return a.retainedSlice();
+    }
+
+    @Override
     public ByteBuf slice(int i, int i1) {
         return a.slice(i, i1);
     }
 
     @Override
+    public ByteBuf retainedSlice(int index, int length) {
+        return a.retainedSlice(index, length);
+    }
+
+    @Override
     public ByteBuf duplicate() {
         return a.duplicate();
+    }
+
+    @Override
+    public ByteBuf retainedDuplicate() {
+        return a.retainedDuplicate();
     }
 
     @Override
@@ -1014,6 +1243,16 @@ public class PacketDataSerializer extends ByteBuf {
     @Override
     public ByteBuf retain() {
         return a.retain();
+    }
+
+    @Override
+    public ByteBuf touch() {
+        return a.touch();
+    }
+
+    @Override
+    public ByteBuf touch(Object hint) {
+        return a.touch(hint);
     }
 
     @Override

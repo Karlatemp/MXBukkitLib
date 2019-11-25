@@ -7,12 +7,16 @@ package cn.mcres.karlatemp.mxlib.impl;
 
 import cn.mcres.karlatemp.mxlib.MXBukkitLib;
 import cn.mcres.karlatemp.mxlib.annotations.AutoInstall;
+import cn.mcres.karlatemp.mxlib.module.packet.PacketSender;
+import cn.mcres.karlatemp.mxlib.module.packet.RawPacket;
 import cn.mcres.karlatemp.mxlib.reflect.Reflect;
 import cn.mcres.karlatemp.mxlib.share.BukkitToolkit;
 import cn.mcres.karlatemp.mxlib.share.MXBukkitLibPluginStartup;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.MessageToByteEncoder;
+import io.netty.util.concurrent.GenericFutureListener;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -26,10 +30,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 
 @AutoInstall
-public class PlayerNetWorkInjector implements Listener {
+public class PlayerNetWorkInjector extends PacketSender implements Listener {
     private static final Map<UUID, Channel> channels = new ConcurrentHashMap<>();
 
     static {
@@ -51,6 +56,7 @@ public class PlayerNetWorkInjector implements Listener {
     private void $init() {
         MXBukkitLib.debug(() -> "[PlayerNetWorkInjector] $init Method called.");
         BukkitToolkit.getOnlinePlayers().forEach(player -> inject(player, false));
+        setInstance(this);
     }
 
     public static Channel getChannel(@NotNull Player player) {
@@ -125,5 +131,22 @@ public class PlayerNetWorkInjector implements Listener {
     public void onPlayerJoin(PlayerJoinEvent player) {
         MXBukkitLib.debug(() -> "[PlayerNetWorkInjector] Player join the server [ " + player.getPlayer().getName() + "]");
         inject(player.getPlayer(), false);
+    }
+
+    @Override
+    public PacketSender sendPacket(@NotNull RawPacket packet, @NotNull Object target) throws ClassCastException {
+        getChannel((Player) target).writeAndFlush(packet).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> PacketSender sendPacketToAll(@NotNull RawPacket packet, @NotNull Predicate<T> filter) {
+        for (Player p : BukkitToolkit.getOnlinePlayers()) {
+            if (((Predicate) filter).test(p)) {
+                sendPacket(packet, p);
+            }
+        }
+        return this;
     }
 }

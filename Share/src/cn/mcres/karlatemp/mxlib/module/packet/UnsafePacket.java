@@ -9,7 +9,7 @@ package cn.mcres.karlatemp.mxlib.module.packet;
  * If you use this interface.
  * You need to manually write to the PacketId
  */
-public interface UnsafePacket extends CustomPacket {
+public interface UnsafePacket extends CustomPacket, UnsafeRawPacket {
     @Override
     default int getPacketId() {
         return 0;
