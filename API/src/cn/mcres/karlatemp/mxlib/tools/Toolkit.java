@@ -19,16 +19,19 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.*;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.security.Permission;
 import java.security.ProtectionDomain;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * 一个工具集合
@@ -615,6 +618,152 @@ public class Toolkit {
                 return ct[at];
             return null;
         }
+
+        /**
+         * Clone a object.
+         *
+         * @param object The source object
+         * @param <T>    The type of object
+         * @return the cloned object
+         * @throws InstantiationException Error on failed to allocate a new instance
+         * @since 2.7
+         */
+        @SuppressWarnings("unchecked")
+        @Contract(pure = true, value = "null -> null; !null -> !null")
+        public static <T> T clone(T object) throws InstantiationException {
+            if (object == null)
+                return null;
+            Class<T> type = (Class<T>) object.getClass();
+            if (type == Class.class) {
+                throw new UnsupportedOperationException("Cannot clone a class");
+            }
+            if (type.isArray()) {
+                Object array = Array.newInstance(type, Array.getLength(object));
+                //noinspection SuspiciousSystemArraycopy
+                System.arraycopy(object, 0, array, 0, Array.getLength(array));
+                return (T) array;
+            }
+            Unsafe unsafe = Unsafe.getUnsafe();
+            final Object instance = unsafe.allocateInstance(type);
+            Class<?> doit = type;
+            do {
+                clone$copy(doit, object, instance);
+                doit = doit.getSuperclass();
+            } while (doit != null);
+            return (T) instance;
+        }
+
+        /**
+         * Get field value with Unsafe
+         *
+         * @param this_ The this object of field.
+         * @param field The field of object.
+         * @return The field value.
+         * @since 2.7
+         */
+        public static Object getObjectValue(Object this_, @NotNull Field field) {
+            long offset;
+            Unsafe unsafe = Unsafe.getUnsafe();
+            if (Modifier.isStatic(field.getModifiers())) {
+                offset = unsafe.staticFieldOffset(field);
+                this_ = field.getDeclaringClass();
+            } else {
+                Objects.requireNonNull(this_);
+                field.getDeclaringClass().cast(this_);
+                offset = unsafe.objectFieldOffset(field);
+            }
+            Class<?> typ = field.getType();
+            if (typ == boolean.class) {
+                return unsafe.getBoolean(this_, offset);
+            } else if (typ == int.class) {
+                return unsafe.getInt(this_, offset);
+            } else if (typ == float.class) {
+                return unsafe.getFloat(this_, offset);
+            } else if (typ == long.class) {
+                return unsafe.getLong(this_, offset);
+            } else if (typ == char.class) {
+                return unsafe.getChar(this_, offset);
+            } else if (typ == short.class) {
+                return unsafe.getShort(this_, offset);
+            } else if (typ == byte.class) {
+                return unsafe.getByte(this_, offset);
+            } else if (typ == double.class) {
+                return unsafe.getDouble(this_, offset);
+            } else {
+                return unsafe.getReference(this_, offset);
+            }
+        }
+
+        /**
+         * Change object's field value.
+         *
+         * @param this_ The this variable.
+         * @param field The field need change.
+         * @param value The value override.
+         */
+        public static void setObjectValue(Object this_, @NotNull Field field, Object value) {
+            long offset;
+            Unsafe unsafe = Unsafe.getUnsafe();
+            if (Modifier.isStatic(field.getModifiers())) {
+                this_ = null;
+                offset = unsafe.staticFieldOffset(field);
+            } else {
+                Objects.requireNonNull(this_);
+                field.getDeclaringClass().cast(this_);
+                offset = unsafe.objectFieldOffset(field);
+            }
+            if (this_ != null)
+                field.getDeclaringClass().cast(this_);
+            Class typ = field.getType();
+            if (typ == boolean.class) {
+                unsafe.putBoolean(this_, offset, (boolean) value);
+            } else if (typ == int.class) {
+                unsafe.putInt(this_, offset, (int) value);
+            } else if (typ == float.class) {
+                unsafe.putFloat(this_, offset, (float) value);
+            } else if (typ == long.class) {
+                unsafe.putLong(this_, offset, (long) value);
+            } else if (typ == char.class) {
+                unsafe.putChar(this_, offset, (char) value);
+            } else if (typ == short.class) {
+                unsafe.putShort(this_, offset, (short) value);
+            } else if (typ == byte.class) {
+                unsafe.putByte(this_, offset, (byte) value);
+            } else if (typ == double.class) {
+                unsafe.putDouble(this_, offset, (double) value);
+            } else {
+                unsafe.putReference(this_, offset, value);
+            }
+        }
+
+        private static void clone$copy(Class<?> type, Object from, Object to) {
+            Unsafe unsafe = Unsafe.getUnsafe();
+            for (Field f : type.getDeclaredFields()) {
+                if (!Modifier.isStatic(f.getModifiers())) {
+                    final long offset = unsafe.objectFieldOffset(f);
+                    Class typ = f.getType();
+                    if (typ == boolean.class) {
+                        unsafe.putBoolean(to, offset, unsafe.getBoolean(from, offset));
+                    } else if (typ == int.class) {
+                        unsafe.putInt(to, offset, unsafe.getInt(from, offset));
+                    } else if (typ == float.class) {
+                        unsafe.putFloat(to, offset, unsafe.getFloat(from, offset));
+                    } else if (typ == long.class) {
+                        unsafe.putLong(to, offset, unsafe.getLong(from, offset));
+                    } else if (typ == char.class) {
+                        unsafe.putChar(to, offset, unsafe.getChar(from, offset));
+                    } else if (typ == short.class) {
+                        unsafe.putShort(to, offset, unsafe.getShort(from, offset));
+                    } else if (typ == byte.class) {
+                        unsafe.putByte(to, offset, unsafe.getByte(from, offset));
+                    } else if (typ == double.class) {
+                        unsafe.putDouble(to, offset, unsafe.getDouble(from, offset));
+                    } else {
+                        unsafe.putReference(to, offset, unsafe.getReference(from, offset));
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -750,30 +899,43 @@ public class Toolkit {
             public void checkSecurityAccess(String target) {
             }
 
+            private static StackTrace create(Class<?> c, StackTraceElement elm) {
+                StackTrace t = new StackTrace();
+                t.c = c;
+                t.elm = elm;
+                return t;
+            }
+
             StackTrace[] classes() {
-                Class[] classes = getClassContext();
+                Class[] classes = Toolkit.StackTrace.getClassContext();
                 StackTraceElement[] elements = new Throwable().getStackTrace();
-                int ln = Math.min(classes.length, elements.length);
-                if (ln < 2) {
-                    return new StackTrace[0];
-                }
-                ln -= 2;
-                StackTrace[] traces = new StackTrace[ln];
-                int off, off2, comp = classes.length - elements.length;
-                if (comp > 0) {
-                    off = comp + 2;
-                    off2 = 2;
-                } else if (comp < 0) {
-                    off = 2;
-                    off2 = elements.length - classes.length + 2;
-                } else {
-                    off = off2 = 2;
-                }
-                for (int i = 0; i < ln; i++) {
-                    StackTrace st = new StackTrace();
-                    st.c = classes[i + off];
-                    st.elm = elements[i + off2];
-                    traces[i] = st;
+                Toolkit.StackTrace[] traces = new Toolkit.StackTrace[elements.length - 2];
+
+                /*
+                System.out.println("ELMS- ");
+                Stream.of(elements).forEach(System.out::println);
+                System.out.println("CLASSES- ");
+                Stream.of(classes).forEach(System.out::println);
+                System.out.println("---\n");
+                */
+
+                int c_length_ed = classes.length - 1;
+                int e_i = 2, c_i = 2, s = 0;
+
+                for (; s < traces.length; ) {
+                    StackTraceElement trace = elements[e_i++];
+                    Class c;
+                    // int cos = c_i;
+                    c = classes[c_i];
+                    if (!trace.getClassName().equals(c.getName())) {
+                        // System.out.println("NW: " + c_i + ", " + cos);
+                        c_i--;
+                        c = classes[c_i];
+                    }
+                    if (c_i < c_length_ed)
+                        c_i++;
+                    // System.out.println("E:" + e_i + ", C:" + cos + ", c " + c + ", t " + trace);
+                    traces[s++] = create(c, trace);
                 }
                 return traces;
             }
@@ -915,6 +1077,105 @@ public class Toolkit {
             }
             return ref;
 
+        }
+
+        /**
+         * Insert data to file
+         *
+         * @param position The insert position
+         * @param data     The data insert
+         * @param access   The random access file.(writable and readable)
+         * @throws IOException The runtime exception.
+         * @since 2.7
+         */
+        public static void insertData(long position, ByteBuffer data, @NotNull RandomAccessFile access) throws IOException {
+            insertData(position, data, access, false);
+        }
+
+        /**
+         * Insert data to file
+         *
+         * @param position The insert position
+         * @param data     The data insert
+         * @param access   The random access file.(writable and readable)
+         * @param raw      Set write all data.(Unsafe)
+         * @throws IOException The runtime exception.
+         * @since 2.7
+         */
+        public static void insertData(long position, ByteBuffer data, @NotNull RandomAccessFile access, boolean raw) throws IOException {
+            if (!data.hasRemaining()) return;
+            /*
+            long pos = access.getFilePointer();
+            access.seek(position);
+            byte[] write = new byte[size], read = new byte[size], tmp;
+            int writeSize = size;
+            do {
+                int w;
+                long pp = access.getFilePointer();
+                if ((w = access.read(read)) < 0) {
+                    if (writeSize > 0) {
+                        access.write(write, 0, writeSize);
+                    }
+                    break;
+                }
+                access.seek(pp);
+                access.write(write, 0, writeSize);
+                tmp = write;
+                write = read;
+                read = tmp;
+                writeSize = w;
+            } while (true);
+            access.seek(pos);
+            */
+            ByteBuffer r, w, tmp;
+            if (raw) {
+                if (data.position() != 0 || data.limit() != data.capacity()) {
+                    throw new IOException("Cannot write a limited raw byte buffer.");
+                }
+                r = ByteBuffer.allocateDirect(data.capacity());
+                w = data;
+                data.clear();
+            } else {
+                w = ByteBuffer.allocateDirect(data.remaining());
+                w.put(data);
+                w.flip();
+                r = ByteBuffer.allocateDirect(w.capacity());
+            }
+            final FileChannel channel = access.getChannel();
+            final long at = channel.position(), aw = access.getFilePointer();
+            channel.position(position);
+            do {
+                long pos = channel.position();
+                if (channel.read(r) < 0) {
+                    if (w.hasRemaining()) {
+                        channel.write(w);
+                    }
+                    break;
+                }
+                channel.position(pos);
+                channel.write(w);
+                tmp = w;
+                w = r;
+                r = tmp;
+                w.flip();
+                r.clear();
+            } while (true);
+            channel.position(at);
+            access.seek(aw);
+        }
+
+        /**
+         * Insert empty data to position
+         *
+         * @param position The insert position
+         * @param size     The empty size
+         * @param access   The random access file.(writable and readable)
+         * @throws IOException The runtime exception.
+         * @since 2.7
+         */
+        public static void insertEmpty(long position, int size, @NotNull RandomAccessFile access) throws IOException {
+            if (size < 1) return;
+            insertData(position, ByteBuffer.allocateDirect(size), access, true);
         }
     }
 }
