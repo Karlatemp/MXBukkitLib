@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class FilterIterator<T> implements Iterator<T> {
@@ -60,5 +61,17 @@ public class FilterIterator<T> implements Iterator<T> {
     @Override
     public void remove() {
         parent.remove();
+    }
+
+    /**
+     * For-each action.
+     *
+     * @param action The action of for-each
+     */
+    @Override
+    public void forEachRemaining(Consumer<? super T> action) {
+        parent.forEachRemaining(k -> {
+            if (filter.test(k)) action.accept(k);
+        });
     }
 }
