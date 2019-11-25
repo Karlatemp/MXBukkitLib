@@ -30,5 +30,6 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="netty-4.1.43.Final" level="application" />
   </component>
 </module>

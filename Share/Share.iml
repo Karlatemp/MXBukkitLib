@@ -18,5 +18,6 @@
     <orderEntry type="module" module-name="Mediator" />
     <orderEntry type="library" name="javassist" level="application" />
     <orderEntry type="library" name="BungeeChatAPI" level="application" />
+    <orderEntry type="library" name="netty-4.1.43.Final" level="application" />
   </component>
 </module>
