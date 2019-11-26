@@ -1,4 +1,4 @@
 Main-Class: cn.mcres.karlatemp.mxlib.MXBukkitLib
 Manifest-Version: 1.0
-Implementation-Version: 2.7
+Implementation-Version: 2.7.1
 Implementation-Vendor: Karlatemp

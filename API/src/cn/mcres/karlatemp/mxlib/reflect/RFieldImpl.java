@@ -8,6 +8,7 @@ package cn.mcres.karlatemp.mxlib.reflect;
 import cn.mcres.karlatemp.mxlib.tools.ThrowHelper;
 import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import cn.mcres.karlatemp.mxlib.tools.Unsafe;
+import cn.mcres.karlatemp.mxlib.tools.security.AccessToolkit;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.AccessibleObject;
@@ -53,32 +54,7 @@ public class RFieldImpl<O, R> implements RField<O, R> {
     public R get() {
         Unsafe unsafe = Unsafe.getUnsafe();
         if (unsafe == null) { // SunUnsafe - Initializing Unsafe Instance.
-            try {
-                try {
-                    field.setAccessible(true);
-                } catch (Throwable error) {
-                    try {
-                        Reflect.ofObject(field)
-                                .getMethod("setAccessible0", boolean.class, boolean.class)
-                                .invoke(true); // JDK 12
-                    } catch (Throwable error2) {
-                        try {
-                            Reflect.ofObject(field)
-                                    .getMethod("setAccessible0", void.class, AccessibleObject.class, boolean.class)
-                                    .invoke(field, true);
-                        } catch (Throwable error3) {
-                            try {
-                                Toolkit.Reflection.getRoot().findSetter(AccessibleObject.class, "override", boolean.class).invoke(field, true);
-                            } catch (Throwable error4) {
-                                return ThrowHelper.thrown(new LinkageError("Fail to set accessible for field " + field, error4));
-                            }
-                        }
-                    }
-                }
-                return (R) field.get(thiz);
-            } catch (IllegalAccessException e) {
-                return ThrowHelper.thrown(e);
-            }
+            AccessToolkit.setAccessible(field, true);
         }
         return (R) Toolkit.Reflection.getObjectValue(thiz, field);
     }

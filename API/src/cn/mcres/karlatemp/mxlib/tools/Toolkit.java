@@ -705,7 +705,7 @@ public class Toolkit {
             long offset;
             Unsafe unsafe = Unsafe.getUnsafe();
             if (Modifier.isStatic(field.getModifiers())) {
-                this_ = null;
+                this_ = field.getDeclaringClass();
                 offset = unsafe.staticFieldOffset(field);
             } else {
                 Objects.requireNonNull(this_);
