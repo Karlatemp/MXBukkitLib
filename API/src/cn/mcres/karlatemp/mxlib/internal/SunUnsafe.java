@@ -6,6 +6,7 @@ package cn.mcres.karlatemp.mxlib.internal;
 
 import cn.mcres.karlatemp.mxlib.reflect.RField;
 import cn.mcres.karlatemp.mxlib.reflect.Reflect;
+import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
@@ -39,7 +40,8 @@ class SunUnsafe extends cn.mcres.karlatemp.mxlib.tools.Unsafe {
         }
     }
 
-    public java.lang.Object allocateInstance(java.lang.Class param0) throws InstantiationException {
+    @NotNull
+    public java.lang.Object allocateInstance(@NotNull java.lang.Class param0) throws InstantiationException {
         return unsafe.allocateInstance(param0);
     }
 
@@ -542,7 +544,7 @@ class SunUnsafe extends cn.mcres.karlatemp.mxlib.tools.Unsafe {
         unsafe.throwException(param0);
     }
 
-    public long objectFieldOffset(java.lang.reflect.Field param0) {
+    public long objectFieldOffset(@NotNull java.lang.reflect.Field param0) {
         return unsafe.objectFieldOffset(param0);
     }
 
@@ -551,19 +553,19 @@ class SunUnsafe extends cn.mcres.karlatemp.mxlib.tools.Unsafe {
         throw new UnsupportedOperationException();
     }
 
-    public java.lang.Object staticFieldBase(java.lang.reflect.Field param0) {
+    public java.lang.Object staticFieldBase(@NotNull java.lang.reflect.Field param0) {
         return unsafe.staticFieldBase(param0);
     }
 
-    public long staticFieldOffset(java.lang.reflect.Field param0) {
+    public long staticFieldOffset(@NotNull java.lang.reflect.Field param0) {
         return unsafe.staticFieldOffset(param0);
     }
 
-    public boolean shouldBeInitialized(java.lang.Class param0) {
+    public boolean shouldBeInitialized(@NotNull java.lang.Class param0) {
         return unsafe.shouldBeInitialized(param0);
     }
 
-    public void ensureClassInitialized(java.lang.Class param0) {
+    public void ensureClassInitialized(@NotNull java.lang.Class param0) {
         unsafe.ensureClassInitialized(param0);
     }
 
@@ -608,11 +610,11 @@ class SunUnsafe extends cn.mcres.karlatemp.mxlib.tools.Unsafe {
         unsafe.freeMemory(param0);
     }
 
-    public int arrayBaseOffset(java.lang.Class param0) {
+    public int arrayBaseOffset(@NotNull java.lang.Class param0) {
         return unsafe.arrayBaseOffset(param0);
     }
 
-    public int arrayIndexScale(java.lang.Class param0) {
+    public int arrayIndexScale(@NotNull java.lang.Class param0) {
         return unsafe.arrayIndexScale(param0);
     }
 
@@ -625,21 +627,21 @@ class SunUnsafe extends cn.mcres.karlatemp.mxlib.tools.Unsafe {
     }
 
     @Override
-    public Class<?> defineClass(String name, byte[] b, int off, int len, ClassLoader loader, ProtectionDomain protectionDomain) {
+    public Class<?> defineClass(String name, @NotNull byte[] b, int off, int len, ClassLoader loader, ProtectionDomain protectionDomain) {
         return null;
     }
 
     @Override
-    public Class<?> defineClass0(String name, byte[] b, int off, int len, ClassLoader loader, ProtectionDomain protectionDomain) {
+    public Class<?> defineClass0(String name, @NotNull byte[] b, int off, int len, ClassLoader loader, ProtectionDomain protectionDomain) {
         return null;
     }
 
     @Override
-    public Object allocateUninitializedArray(Class<?> componentType, int length) {
+    public Object allocateUninitializedArray(@NotNull Class<?> componentType, int length) {
         return null;
     }
 
-    public java.lang.Class defineAnonymousClass(java.lang.Class param0, byte[] param1, java.lang.Object[] param2) {
+    public java.lang.Class defineAnonymousClass(@NotNull java.lang.Class param0, @NotNull byte[] param1, java.lang.Object[] param2) {
         return unsafe.defineAnonymousClass(param0, param1, param2);
     }
 

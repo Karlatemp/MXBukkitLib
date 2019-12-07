@@ -7,6 +7,7 @@
       <module fileurl="file://$PROJECT_DIR$/API/$OpenJ12/API$OpenJ12.iml" filepath="$PROJECT_DIR$/API/$OpenJ12/API$OpenJ12.iml" />
       <module fileurl="file://$PROJECT_DIR$/Bukkit/Bukkit.iml" filepath="$PROJECT_DIR$/Bukkit/Bukkit.iml" />
       <module fileurl="file://$PROJECT_DIR$/BungeeCord/BungeeCord.iml" filepath="$PROJECT_DIR$/BungeeCord/BungeeCord.iml" />
+      <module fileurl="file://$PROJECT_DIR$/FakeMinecraftServer/FakeMinecraftServer.iml" filepath="$PROJECT_DIR$/FakeMinecraftServer/FakeMinecraftServer.iml" />
       <module fileurl="file://$PROJECT_DIR$/Instrumentation/Instrumentation.iml" filepath="$PROJECT_DIR$/Instrumentation/Instrumentation.iml" />
       <module fileurl="file://$PROJECT_DIR$/Instrumentation/$CodeShare/Instrumentation$CodeShare.iml" filepath="$PROJECT_DIR$/Instrumentation/$CodeShare/Instrumentation$CodeShare.iml" />
       <module fileurl="file://$PROJECT_DIR$/Instrumentation/$JDK9/Instrumentation$JDK9.iml" filepath="$PROJECT_DIR$/Instrumentation/$JDK9/Instrumentation$JDK9.iml" />

@@ -46,7 +46,7 @@ public class MojangYggdrasil extends Yggdrasil {
     public String queryPlayerHasJoined_make_link(String username, String serverId, String player_ip) {
         URIActuator u = URIActuator.getInstance();
         String link = "https://sessionserver.mojang.com/session/minecraft/hasJoined?username="
-                + u.encodeToString(username) + "&sererId=" + u.encodeToString(serverId);
+                + u.encodeToString(username) + "&serverId=" + u.encodeToString(serverId);
         if (player_ip != null) {
             link += "&ip=" + u.encodeToString(player_ip);
         }

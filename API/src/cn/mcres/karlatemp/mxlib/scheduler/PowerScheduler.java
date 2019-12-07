@@ -221,7 +221,7 @@ public class PowerScheduler implements MXScheduler {
         }
     }
 
-    private ILogger logger;
+    private final ILogger logger;
 
     protected void dumpException(MXTask task, Throwable error) {
         if (logger == null) error.printStackTrace();

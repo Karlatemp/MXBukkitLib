@@ -1,3 +1,7 @@
+2.8
+    Add MinecraftFakeServer Module.
+    Fix MojangYggdrasil Module.
+    Netty NIO Work System.
 2.7.1
     BUG FIX:
         Toolkit.Reflection.setObjectValue -> JVM Error.

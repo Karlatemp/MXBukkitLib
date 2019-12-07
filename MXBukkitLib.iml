@@ -6,9 +6,9 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="true" />
     </content>
-    <orderEntry type="module" module-name="API" />
+    <orderEntry type="jdk" jdkName="12" jdkType="JavaSDK" />
+    <orderEntry type="library" name="netty-4.1.43.Final" level="application" />
     <orderEntry type="module" module-name="Bukkit" />
-    <orderEntry type="module" module-name="Instrumentation" />
     <orderEntry type="module" module-name="Legacy" />
     <orderEntry type="module" module-name="Mediator" />
     <orderEntry type="module" module-name="Share" />
@@ -18,8 +18,8 @@
     <orderEntry type="module" module-name="API$OpenJ12" />
     <orderEntry type="module" module-name="Instrumentation$CodeShare" />
     <orderEntry type="module" module-name="Instrumentation$JDK9" />
-    <orderEntry type="jdk" jdkName="12" jdkType="JavaSDK" />
-    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="API" />
+    <orderEntry type="module" module-name="FakeMinecraftServer" />
     <orderEntry type="library" name="javassist" level="application" />
     <orderEntry type="library" name="SkillAPI" level="application" />
     <orderEntry type="library" name="MythicMobs-4.6.5" level="application" />
@@ -30,6 +30,7 @@
     <orderEntry type="library" name="asm-all-5.2" level="application" />
     <orderEntry type="library" name="PlaceholderAPI" level="application" />
     <orderEntry type="library" name="BungeeChatAPI" level="application" />
-    <orderEntry type="library" name="spigot-1.12.2" level="application" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="Instrumentation" />
   </component>
 </module>

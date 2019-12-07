@@ -26,7 +26,7 @@ public abstract class UniqueKey<T extends UniqueKey<T>> implements Comparable<T>
                 throw new IllegalArgumentException("'" + name + "' is already in use");
             }
             validArguments(args);
-            if (((Map) registeredKeys).put(name, this) != null) {
+            if (((Map) registeredKeys).putIfAbsent(name, this) != this) {
                 throw new IllegalArgumentException("'" + name + "' is already in use");
             }
         } else {

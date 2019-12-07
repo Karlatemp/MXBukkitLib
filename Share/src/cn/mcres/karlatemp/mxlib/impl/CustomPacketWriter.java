@@ -21,7 +21,7 @@ public class CustomPacketWriter extends MessageToByteEncoder<CustomPacket> {
 
     @Override
     protected void encode(ChannelHandlerContext context, CustomPacket packet, ByteBuf byteBuf) throws Exception {
-        PacketDataSerializer serializer = new PacketDataSerializer(byteBuf);
+        PacketDataSerializer serializer = PacketDataSerializer.fromByteBuf(byteBuf);
         if (!(packet instanceof UnsafePacket))
             serializer.writeVarInt(packet.getPacketId());
         packet.writeData(serializer);

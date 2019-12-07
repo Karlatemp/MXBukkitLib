@@ -1,19 +1,13 @@
 /*
  * Copyright (c) 2018-2019 Karlatemp. All rights reserved.
- * Reserved.FileName: MinecraftKey.java@author: karlatemp@vip.qq.com: 19-11-16 下午6:37@version: 2.0
+ * Reserved.FileName: MinecraftKey.java@author: karlatemp@vip.qq.com: 19-11-28 下午11:29@version: 2.0
  */
 
 package cn.mcres.karlatemp.mxlib.share;
 
 import cn.mcres.karlatemp.mxlib.exceptions.ResourceKeyInvalidException;
 import cn.mcres.karlatemp.mxlib.tools.StringHelper;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonSerializer;
 import org.jetbrains.annotations.Nullable;
-
-import java.lang.reflect.Type;
 
 /**
  * @since 2.6

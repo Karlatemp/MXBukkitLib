@@ -55,6 +55,11 @@ public class RFieldImpl<O, R> implements RField<O, R> {
         Unsafe unsafe = Unsafe.getUnsafe();
         if (unsafe == null) { // SunUnsafe - Initializing Unsafe Instance.
             AccessToolkit.setAccessible(field, true);
+            try {
+                return (R) field.get(null);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
         }
         return (R) Toolkit.Reflection.getObjectValue(thiz, field);
     }

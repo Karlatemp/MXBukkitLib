@@ -23,7 +23,7 @@ import java.nio.channels.WritableByteChannel;
  *
  * @author Karlatemp
  */
-public class EmptyStream extends Writer implements ReadableByteChannel, WritableByteChannel, Appendable {
+public class EmptyStream extends Writer implements ReadableByteChannel, WritableByteChannel, Appendable, DataInput, DataOutput {
     public static final EmptyStream stream = new EmptyStream();
 
     public static EmptyStream getInstance() {
@@ -55,6 +55,14 @@ public class EmptyStream extends Writer implements ReadableByteChannel, Writable
     @Override
     public void write(@NotNull char[] cbuf, int off, int len) throws IOException {
 
+    }
+
+    /**
+     * @return The empty writer
+     * @since 2.8
+     */
+    public Writer asWriter() {
+        return this;
     }
 
     public Reader asReader() {
@@ -113,6 +121,71 @@ public class EmptyStream extends Writer implements ReadableByteChannel, Writable
     }
 
     @Override
+    public void write(@NotNull byte[] b) throws IOException {
+
+    }
+
+    @Override
+    public void write(@NotNull byte[] b, int off, int len) throws IOException {
+
+    }
+
+    @Override
+    public void writeBoolean(boolean v) throws IOException {
+
+    }
+
+    @Override
+    public void writeByte(int v) throws IOException {
+
+    }
+
+    @Override
+    public void writeShort(int v) throws IOException {
+
+    }
+
+    @Override
+    public void writeChar(int v) throws IOException {
+
+    }
+
+    @Override
+    public void writeInt(int v) throws IOException {
+
+    }
+
+    @Override
+    public void writeLong(long v) throws IOException {
+
+    }
+
+    @Override
+    public void writeFloat(float v) throws IOException {
+
+    }
+
+    @Override
+    public void writeDouble(double v) throws IOException {
+
+    }
+
+    @Override
+    public void writeBytes(@NotNull String s) throws IOException {
+
+    }
+
+    @Override
+    public void writeChars(@NotNull String s) throws IOException {
+
+    }
+
+    @Override
+    public void writeUTF(@NotNull String s) throws IOException {
+
+    }
+
+    @Override
     public void write(char[] cbuf) throws IOException {
     }
 
@@ -128,6 +201,82 @@ public class EmptyStream extends Writer implements ReadableByteChannel, Writable
 
     public PrintStream asPrintStream() {
         return ps;
+    }
+
+    @Override
+    public void readFully(@NotNull byte[] b) throws IOException {
+        throw new EOFException();
+    }
+
+    @Override
+    public void readFully(@NotNull byte[] b, int off, int len) throws IOException {
+        throw new EOFException();
+    }
+
+    @Override
+    public int skipBytes(int n) throws IOException {
+        return 0;
+    }
+
+    @Override
+    public boolean readBoolean() throws IOException {
+        throw new EOFException();
+    }
+
+    @Override
+    public byte readByte() throws IOException {
+        throw new EOFException();
+    }
+
+    @Override
+    public int readUnsignedByte() throws IOException {
+        throw new EOFException();
+    }
+
+    @Override
+    public short readShort() throws IOException {
+        throw new EOFException();
+    }
+
+    @Override
+    public int readUnsignedShort() throws IOException {
+        throw new EOFException();
+    }
+
+    @Override
+    public char readChar() throws IOException {
+        throw new EOFException();
+    }
+
+    @Override
+    public int readInt() throws IOException {
+        throw new EOFException();
+    }
+
+    @Override
+    public long readLong() throws IOException {
+        throw new EOFException();
+    }
+
+    @Override
+    public float readFloat() throws IOException {
+        throw new EOFException();
+    }
+
+    @Override
+    public double readDouble() throws IOException {
+        throw new EOFException();
+    }
+
+    @Override
+    public String readLine() throws IOException {
+        throw new EOFException();
+    }
+
+    @NotNull
+    @Override
+    public String readUTF() throws IOException {
+        throw new EOFException();
     }
 
     private static final class EmptyInputStream extends InputStream {

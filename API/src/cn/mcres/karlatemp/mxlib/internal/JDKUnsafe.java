@@ -7,11 +7,13 @@ package cn.mcres.karlatemp.mxlib.internal;
 
 
 import jdk.internal.misc.Unsafe;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings({"Since15", "unchecked", "rawtypes", "RedundantSuppression", "deprecation"})
 class JDKUnsafe extends cn.mcres.karlatemp.mxlib.tools.Unsafe {
     private static final Unsafe unsafe = Unsafe.getUnsafe();
-    public java.lang.Object allocateInstance(java.lang.Class param0) throws InstantiationException {
+    @NotNull
+    public java.lang.Object allocateInstance(@NotNull java.lang.Class param0) throws InstantiationException {
         return unsafe.allocateInstance(param0);
     }
 
@@ -643,7 +645,7 @@ class JDKUnsafe extends cn.mcres.karlatemp.mxlib.tools.Unsafe {
         unsafe.throwException(param0);
     }
 
-    public java.lang.Class defineClass(java.lang.String param0, byte[] param1, int param2, int param3, java.lang.ClassLoader param4, java.security.ProtectionDomain param5) {
+    public java.lang.Class defineClass(java.lang.String param0, @NotNull byte[] param1, int param2, int param3, java.lang.ClassLoader param4, java.security.ProtectionDomain param5) {
         return unsafe.defineClass(param0, param1, param2, param3, param4, param5);
     }
 
@@ -651,23 +653,23 @@ class JDKUnsafe extends cn.mcres.karlatemp.mxlib.tools.Unsafe {
         return unsafe.objectFieldOffset(param0, param1);
     }
 
-    public long objectFieldOffset(java.lang.reflect.Field param0) {
+    public long objectFieldOffset(@NotNull java.lang.reflect.Field param0) {
         return unsafe.objectFieldOffset(param0);
     }
 
-    public java.lang.Object staticFieldBase(java.lang.reflect.Field param0) {
+    public java.lang.Object staticFieldBase(@NotNull java.lang.reflect.Field param0) {
         return unsafe.staticFieldBase(param0);
     }
 
-    public long staticFieldOffset(java.lang.reflect.Field param0) {
+    public long staticFieldOffset(@NotNull java.lang.reflect.Field param0) {
         return unsafe.staticFieldOffset(param0);
     }
 
-    public boolean shouldBeInitialized(java.lang.Class param0) {
+    public boolean shouldBeInitialized(@NotNull java.lang.Class param0) {
         return unsafe.shouldBeInitialized(param0);
     }
 
-    public void ensureClassInitialized(java.lang.Class param0) {
+    public void ensureClassInitialized(@NotNull java.lang.Class param0) {
         unsafe.ensureClassInitialized(param0);
     }
 
@@ -739,11 +741,11 @@ class JDKUnsafe extends cn.mcres.karlatemp.mxlib.tools.Unsafe {
         unsafe.freeMemory(param0);
     }
 
-    public int arrayBaseOffset(java.lang.Class param0) {
+    public int arrayBaseOffset(@NotNull java.lang.Class param0) {
         return unsafe.arrayBaseOffset(param0);
     }
 
-    public int arrayIndexScale(java.lang.Class param0) {
+    public int arrayIndexScale(@NotNull java.lang.Class param0) {
         return unsafe.arrayIndexScale(param0);
     }
 
@@ -755,15 +757,15 @@ class JDKUnsafe extends cn.mcres.karlatemp.mxlib.tools.Unsafe {
         return unsafe.pageSize();
     }
 
-    public java.lang.Class defineClass0(java.lang.String param0, byte[] param1, int param2, int param3, java.lang.ClassLoader param4, java.security.ProtectionDomain param5) {
+    public java.lang.Class defineClass0(java.lang.String param0, @NotNull byte[] param1, int param2, int param3, java.lang.ClassLoader param4, java.security.ProtectionDomain param5) {
         return unsafe.defineClass0(param0, param1, param2, param3, param4, param5);
     }
 
-    public java.lang.Class defineAnonymousClass(java.lang.Class param0, byte[] param1, java.lang.Object[] param2) {
+    public java.lang.Class defineAnonymousClass(@NotNull java.lang.Class param0, @NotNull byte[] param1, java.lang.Object[] param2) {
         return unsafe.defineAnonymousClass(param0, param1, param2);
     }
 
-    public java.lang.Object allocateUninitializedArray(java.lang.Class param0, int param1) {
+    public java.lang.Object allocateUninitializedArray(@NotNull java.lang.Class param0, int param1) {
         return unsafe.allocateUninitializedArray(param0, param1);
     }
 

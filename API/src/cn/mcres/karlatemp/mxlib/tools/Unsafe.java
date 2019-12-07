@@ -27,6 +27,7 @@ package cn.mcres.karlatemp.mxlib.tools; /*jdk.internal.misc*/
 
 import cn.mcres.karlatemp.mxlib.internal.UnsafeInstaller;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Console;
 import java.lang.reflect.Field;
@@ -166,6 +167,7 @@ public abstract class Unsafe {
      * @throws RuntimeException No defined exceptions are thrown, not even
      *                          {@link NullPointerException}
      */
+    @Contract(pure = true)
     public abstract int getInt(Object o, long offset);
 
     /**
@@ -195,6 +197,7 @@ public abstract class Unsafe {
      *
      * @see #getInt(Object, long)
      */
+    @Contract(pure = true)
     public abstract Object getReference(Object o, long offset);
 
     /**
@@ -213,6 +216,7 @@ public abstract class Unsafe {
     /**
      * @see #getInt(Object, long)
      */
+    @Contract(pure = true)
     public abstract boolean getBoolean(Object o, long offset);
 
     /**
@@ -223,6 +227,7 @@ public abstract class Unsafe {
     /**
      * @see #getInt(Object, long)
      */
+    @Contract(pure = true)
     public abstract byte getByte(Object o, long offset);
 
     /**
@@ -233,6 +238,7 @@ public abstract class Unsafe {
     /**
      * @see #getInt(Object, long)
      */
+    @Contract(pure = true)
     public abstract short getShort(Object o, long offset);
 
     /**
@@ -243,6 +249,7 @@ public abstract class Unsafe {
     /**
      * @see #getInt(Object, long)
      */
+    @Contract(pure = true)
     public abstract char getChar(Object o, long offset);
 
     /**
@@ -253,6 +260,7 @@ public abstract class Unsafe {
     /**
      * @see #getInt(Object, long)
      */
+    @Contract(pure = true)
     public abstract long getLong(Object o, long offset);
 
     /**
@@ -263,6 +271,7 @@ public abstract class Unsafe {
     /**
      * @see #getInt(Object, long)
      */
+    @Contract(pure = true)
     public abstract float getFloat(Object o, long offset);
 
     /**
@@ -273,6 +282,7 @@ public abstract class Unsafe {
     /**
      * @see #getInt(Object, long)
      */
+    @Contract(pure = true)
     public abstract double getDouble(Object o, long offset);
 
     /**
@@ -295,6 +305,7 @@ public abstract class Unsafe {
      * @see #allocateMemory
      * @see #getInt(Object, long)
      */
+    @Contract(pure = true)
     public abstract long getAddress(Object o, long offset);
 
     /**
@@ -319,6 +330,7 @@ public abstract class Unsafe {
      * @param address a memory address locating the variable
      * @return the value fetched from the indicated abstract variable
      */
+    @Contract(pure = true)
     public abstract Object getUncompressedObject(long address);
 
     // These work on values in the C heap.
@@ -330,6 +342,7 @@ public abstract class Unsafe {
      *
      * @see #allocateMemory
      */
+    @Contract(pure = true)
     public abstract byte getByte(long address);
 
     /**
@@ -346,6 +359,7 @@ public abstract class Unsafe {
     /**
      * @see #getByte(long)
      */
+    @Contract(pure = true)
     public short getShort(long address) {
         return getShort(null, address);
     }
@@ -360,6 +374,7 @@ public abstract class Unsafe {
     /**
      * @see #getByte(long)
      */
+    @Contract(pure = true)
     public char getChar(long address) {
         return getChar(null, address);
     }
@@ -374,6 +389,7 @@ public abstract class Unsafe {
     /**
      * @see #getByte(long)
      */
+    @Contract(pure = true)
     public int getInt(long address) {
         return getInt(null, address);
     }
@@ -388,6 +404,7 @@ public abstract class Unsafe {
     /**
      * @see #getByte(long)
      */
+    @Contract(pure = true)
     public long getLong(long address) {
         return getLong(null, address);
     }
@@ -402,6 +419,7 @@ public abstract class Unsafe {
     /**
      * @see #getByte(long)
      */
+    @Contract(pure = true)
     public float getFloat(long address) {
         return getFloat(null, address);
     }
@@ -416,6 +434,7 @@ public abstract class Unsafe {
     /**
      * @see #getByte(long)
      */
+    @Contract(pure = true)
     public double getDouble(long address) {
         return getDouble(null, address);
     }
@@ -430,6 +449,7 @@ public abstract class Unsafe {
     /**
      * @see #getAddress(Object, long)
      */
+    @Contract(pure = true)
     public long getAddress(long address) {
         return getAddress(null, address);
     }
@@ -466,6 +486,7 @@ public abstract class Unsafe {
      * @see #getByte(long)
      * @see #putByte(long, byte)
      */
+    @Contract(pure = true)
     public abstract long allocateMemory(long bytes);
 
     /**
@@ -662,7 +683,8 @@ public abstract class Unsafe {
      *
      * @see #getInt(Object, long)
      */
-    public abstract long objectFieldOffset(Field f);
+    @Contract(pure = true)
+    public abstract long objectFieldOffset(@NotNull Field f);
 
     /**
      * Reports the location of the field with a given name in the storage
@@ -674,6 +696,7 @@ public abstract class Unsafe {
      *                              would throw {@code java.lang.NoSuchFieldException}.
      * @see #objectFieldOffset(Field)
      */
+    @Contract(pure = true)
     public abstract long objectFieldOffset(Class<?> c, String name);
 
     /**
@@ -694,7 +717,8 @@ public abstract class Unsafe {
      *
      * @see #getInt(Object, long)
      */
-    public abstract long staticFieldOffset(Field f);
+    @Contract(pure = true)
+    public abstract long staticFieldOffset(@NotNull Field f);
 
     /**
      * Reports the location of a given static field, in conjunction with {@link
@@ -706,7 +730,8 @@ public abstract class Unsafe {
      * not be used in any way except as argument to the get and put routines in
      * this class.
      */
-    public abstract Object staticFieldBase(Field f);
+    @Contract(pure = true)
+    public abstract Object staticFieldBase(@NotNull Field f);
 
     /**
      * Detects if the given class may need to be initialized. This is often
@@ -715,14 +740,15 @@ public abstract class Unsafe {
      *
      * @return false only if a call to {@code ensureClassInitialized} would have no effect
      */
-    public abstract boolean shouldBeInitialized(Class<?> c);
+    @Contract(pure = true)
+    public abstract boolean shouldBeInitialized(@NotNull Class<?> c);
 
     /**
      * Ensures the given class has been initialized. This is often
      * needed in conjunction with obtaining the static field base of a
      * class.
      */
-    public abstract void ensureClassInitialized(Class<?> c);
+    public abstract void ensureClassInitialized(@NotNull Class<?> c);
 
     /**
      * Reports the offset of the first element in the storage allocation of a
@@ -734,7 +760,8 @@ public abstract class Unsafe {
      * @see #getInt(Object, long)
      * @see #putInt(Object, long, int)
      */
-    public abstract int arrayBaseOffset(Class<?> arrayClass);
+    @Contract(pure = true)
+    public abstract int arrayBaseOffset(@NotNull Class<?> arrayClass);
 
     /**
      * The value of {@code arrayBaseOffset(boolean[].class)}
@@ -801,7 +828,8 @@ public abstract class Unsafe {
      * @see #getInt(Object, long)
      * @see #putInt(Object, long, int)
      */
-    public abstract int arrayIndexScale(Class<?> arrayClass);
+    @Contract(pure = true)
+    public abstract int arrayIndexScale(@NotNull Class<?> arrayClass);
 
     /**
      * The value of {@code arrayIndexScale(boolean[].class)}
@@ -863,6 +891,7 @@ public abstract class Unsafe {
      * other primitive types (as stored in abstract memory blocks) is determined
      * fully by their information content.
      */
+    @Contract(pure = true)
     public abstract int addressSize();
 
     /**
@@ -874,6 +903,7 @@ public abstract class Unsafe {
      * Reports the size in bytes of a abstract memory page (whatever that is).
      * This value will always be a power of two.
      */
+    @Contract(pure = true)
     public abstract int pageSize();
 
 
@@ -883,11 +913,11 @@ public abstract class Unsafe {
      * Tells the VM to define a class, without security checks.  By default, the
      * class loader and protection domain come from the caller's class.
      */
-    public abstract Class<?> defineClass(String name, byte[] b, int off, int len,
+    public abstract Class<?> defineClass(String name, @NotNull byte[] b, int off, int len,
                                          ClassLoader loader,
                                          ProtectionDomain protectionDomain);
 
-    public abstract Class<?> defineClass0(String name, byte[] b, int off, int len,
+    public abstract Class<?> defineClass0(String name, @NotNull byte[] b, int off, int len,
                                           ClassLoader loader,
                                           ProtectionDomain protectionDomain);
 
@@ -908,13 +938,15 @@ public abstract class Unsafe {
      * @param data      bytes of a class file
      * @param cpPatches where non-null entries exist, they replace corresponding CP entries in data
      */
-    public abstract Class<?> defineAnonymousClass(Class<?> hostClass, byte[] data, Object[] cpPatches);
+    public abstract Class<?> defineAnonymousClass(@NotNull Class<?> hostClass, @NotNull byte[] data, Object[] cpPatches);
 
     /**
      * Allocates an instance but does not run any constructor.
      * Initializes the class if it has not yet been.
      */
-    public abstract Object allocateInstance(Class<?> cls)
+    @NotNull
+    @Contract(pure = true)
+    public abstract <T> T allocateInstance(@NotNull Class<T> cls)
             throws InstantiationException;
 
     /**
@@ -942,7 +974,8 @@ public abstract class Unsafe {
      * @implnote This method can only allocate primitive arrays, to avoid garbage reference
      * elements that could break heap integrity.
      */
-    public abstract Object allocateUninitializedArray(Class<?> componentType, int length);
+    @Contract(pure = true)
+    public abstract Object allocateUninitializedArray(@NotNull Class<?> componentType, int length);
 
 
     /**
@@ -1328,7 +1361,7 @@ public abstract class Unsafe {
      * Fetches a reference value from a given Java variable, with volatile
      * load semantics. Otherwise identical to {@link #getReference(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract Object getReferenceVolatile(Object o, long offset);
 
     /**
@@ -1341,7 +1374,7 @@ public abstract class Unsafe {
     /**
      * Volatile version of {@link #getInt(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract int getIntVolatile(Object o, long offset);
 
     /**
@@ -1353,7 +1386,7 @@ public abstract class Unsafe {
     /**
      * Volatile version of {@link #getBoolean(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract boolean getBooleanVolatile(Object o, long offset);
 
     /**
@@ -1365,7 +1398,7 @@ public abstract class Unsafe {
     /**
      * Volatile version of {@link #getByte(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract byte getByteVolatile(Object o, long offset);
 
     /**
@@ -1377,7 +1410,7 @@ public abstract class Unsafe {
     /**
      * Volatile version of {@link #getShort(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract short getShortVolatile(Object o, long offset);
 
     /**
@@ -1389,7 +1422,7 @@ public abstract class Unsafe {
     /**
      * Volatile version of {@link #getChar(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract char getCharVolatile(Object o, long offset);
 
     /**
@@ -1401,7 +1434,7 @@ public abstract class Unsafe {
     /**
      * Volatile version of {@link #getLong(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract long getLongVolatile(Object o, long offset);
 
     /**
@@ -1413,7 +1446,7 @@ public abstract class Unsafe {
     /**
      * Volatile version of {@link #getFloat(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract float getFloatVolatile(Object o, long offset);
 
     /**
@@ -1425,7 +1458,7 @@ public abstract class Unsafe {
     /**
      * Volatile version of {@link #getDouble(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract double getDoubleVolatile(Object o, long offset);
 
     /**
@@ -1438,55 +1471,55 @@ public abstract class Unsafe {
     /**
      * Acquire version of {@link #getReferenceVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract Object getReferenceAcquire(Object o, long offset);
 
     /**
      * Acquire version of {@link #getBooleanVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract boolean getBooleanAcquire(Object o, long offset);
 
     /**
      * Acquire version of {@link #getByteVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract byte getByteAcquire(Object o, long offset);
 
     /**
      * Acquire version of {@link #getShortVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract short getShortAcquire(Object o, long offset);
 
     /**
      * Acquire version of {@link #getCharVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract char getCharAcquire(Object o, long offset);
 
     /**
      * Acquire version of {@link #getIntVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract int getIntAcquire(Object o, long offset);
 
     /**
      * Acquire version of {@link #getFloatVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract float getFloatAcquire(Object o, long offset);
 
     /**
      * Acquire version of {@link #getLongVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract long getLongAcquire(Object o, long offset);
 
     /**
      * Acquire version of {@link #getDoubleVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract double getDoubleAcquire(Object o, long offset);
 
     /*
@@ -1558,55 +1591,55 @@ public abstract class Unsafe {
     /**
      * Opaque version of {@link #getReferenceVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract Object getReferenceOpaque(Object o, long offset);
 
     /**
      * Opaque version of {@link #getBooleanVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract boolean getBooleanOpaque(Object o, long offset);
 
     /**
      * Opaque version of {@link #getByteVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract byte getByteOpaque(Object o, long offset);
 
     /**
      * Opaque version of {@link #getShortVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract short getShortOpaque(Object o, long offset);
 
     /**
      * Opaque version of {@link #getCharVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract char getCharOpaque(Object o, long offset);
 
     /**
      * Opaque version of {@link #getIntVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract int getIntOpaque(Object o, long offset);
 
     /**
      * Opaque version of {@link #getFloatVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract float getFloatOpaque(Object o, long offset);
 
     /**
      * Opaque version of {@link #getLongVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract long getLongOpaque(Object o, long offset);
 
     /**
      * Opaque version of {@link #getDoubleVolatile(Object, long)}
      */
-
+    @Contract(pure = true)
     public abstract double getDoubleOpaque(Object o, long offset);
 
     /**
@@ -2132,7 +2165,7 @@ public abstract class Unsafe {
      *                          {@link NullPointerException}
      * @since 9
      */
-
+    @Contract(pure = true)
     public abstract long getLongUnaligned(Object o, long offset);
 
     /**
@@ -2146,39 +2179,43 @@ public abstract class Unsafe {
      * @return the value fetched from the indicated object
      * @since 9
      */
+    @Contract(pure = true)
     public abstract long getLongUnaligned(Object o, long offset, boolean bigEndian);
 
     /**
      * @see #getLongUnaligned(Object, long)
      */
-
+    @Contract(pure = true)
     public abstract int getIntUnaligned(Object o, long offset);
 
     /**
      * @see #getLongUnaligned(Object, long, boolean)
      */
+    @Contract(pure = true)
     public abstract int getIntUnaligned(Object o, long offset, boolean bigEndian);
 
     /**
      * @see #getLongUnaligned(Object, long)
      */
-
+    @Contract(pure = true)
     public abstract short getShortUnaligned(Object o, long offset);
 
     /**
      * @see #getLongUnaligned(Object, long, boolean)
      */
+    @Contract(pure = true)
     public abstract short getShortUnaligned(Object o, long offset, boolean bigEndian);
 
     /**
      * @see #getLongUnaligned(Object, long)
      */
-
+    @Contract(pure = true)
     public abstract char getCharUnaligned(Object o, long offset);
 
     /**
      * @see #getLongUnaligned(Object, long, boolean)
      */
+    @Contract(pure = true)
     public abstract char getCharUnaligned(Object o, long offset, boolean bigEndian);
 
     /**
