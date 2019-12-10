@@ -32,7 +32,7 @@ public class FMS {
         });
         ServerAuthSuccessEvent.handlers.register(event -> {
             event.setDisconnectMessage(new TextComponent(
-                    new ComponentBuilder("Opp. Here was exception. ")
+                    new ComponentBuilder("Opp. Error: ")
                             .append("Permission denied.").color(ChatColor.RED)
                             .append(new Date().toString()).color(ChatColor.DARK_AQUA).create()
             ));

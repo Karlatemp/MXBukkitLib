@@ -32,5 +32,6 @@
     <orderEntry type="library" name="BungeeChatAPI" level="application" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Instrumentation" />
+    <orderEntry type="library" name="spigot-all" level="application" />
   </component>
 </module>

@@ -85,16 +85,22 @@ public class MessageFactoryAnsi extends MessageFactoryImpl {
         switch (st) {
             case BLOCKED:
                 p = "\u00a7c";
+                break;
             case NEW:
                 p = "\u00a76";
+                break;
             case RUNNABLE:
                 p = "\u00a7a";
+                break;
             case TERMINATED:
                 p = "\u00a7d";
+                break;
             case TIMED_WAITING:
                 p = "\u00a77";
+                break;
             case WAITING:
                 p = "\u00a74";
+                break;
         }
         return p + st;
     }
@@ -106,7 +112,7 @@ public class MessageFactoryAnsi extends MessageFactoryImpl {
         StringBuilder sb = new StringBuilder("\u00a79Thread Info: \u00a7b")
                 .append(inf.getThreadName()).append("\u00a7r[\u00a7bid\u00a7r=\u00a75")
                 .append(inf.getThreadId()).append("\u00a7r] ")
-                .append(colored(threadState)).append(threadState)
+                .append(colored(threadState))
                 .append("\u00a79 BlockCount\u00a7r[\u00a75").append(inf.getBlockedCount())
                 .append("\u00a7r] BlockTime\u00a7r[\u00a75").append(inf.getBlockedTime()).append("\u00a7r]");
         if (inf.getLockName() != null) {

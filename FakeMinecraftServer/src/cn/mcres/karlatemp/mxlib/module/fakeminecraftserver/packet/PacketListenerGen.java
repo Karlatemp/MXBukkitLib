@@ -16,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import sun.rmi.runtime.Log;
 
 import java.lang.reflect.Modifier;
 import java.util.*;

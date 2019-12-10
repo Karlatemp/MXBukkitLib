@@ -1,3 +1,6 @@
+2.8.1
+    Rebuild PowerScheduler. No High CPU Using
+    Fix LoggerFormat error.
 2.8
     Add MinecraftFakeServer Module.
     Fix MojangYggdrasil Module.
