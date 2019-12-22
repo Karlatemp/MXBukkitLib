@@ -59,6 +59,7 @@ cn.mcres.karlatemp.mxlib.encrypt
 cn.mcres.karlatemp.mxlib.event
 cn.mcres.karlatemp.mxlib.event.bukkit
 cn.mcres.karlatemp.mxlib.event.core
+cn.mcres.karlatemp.mxlib.event.network
 cn.mcres.karlatemp.mxlib.exceptions
 cn.mcres.karlatemp.mxlib.files
 cn.mcres.karlatemp.mxlib.formatter
@@ -82,6 +83,7 @@ cn.mcres.karlatemp.mxlib.module.translate
 cn.mcres.karlatemp.mxlib.nbt
 cn.mcres.karlatemp.mxlib.nbt.visitor
 cn.mcres.karlatemp.mxlib.network
+cn.mcres.karlatemp.mxlib.network.minecraft
 cn.mcres.karlatemp.mxlib.reflect
 cn.mcres.karlatemp.mxlib.remote
 cn.mcres.karlatemp.mxlib.remote.netty
