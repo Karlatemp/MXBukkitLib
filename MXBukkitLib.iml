@@ -14,24 +14,21 @@
     <orderEntry type="module" module-name="Share" />
     <orderEntry type="module" module-name="Spigot" />
     <orderEntry type="module" module-name="Static" />
-    <orderEntry type="module" module-name="API$Med" />
-    <orderEntry type="module" module-name="API$OpenJ12" />
-    <orderEntry type="module" module-name="Instrumentation$CodeShare" />
-    <orderEntry type="module" module-name="Instrumentation$JDK9" />
     <orderEntry type="module" module-name="API" />
     <orderEntry type="module" module-name="FakeMinecraftServer" />
     <orderEntry type="library" name="javassist" level="application" />
     <orderEntry type="library" name="SkillAPI" level="application" />
     <orderEntry type="library" name="MythicMobs-4.6.5" level="application" />
     <orderEntry type="library" name="Gson" level="application" />
+    <orderEntry type="library" name="guava-28.1-jre" level="application" />
     <orderEntry type="library" name="spring boot" level="application" />
     <orderEntry type="library" name="JDKTools" level="application" />
     <orderEntry type="library" name="JetBrains Java Annotations-13.0" level="application" />
-    <orderEntry type="library" name="asm-all-5.2" level="application" />
+    <orderEntry type="library" name="asm" level="application" />
     <orderEntry type="library" name="PlaceholderAPI" level="application" />
     <orderEntry type="library" name="BungeeChatAPI" level="application" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="Instrumentation" />
     <orderEntry type="library" name="spigot-all" level="application" />
+    <orderEntry type="module" module-name="ClassStringConstReplacer" />
   </component>
 </module>

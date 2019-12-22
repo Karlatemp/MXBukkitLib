@@ -72,7 +72,7 @@ public class MXBukkitLib {
             dump.printStackTrace();
         }
         List<MXLibBootProvider> providerList = new ArrayList<>();
-        final ServiceLoader<MXLibBootProvider> service = ServiceLoader.load(MXLibBootProvider.class, MXBukkitLib.class.getClassLoader());
+        final ServiceLoader<MXLibBootProvider> service = ServiceLoader.load(MXLibBootProvider.class, Toolkit.Reflection.getClassLoader(MXBukkitLib.class));
         service.reload();
         for (MXLibBootProvider p : service) {
             providerList.add(p);

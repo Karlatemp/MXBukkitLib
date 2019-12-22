@@ -33,6 +33,7 @@ import java.util.logging.*;
 
 import cn.mcres.karlatemp.mxlib.MXBukkitLib;
 import cn.mcres.karlatemp.mxlib.logging.ILogger;
+import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -225,7 +226,7 @@ public class Core {
     }
 
     public static String getJarVersion(Class<?> c) {
-        ClassLoader cl = c.getClassLoader();
+        ClassLoader cl = Toolkit.Reflection.getClassLoader(c);
         if (cl == null) {
             return getJavaVersion();
         }

@@ -12,8 +12,6 @@
     </properties>
     <root id="archive" name="MXBukkitLib Static dependency.jar">
       <element id="module-output" name="API" />
-      <element id="module-output" name="API$Med" />
-      <element id="module-output" name="API$OpenJ12" />
       <element id="module-output" name="Mediator" />
       <element id="module-output" name="Static" />
     </root>

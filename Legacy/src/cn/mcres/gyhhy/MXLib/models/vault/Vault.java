@@ -13,6 +13,7 @@ package cn.mcres.gyhhy.MXLib.models.vault;
 import cn.mcres.gyhhy.MXLib.Core;
 import cn.mcres.gyhhy.MXLib.RefUtil;
 import cn.mcres.gyhhy.MXLib.models.Model;
+import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -26,7 +27,7 @@ public class Vault extends Model<VaultMapping> {
     static {
         if (RefUtil.classExists("org.bukkit.Bukkit")
                 && RefUtil.classExists("org.bukkit.Server")
-                && RefUtil.classExists("net.milkbowl.vault.economy.Economy", true, Vault.class.getClassLoader())) {
+                && RefUtil.classExists("net.milkbowl.vault.economy.Economy", true, Toolkit.Reflection.getClassLoader(Vault.class))) {
             Server ser = Bukkit.getServer();
             if (ser != null) {
                 ServicesManager sm = ser.getServicesManager();

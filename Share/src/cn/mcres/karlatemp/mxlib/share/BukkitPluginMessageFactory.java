@@ -6,12 +6,13 @@
 package cn.mcres.karlatemp.mxlib.share;
 
 import cn.mcres.karlatemp.mxlib.logging.MessageFactoryAnsi;
+import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 
 public class BukkitPluginMessageFactory extends MessageFactoryAnsi {
     @Override
     protected Class<?> forName(String name) throws ClassNotFoundException {
         try {
-            return Class.forName(name, false, getClass().getClassLoader());
+            return Class.forName(name, false, Toolkit.Reflection.getClassLoader(getClass()));
         } catch (ClassNotFoundException nfe) {
             return super.forName(name);
         }

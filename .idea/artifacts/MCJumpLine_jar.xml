@@ -1,0 +1,31 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="MCJumpLine:jar">
+    <output-path>$PROJECT_DIR$/dist</output-path>
+    <root id="archive" name="MCJumpLine.jar">
+      <element id="module-output" name="MCJumpLine" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-buffer-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-build-25.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-codec-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-codec-http-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-codec-http2-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-codec-memcache-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-codec-mqtt-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-codec-redis-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-codec-socks-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-codec-stomp-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-common-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-example-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-handler-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-handler-proxy-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-resolver-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-tcnative-2.0.26.Final-osx-x86_64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-transport-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-transport-native-epoll-4.1.43.Final-linux-x86_64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-transport-native-kqueue-4.1.43.Final-osx-x86_64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-transport-native-unix-common-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-transport-rxtx-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-transport-sctp-4.1.43.Final.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="G:/Java/netty-4.1.43.Final/jar/netty-transport-udt-4.1.43.Final.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

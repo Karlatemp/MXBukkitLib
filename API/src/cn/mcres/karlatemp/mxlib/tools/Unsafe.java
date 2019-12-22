@@ -25,6 +25,8 @@
 
 package cn.mcres.karlatemp.mxlib.tools; /*jdk.internal.misc*/
 
+import cn.mcres.karlatemp.mxlib.MXBukkitLib;
+import cn.mcres.karlatemp.mxlib.internal.UFRF;
 import cn.mcres.karlatemp.mxlib.internal.UnsafeInstaller;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Console;
 import java.lang.reflect.Field;
 import java.security.ProtectionDomain;
+import java.util.Objects;
 
 
 /**
@@ -57,10 +60,31 @@ import java.security.ProtectionDomain;
  * @since 2.7
  */
 public abstract class Unsafe {
-    private static final Unsafe INSTALLED = install();
+    private static volatile boolean installed;
+    private static transient Unsafe INSTALLED;
+
+    static {
+        // Need alloc Reflection First.
+        Objects.requireNonNull(Toolkit.Reflection.getInstance());
+        INSTALLED = install();
+        try {
+            Toolkit.Reflection.ref = INSTALLED.allocateInstance(UFRF.class);
+        } catch (InstantiationException e) {
+            MXBukkitLib.getLogger().printStackTrace(e);
+        }
+    }
+
+    /**
+     * Call by MXLib Internal Code
+     */
+    public static void $finishUnsafeInit() {
+        installed = true;
+    }
+
     private static boolean gotted;
 
     private static Unsafe install() {
+        if (installed) throw new IllegalStateException();
         return UnsafeInstaller.install();
     }
 
@@ -90,9 +114,9 @@ public abstract class Unsafe {
      */
     @Contract(pure = true)
     public static Unsafe getUnsafe() {
-        if (!gotted) {
+        if (!gotted && installed) {
             Class<?> caller = Toolkit.Reflection.getCallerClass();
-            if (caller.getClassLoader() != Unsafe.class.getClassLoader()) {
+            if (Toolkit.Reflection.getClassLoader(caller) != Toolkit.Reflection.getClassLoader(Unsafe.class)) {
                 gotted = true;
                 String message = "" +
                         "WARMING: An illegal reflective access operation has occurred\n" +

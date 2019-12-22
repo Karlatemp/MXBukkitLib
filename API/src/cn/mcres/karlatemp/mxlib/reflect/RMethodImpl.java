@@ -17,6 +17,14 @@ public class RMethodImpl<O, T> implements RMethod<O, T> {
     private O thiz;
     Class<?> root;
 
+    @Override
+    public RMethod<O, T> newContext() {
+        RMethodImpl<O, T> cp = new RMethodImpl<>(method);
+        cp.root = root;
+        cp.thiz = thiz;
+        return cp;
+    }
+
     public RMethodImpl(@NotNull Method method) {
         this.method = method;
     }
@@ -44,6 +52,7 @@ public class RMethodImpl<O, T> implements RMethod<O, T> {
         return thiz;
     }
 
+    @NotNull
     @SuppressWarnings("unchecked")
     @Override
     public Reflect<T> invoke(Object... values) {

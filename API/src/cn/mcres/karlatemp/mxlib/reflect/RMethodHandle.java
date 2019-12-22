@@ -84,6 +84,7 @@ public class RMethodHandle<O, R> implements RMethod<O, R> {
         return self;
     }
 
+    @NotNull
     @SuppressWarnings("unchecked")
     @Override
     public Reflect<R> invoke(Object... values) {
@@ -105,5 +106,13 @@ public class RMethodHandle<O, R> implements RMethod<O, R> {
             }
         }
         return new ObjectReflect(ret, root == null ? null : handle.type().returnType());
+    }
+
+    @Override
+    public RMethod<O, R> newContext() {
+        RMethodHandle<O, R> coped = new RMethodHandle<>(st, owner, handle);
+        coped.self = self;
+        coped.root = root;
+        return coped;
     }
 }

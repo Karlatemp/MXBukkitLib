@@ -144,8 +144,7 @@ public class ItemStackComponent extends BaseComponent implements GsonHelper.Json
     @Nullable
     public static Class<?> getPowerClass() {
         Class c = Toolkit.Reflection.getCallerClass();
-        if (c == null) return null;
-        if (c.getClassLoader() != ItemStackComponent.class.getClassLoader())
+        if (Toolkit.Reflection.getClassLoader(c) != Toolkit.Reflection.getClassLoader(ItemStackComponent.class))
             return null;
         if (c.getName().startsWith("cn.mcres.karlatemp.mxlib.") ||
                 c.getName().startsWith("cn.mcres.gyhhy.MXLib.")) {

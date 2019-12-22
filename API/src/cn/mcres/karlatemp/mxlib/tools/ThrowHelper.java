@@ -24,7 +24,7 @@ import java.lang.reflect.Modifier;
 public class ThrowHelper {
     private static final ThrowHelper impl;
 
-    public static final ThrowHelper getInstance() {
+    public static ThrowHelper getInstance() {
         return impl;
     }
 
@@ -74,7 +74,7 @@ public class ThrowHelper {
             ByteArrayOutputStream save = new ByteArrayOutputStream();
             cf.write(new DataOutputStream(save));
             byte[] code = save.toByteArray();
-            Class<?> c = Toolkit.Reflection.defineClass(ThrowHelper.class.getClassLoader(),
+            Class<?> c = Toolkit.Reflection.defineClass(Toolkit.Reflection.getClassLoader(ThrowHelper.class),
                     null, code, 0, code.length, null);
             th = c.asSubclass(ThrowHelper.class).newInstance();
         } catch (Throwable thr) {

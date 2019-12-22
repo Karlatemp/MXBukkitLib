@@ -7,6 +7,7 @@ package cn.mcres.karlatemp.mxlib.share;
 
 import cn.mcres.karlatemp.mxlib.impl.InternalClasses;
 import cn.mcres.karlatemp.mxlib.module.chat.RFT;
+import cn.mcres.karlatemp.mxlib.reflect.RMethod;
 import cn.mcres.karlatemp.mxlib.reflect.Reflect;
 import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import org.bukkit.Bukkit;
@@ -25,10 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.Locale;
+import java.util.*;
 import java.util.function.Function;
 
 @SuppressWarnings("deprecation")
@@ -85,7 +83,7 @@ public class BukkitToolkit {
             try {
                 //noinspection unchecked
                 itemToMaterial = Toolkit.Reflection.defineClass(
-                        BukkitToolkit.class.getClassLoader(), null,
+                        Toolkit.Reflection.getClassLoader(BukkitToolkit.class), null,
                         code, 0, code.length, BukkitToolkit.class.getProtectionDomain())
                         .asSubclass(Function.class)
                         .getConstructor().newInstance();
@@ -270,7 +268,7 @@ public class BukkitToolkit {
             return JavaPlugin.getProvidingPlugin(clazz);
         } catch (Exception ignore) {
         }
-        final ClassLoader cl = clazz.getClassLoader();
+        final ClassLoader cl = Toolkit.Reflection.getClassLoader(clazz);
         if (cl == null) return null;// is Java System class
         if (PluginClassLoader.isInstance(cl)) {
             try {
@@ -330,5 +328,43 @@ public class BukkitToolkit {
 
     public static Plugin getPlugin() {
         return getCallerPlugin();
+    }
+
+    public static int getPacketId(@NotNull String packetType) {
+        try {
+            return GetPacketIdImpl.a(packetType);
+        } catch (ClassNotFoundException e) {
+            throw new NoClassDefFoundError(e.toString());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    static class GetPacketIdImpl {
+        static RMethod<Object, Object> EnumProtocol$a_Packet_EnumProtocol;
+        static RMethod<Object, Integer> EnumProtocol$a_EnumProtocolDirection_Packet_Integer;
+        static Class<?> EnumProtocolDirection;
+        static final ClassLoader loader = Toolkit.Reflection.getClassLoader(GetPacketIdImpl.class);
+
+        static int a(String ptype) throws ClassNotFoundException {
+            if (EnumProtocol$a_Packet_EnumProtocol == null) {
+                Class<?> EnumProtocol = Toolkit.Reflection.forName(getNMSPackage() + ".EnumProtocol", true, loader),
+                        Packet = Toolkit.Reflection.forName(getNMSPackage() + ".Packet", true, loader);
+                final Reflect<?> reflect = Reflect.ofClass(EnumProtocol);
+                EnumProtocol$a_Packet_EnumProtocol = (RMethod<Object, Object>) reflect.getMethod("a", new Class[]{Packet});
+                EnumProtocolDirection = Toolkit.Reflection.forName(getNMSPackage() + ".EnumProtocolDirection", true, loader);
+                EnumProtocol$a_EnumProtocolDirection_Packet_Integer = (RMethod<Object, Integer>) reflect.getMethod("a", Integer.class, EnumProtocolDirection, Packet);
+            }
+            Object packet = Toolkit.Reflection.allocObject(Toolkit.Reflection.loadClassLink(Arrays.asList(getNMSPackage() + "." + ptype, ptype), loader));
+            Object protocol = EnumProtocol$a_Packet_EnumProtocol.invoke(packet).get();
+            if (protocol == null) throw new UnsupportedOperationException("Unknwon protocol for packet:" + ptype);
+            final RMethod<Object, Integer> context = EnumProtocol$a_EnumProtocolDirection_Packet_Integer.newContext().self(protocol);
+            for (Object dire : EnumProtocolDirection.getEnumConstants()) {
+                Integer result = context.invoke(dire, packet).get();
+                if (result != null) {
+                    return result;
+                }
+            }
+            return -1;
+        }
     }
 }

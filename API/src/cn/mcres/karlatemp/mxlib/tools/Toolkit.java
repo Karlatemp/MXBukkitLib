@@ -8,9 +8,15 @@ package cn.mcres.karlatemp.mxlib.tools;
 import cn.mcres.karlatemp.mxlib.MXLibBootProvider;
 import cn.mcres.karlatemp.mxlib.cmd.ICommand;
 import cn.mcres.karlatemp.mxlib.cmd.ICommands;
+import cn.mcres.karlatemp.mxlib.internal.ClassLoaderGetter;
+import cn.mcres.karlatemp.mxlib.internal.UFRF;
+import cn.mcres.karlatemp.mxlib.internal.UnsafeInstaller;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 import java.io.*;
 import java.lang.invoke.MethodHandle;
@@ -284,7 +290,7 @@ public class Toolkit {
      */
     public abstract static class Reflection {
         private static final MethodHandles.Lookup root;
-        private static final Reflection ref;
+        static Reflection ref;
 
         /**
          * 这只能用来判断使用哪种方法{@link Object#getClass()}
@@ -399,9 +405,9 @@ public class Toolkit {
                 } catch (ClassNotFoundException ignore) {
                 }
             }
-            if ((flags & LOAD_CLASS_THREAD_CONTENT) != 0) {
+            if ((flags & LOAD_CLASS_CALLER_CLASSLOADER) != 0) {
                 try {
-                    return Class.forName(name, false, Reflection.getCallerClass().getClassLoader());
+                    return Class.forName(name, false, getClassLoader(Reflection.getCallerClass()));
                 } catch (ClassNotFoundException ignore) {
                 }
             }
@@ -429,15 +435,50 @@ public class Toolkit {
             throw new ClassNotFoundException(name);
         }
 
+        public static Class<?> loadClassLink(Collection<String> types, @Nullable ClassLoader loader) throws ClassNotFoundException {
+            final ClassLoader caller = getClassLoader(Reflection.getCallerClass()), context = Thread.currentThread().getContextClassLoader();
+            if (types == null || types.isEmpty()) return null;
+            for (String name : types) {
+                try {
+                    if (loader != null)
+                        return loader.loadClass(name);
+                } catch (ClassNotFoundException ignore) {
+                }
+                try {
+                    return Class.forName(name);
+                } catch (ClassNotFoundException ignore) {
+                }
+                try {
+                    return Class.forName(name, false, context);
+                } catch (ClassNotFoundException ignore) {
+                }
+                try {
+                    return Class.forName(name, false, caller);
+                } catch (ClassNotFoundException ignore) {
+                }
+
+            }
+            throw new ClassNotFoundException();
+        }
+
         @Contract("null, _ -> null; !null, _ -> !null")
         public static <T extends AccessibleObject> T setAccess(T accessibleObject, boolean b) {
             if (accessibleObject != null) accessibleObject.setAccessible(b);
             return accessibleObject;
         }
 
+        public static <T> T allocObject(Class<T> type) {
+            if (type == Class.class) throw new UnsupportedOperationException(String.valueOf(type));
+            try {
+                return Unsafe.getUnsafe().allocateInstance(type);
+            } catch (InstantiationException e) {
+                throw new UnsupportedOperationException(e);
+            }
+        }
+
         protected abstract Class<?> defineClass0(
                 ClassLoader loader,
-                String name, byte[] b, int off, int len,
+                String name, @NotNull byte[] b, int off, int len,
                 ProtectionDomain protectionDomain)
                 throws ClassFormatError;
 
@@ -483,18 +524,15 @@ public class Toolkit {
          *                                   certificates than this class, or if <tt>name</tt> begins with
          *                                   "<tt>java.</tt>".
          */
-        @Contract("null,_,_,_,_,_ -> fail;" +
-                "_,_,null,_,_,_ -> fail;")
         public static Class<?> defineClass(
                 ClassLoader loader,
-                String name, byte[] b, int off, int len,
+                String name, @NotNull byte[] b, int off, int len,
                 ProtectionDomain protectionDomain)
                 throws ClassFormatError {
             return ref.defineClass0(loader, name, b, off, len, protectionDomain);
         }
 
         static {
-            Reflection rf;
             MethodHandles.Lookup lk;
             try {
                 try {
@@ -510,83 +548,7 @@ public class Toolkit {
                 lk = MethodHandles.lookup();
             }
             root = lk;
-            try {
-                MethodHandle mmh = lk.findSpecial(ClassLoader.class, "defineClass", MethodType.methodType(Class.class, String.class, byte[].class, int.class, int.class, ProtectionDomain.class), ClassLoader.class);
-                rf = new $1(mmh);
-            } catch (Throwable thr) {
-                try {
-                    Method met = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class, ProtectionDomain.class);
-                    met.setAccessible(true);
-                    try {
-                        MethodHandle mmh = lk.unreflect(met);
-                        rf = new $1(mmh);
-                    } catch (Throwable t) {
-                        rf = new $2(met);
-                    }
-                } catch (Throwable thr0) {
-                    rf = null;
-                }
-            }
-            ref = rf;
-        }
-
-        private static class $2 extends Reflection {
-            private final Method met;
-
-            $2(Method met) {
-                this.met = met;
-            }
-
-            @Override
-            protected Class<?> defineClass0(ClassLoader loader, String name, byte[] b, int off, int len, ProtectionDomain protectionDomain) throws ClassFormatError {
-                try {
-                    return (Class) met.invoke(loader, name, b, off, len, protectionDomain);
-                } catch (IllegalAccessException e) {
-                    ClassFormatError f = new ClassFormatError(e.toString());
-                    f.addSuppressed(e);
-                    throw f;
-                } catch (InvocationTargetException e) {
-                    Throwable own = e.getTargetException();
-                    if (own == null) {
-                        ClassFormatError f = new ClassFormatError(e.toString());
-                        f.addSuppressed(e);
-                        throw f;
-                    }
-                    if (own instanceof ClassFormatError) {
-                        throw (ClassFormatError) own;
-                    }
-                    if (own instanceof RuntimeException) {
-                        throw (RuntimeException) own;
-                    }
-                    if (own instanceof Error) {
-                        throw (Error) own;
-                    }
-                    ClassFormatError f = new ClassFormatError(e.toString());
-                    f.addSuppressed(own);
-                    throw f;
-                }
-            }
-        }
-
-        private static class $1 extends Reflection {
-            private final MethodHandle def;
-
-            $1(MethodHandle def) {
-                this.def = def;
-            }
-
-            @Override
-            protected Class<?> defineClass0(ClassLoader loader, String name, byte[] b, int off, int len, ProtectionDomain protectionDomain) throws ClassFormatError {
-                try {
-                    return (Class) def.invoke(loader, name, b, off, len, protectionDomain);
-                } catch (ClassFormatError cfe) {
-                    throw cfe;
-                } catch (Throwable throwable) {
-                    ClassFormatError err = new ClassFormatError(throwable.toString());
-                    err.addSuppressed(throwable);
-                    throw err;
-                }
-            }
+            ref = UnsafeInstaller.installReflection();
         }
 
         /**
@@ -619,23 +581,48 @@ public class Toolkit {
             return null;
         }
 
+        private static final boolean Clone$Unsafe = Boolean.getBoolean("mxlib.reflect.clone.unsafe");
+        private static final Class<?> Module, ModuleLayer;
+
+        static {
+            Class<?> a = null, b = null;
+            try {
+                a = Class.forName("java.lang.Module");
+                b = Class.forName("java.lang.ModuleLayer");
+            } catch (ClassNotFoundException ignore) {
+            }
+            Module = a;
+            ModuleLayer = b;
+        }
+
         /**
          * Clone a object.
          *
          * @param object The source object
          * @param <T>    The type of object
          * @return the cloned object
-         * @throws InstantiationException Error on failed to allocate a new instance
          * @since 2.7
          */
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "CastCanBeRemovedNarrowingVariableType"})
         @Contract(pure = true, value = "null -> null; !null -> !null")
-        public static <T> T clone(T object) throws InstantiationException {
+        public static <T> T clone(T object) {
             if (object == null)
                 return null;
             Class<T> type = (Class<T>) object.getClass();
             if (type == Class.class) {
                 throw new UnsupportedOperationException("Cannot clone a class");
+            }
+            if (!Clone$Unsafe) {
+                if (object instanceof ClassLoader || object instanceof SecurityManager || object instanceof Runtime
+                        || object instanceof Thread || object instanceof ThreadLocal || object instanceof Method || object instanceof Field || object instanceof Constructor
+                        || object instanceof MethodHandle || object instanceof ThreadGroup || object instanceof Package
+                        || (Module != null && Module.isInstance(object)) || (ModuleLayer != null && ModuleLayer.isInstance(object))
+                        || object instanceof java.nio.channels.Channel || object instanceof ByteBuffer
+                        || (object instanceof OutputStream && !(object instanceof ByteArrayOutputStream))
+                        || (object instanceof InputStream && !(object instanceof ByteArrayInputStream))
+                        || object instanceof Writer || object instanceof Reader) {
+                    throw new UnsupportedOperationException("Cannot clone unsafe object.");
+                }
             }
             if (type.isArray()) {
                 Object array = Array.newInstance(type, Array.getLength(object));
@@ -644,7 +631,12 @@ public class Toolkit {
                 return (T) array;
             }
             Unsafe unsafe = Unsafe.getUnsafe();
-            final Object instance = unsafe.allocateInstance(type);
+            final Object instance;
+            try {
+                instance = unsafe.allocateInstance(type);
+            } catch (InstantiationException e) {
+                throw new RuntimeException("This should not happen", e);
+            }
             Class<?> doit = type;
             do {
                 clone$copy(doit, object, instance);
@@ -712,8 +704,6 @@ public class Toolkit {
                 field.getDeclaringClass().cast(this_);
                 offset = unsafe.objectFieldOffset(field);
             }
-            if (this_ != null)
-                field.getDeclaringClass().cast(this_);
             Class typ = field.getType();
             if (typ == boolean.class) {
                 unsafe.putBoolean(this_, offset, (boolean) value);
@@ -763,6 +753,11 @@ public class Toolkit {
                     }
                 }
             }
+        }
+
+        @Contract(pure = true, value = "null -> fail;")
+        public static ClassLoader getClassLoader(Class<?> clazz) {
+            return ClassLoaderGetter.impl.apply(clazz);
         }
     }
 

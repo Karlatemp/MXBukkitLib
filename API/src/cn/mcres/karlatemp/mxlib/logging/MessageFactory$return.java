@@ -5,16 +5,44 @@
 
 package cn.mcres.karlatemp.mxlib.logging;
 
-@SuppressWarnings("Duplicates")
-class MessageFactory$return implements MessageFactory$return$inter {
-    static MessageFactory$return$inter ret;
+@SuppressWarnings({"Duplicates", "Since15"})
+class MessageFactory$return {
+    static MessageFactory$return ret;
+
+
+    String getModuleName(StackTraceElement elm) {
+        return null;
+    }
+
+    String getClassLoaderName(StackTraceElement elm) {
+        return null;
+    }
+
+    String getModuleVersion(StackTraceElement elm) {
+        return null;
+    }
 
     static {
         ret = new MessageFactory$return();
         try {
             Class<StackTraceElement> c = StackTraceElement.class;
             c.getMethod("getModuleName");
-            ret = new $ret_OpenJ12();
+            ret = new MessageFactory$return() {
+                @Override
+                String getModuleName(StackTraceElement elm) {
+                    return elm.getModuleName();
+                }
+
+                @Override
+                String getClassLoaderName(StackTraceElement elm) {
+                    return elm.getClassLoaderName();
+                }
+
+                @Override
+                String getModuleVersion(StackTraceElement elm) {
+                    return elm.getModuleVersion();
+                }
+            };
         } catch (Throwable thr) {
         }
     }

@@ -195,7 +195,7 @@ public class Options {
         String pc = url.getProtocol();
         Package pag = cx.getPackage();
         String pn = pag.getName();
-//        sun.net.www.protocol.file.FileURLConnection;
+//        sun.network.www.protocol.file.FileURLConnection;
         try {
             final List<Object> names = sr;
             if (pc.equalsIgnoreCase("jar")) {

@@ -5,6 +5,7 @@
 
 package cn.mcres.karlatemp.mxlib.reflect;
 
+import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -48,5 +49,15 @@ public interface RMethod<O, R> {
     @Contract(pure = true)
     O self();
 
+    @NotNull
     Reflect<R> invoke(Object... values);
+
+    /**
+     * Copy context.
+     *
+     * @return New context for this method.
+     */
+    default RMethod<O, R> newContext() {
+        return Toolkit.Reflection.clone(this);
+    }
 }

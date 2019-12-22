@@ -5,6 +5,8 @@
 
 package cn.mcres.karlatemp.mxlib;
 
+import cn.mcres.karlatemp.mxlib.tools.Toolkit;
+
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -79,7 +81,7 @@ public class ReadPropertiesAutoConfigs {
 
     public static void load() {
         SharedConfigurationProcessor cp = new SharedConfigurationProcessor();
-        ClassLoader loader = ReadPropertiesAutoConfigs.class.getClassLoader();
+        ClassLoader loader = Toolkit.Reflection.getClassLoader(ReadPropertiesAutoConfigs.class);
         ArrayList<String> list = new ArrayList<>();
         search(loader, null, list, "META-INF/mxlib.autoconfig.list");
         search(loader, null, list, "/META-INF/mxlib.autoconfig.list");

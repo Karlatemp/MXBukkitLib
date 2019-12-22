@@ -23,11 +23,15 @@
       <element id="module-output" name="Legacy" />
       <element id="artifact" artifact-name="Instrumentation:jar" />
       <element id="directory" name="org">
-        <element id="extracted-dir" path="G:/Java/asm-all-5.2.jar" path-in-jar="/org/" />
         <element id="extracted-dir" path="G:/Java/JetBrains Java Annotations-13.0.jar" path-in-jar="/org/" />
+        <element id="extracted-dir" path="G:/Java/ASM/asm-7.2.jar" path-in-jar="/org/" />
+        <element id="extracted-dir" path="G:/Java/ASM/asm-xml-6.2.jar" path-in-jar="/org/" />
+        <element id="extracted-dir" path="G:/Java/ASM/asm-util-7.2.jar" path-in-jar="/org/" />
+        <element id="extracted-dir" path="G:/Java/ASM/asm-tree-7.2.jar" path-in-jar="/org/" />
+        <element id="extracted-dir" path="G:/Java/ASM/asm-commons-7.2.jar" path-in-jar="/org/" />
+        <element id="extracted-dir" path="G:/Java/ASM/asm-analysis-7.2.jar" path-in-jar="/org/" />
       </element>
-      <element id="module-output" name="API$Med" />
-      <element id="module-output" name="API$OpenJ12" />
+      <element id="extracted-dir" path="G:/Java/guava-28.1-jre.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

@@ -32,7 +32,7 @@ public abstract class PacketDataSerializer extends ByteBuf {
 
     static {
         byte[] data = WrappedClassImplements.doImplement(PacketDataSerializer.class).toByteArray();
-        implementClass = Toolkit.Reflection.defineClass(PacketDataSerializer.class.getClassLoader(), null, data, 0, data.length, PacketDataSerializer.class.getProtectionDomain())
+        implementClass = Toolkit.Reflection.defineClass(Toolkit.Reflection.getClassLoader(PacketDataSerializer.class), null, data, 0, data.length, PacketDataSerializer.class.getProtectionDomain())
                 .asSubclass(PacketDataSerializer.class);
         MethodHandles.Lookup lk = Toolkit.Reflection.getRoot();
         MethodHandle mh;

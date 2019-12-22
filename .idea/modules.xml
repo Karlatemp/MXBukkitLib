@@ -3,17 +3,15 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/API/API.iml" filepath="$PROJECT_DIR$/API/API.iml" />
-      <module fileurl="file://$PROJECT_DIR$/API/$Med/API$Med.iml" filepath="$PROJECT_DIR$/API/$Med/API$Med.iml" />
-      <module fileurl="file://$PROJECT_DIR$/API/$OpenJ12/API$OpenJ12.iml" filepath="$PROJECT_DIR$/API/$OpenJ12/API$OpenJ12.iml" />
       <module fileurl="file://$PROJECT_DIR$/Bukkit/Bukkit.iml" filepath="$PROJECT_DIR$/Bukkit/Bukkit.iml" />
       <module fileurl="file://$PROJECT_DIR$/BungeeCord/BungeeCord.iml" filepath="$PROJECT_DIR$/BungeeCord/BungeeCord.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ClassStringConstReplacer/ClassStringConstReplacer.iml" filepath="$PROJECT_DIR$/ClassStringConstReplacer/ClassStringConstReplacer.iml" />
       <module fileurl="file://$PROJECT_DIR$/FakeMinecraftServer/FakeMinecraftServer.iml" filepath="$PROJECT_DIR$/FakeMinecraftServer/FakeMinecraftServer.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Instrumentation/Instrumentation.iml" filepath="$PROJECT_DIR$/Instrumentation/Instrumentation.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Instrumentation/$CodeShare/Instrumentation$CodeShare.iml" filepath="$PROJECT_DIR$/Instrumentation/$CodeShare/Instrumentation$CodeShare.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Instrumentation/$JDK9/Instrumentation$JDK9.iml" filepath="$PROJECT_DIR$/Instrumentation/$JDK9/Instrumentation$JDK9.iml" />
       <module fileurl="file://$PROJECT_DIR$/Legacy/Legacy.iml" filepath="$PROJECT_DIR$/Legacy/Legacy.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MCJumpLine/MCJumpLine.iml" filepath="$PROJECT_DIR$/MCJumpLine/MCJumpLine.iml" />
       <module fileurl="file://$PROJECT_DIR$//MXBukkitLib.iml" filepath="$PROJECT_DIR$//MXBukkitLib.iml" />
       <module fileurl="file://$PROJECT_DIR$/../MXBukkitLibDocs/MXBukkitLibDocs.iml" filepath="$PROJECT_DIR$/../MXBukkitLibDocs/MXBukkitLibDocs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MXRemoteConnection/MXRemoteConnection.iml" filepath="$PROJECT_DIR$/MXRemoteConnection/MXRemoteConnection.iml" />
       <module fileurl="file://$PROJECT_DIR$/Mediator/Mediator.iml" filepath="$PROJECT_DIR$/Mediator/Mediator.iml" />
       <module fileurl="file://$PROJECT_DIR$/PluginTester/PluginTester.iml" filepath="$PROJECT_DIR$/PluginTester/PluginTester.iml" />
       <module fileurl="file://$PROJECT_DIR$/Share/Share.iml" filepath="$PROJECT_DIR$/Share/Share.iml" />

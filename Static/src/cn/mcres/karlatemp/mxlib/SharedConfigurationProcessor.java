@@ -118,12 +118,12 @@ public class SharedConfigurationProcessor implements IConfigurationProcessor {
 
     @Override
     public void load(List<String> classes) {
-        load(Toolkit.Reflection.getCallerClass(), Toolkit.Reflection.getCallerClass().getClassLoader(), classes, null, MXBukkitLib.getBeanManager());
+        load(Toolkit.Reflection.getCallerClass(), Toolkit.Reflection.getClassLoader(Toolkit.Reflection.getCallerClass()), classes, null, MXBukkitLib.getBeanManager());
     }
 
     @Override
     public void load(Class boot) {
-        ClassLoader loader = boot.getClassLoader();
+        ClassLoader loader = Toolkit.Reflection.getClassLoader(boot);
         if (loader == null) return;// Cannot load configs from `rt.jar`
         IBeanManager beans = MXBukkitLib.getBeanManager();
         if (beans == null) return;

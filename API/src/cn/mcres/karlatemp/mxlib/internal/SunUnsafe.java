@@ -12,11 +12,16 @@ import sun.misc.Unsafe;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.security.ProtectionDomain;
+import java.util.Objects;
 import java.util.Optional;
 
 @SuppressWarnings({"unchecked", "RedundantSuppression", "rawtypes"})
 class SunUnsafe extends cn.mcres.karlatemp.mxlib.tools.Unsafe {
     private static final Unsafe unsafe;
+
+    SunUnsafe() {
+        Objects.requireNonNull(SR.init());
+    }
 
     static {
         try {
@@ -628,12 +633,15 @@ class SunUnsafe extends cn.mcres.karlatemp.mxlib.tools.Unsafe {
 
     @Override
     public Class<?> defineClass(String name, @NotNull byte[] b, int off, int len, ClassLoader loader, ProtectionDomain protectionDomain) {
-        return null;
+        // This method exists in JDK8.
+        // Does not exist in JDK12.
+        return SR.defineClass.defineClass(unsafe, name, b, off, len, loader, protectionDomain);
     }
 
     @Override
     public Class<?> defineClass0(String name, @NotNull byte[] b, int off, int len, ClassLoader loader, ProtectionDomain protectionDomain) {
-        return null;
+        // Same as above
+        return SR.defineClass0.defineClass(unsafe, name, b, off, len, loader, protectionDomain);
     }
 
     @Override

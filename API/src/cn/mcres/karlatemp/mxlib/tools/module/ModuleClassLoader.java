@@ -71,7 +71,7 @@ public class ModuleClassLoader extends ClassLoader {
         if (exportChecker != null) {
             synchronized (getClassLoadingLock(name)) {
                 Class<?> caller = Toolkit.Reflection.getCallerClass();
-                ClassLoader loader = caller.getClassLoader();
+                ClassLoader loader = Toolkit.Reflection.getClassLoader(caller);
                 if (caller == ClassLoader.class) {
                     if (new Throwable().getStackTrace()[1].getMethodName().startsWith("defineClass")) {
                         return loadClass(name, false);

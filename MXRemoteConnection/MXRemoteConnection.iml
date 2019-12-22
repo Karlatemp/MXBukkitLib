@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="netty-4.1.43.Final" level="application" />
+    <orderEntry type="module" module-name="API" />
+    <orderEntry type="module" module-name="Static" />
+    <orderEntry type="library" name="JetBrains Java Annotations-13.0" level="application" />
+    <orderEntry type="library" name="spigot-all" level="application" />
+    <orderEntry type="library" name="guava-28.1-jre" level="application" />
+  </component>
+</module>

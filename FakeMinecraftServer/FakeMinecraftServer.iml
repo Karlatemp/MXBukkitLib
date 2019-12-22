@@ -8,13 +8,14 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="netty-4.1.43.Final" level="application" />
-    <orderEntry type="module" module-name="API" />
-    <orderEntry type="library" name="JetBrains Java Annotations-13.0" level="application" />
+    <orderEntry type="library" name="guava-28.1-jre" level="application" />
+    <orderEntry type="library" name="asm" level="application" />
     <orderEntry type="library" name="Gson" level="application" />
-    <orderEntry type="library" name="javassist" level="application" />
-    <orderEntry type="library" name="asm-all-5.2" level="application" />
+    <orderEntry type="module" module-name="API" />
+    <orderEntry type="module" module-name="Legacy" />
+    <orderEntry type="library" name="JetBrains Java Annotations-13.0" level="application" />
     <orderEntry type="library" name="BungeeChatAPI" level="application" />
     <orderEntry type="library" name="spigot-1.12.2" level="application" />
-    <orderEntry type="module" module-name="Legacy" />
+    <orderEntry type="library" name="javassist" level="application" />
   </component>
 </module>

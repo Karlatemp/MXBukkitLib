@@ -7,6 +7,7 @@ package cn.mcres.karlatemp.mxlib.logging;
 
 import cn.mcres.karlatemp.mxlib.tools.CharCompiler;
 import cn.mcres.karlatemp.mxlib.tools.StringHelper;
+import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 
 import java.lang.management.LockInfo;
 import java.lang.management.MonitorInfo;
@@ -70,7 +71,7 @@ public class MessageFactoryImpl implements IMessageFactory {
         try {
             return Class.forName(name, false, Thread.currentThread().getContextClassLoader());
         } catch (Throwable thr) {
-            return Class.forName(name, false, getClass().getClassLoader());
+            return Class.forName(name, false, Toolkit.Reflection.getClassLoader(getClass()));
         }
     }
 
