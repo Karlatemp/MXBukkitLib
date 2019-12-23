@@ -17,9 +17,27 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * A Loader to load translates.
+ *
+ * <pre>{@code public class Logging{
+ *     private static final MTranslate translate = TranslateLoader.loadTranslate(
+ *          Logging.class::getResourceAsStream,
+ *          "language",
+ *          null,
+ *          ".properties",
+ *          TranslateLoader.PARSER_PROPERTIES,
+ *          (path, error) -> {
+ *              System.err.println("Error in loading resource " + path);
+ *              error.printStackTrace();
+ *          }
+ *     );
+ * }}</pre>
+ *
+ * @since 2.9
+ */
 public class TranslateLoader {
     private static final Gson g = new Gson();
 

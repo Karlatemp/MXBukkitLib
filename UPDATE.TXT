@@ -1,5 +1,10 @@
 2.9
-    WAIT FOR EDIT...
+    Fix JDK8 Unsafe Cannot define class.
+    Add class loader getter in Toolkit.Reflection
+    Add minecraft netty packet message encoder/decoder.
+    Add Netty HttpClient.
+    Add Direct Reflection Generator.
+    Add Translate Loader
 2.8.1
     Rebuild PowerScheduler. No High CPU Using
     Fix LoggerFormat error.
