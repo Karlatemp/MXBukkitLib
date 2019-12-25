@@ -1,9 +1,0 @@
-main: cn.mcres.karlatemp.mxlib.tester.plugintester.PluginTester
-version: 2.2
-author: Karlatemp
-website: https://karlatemp.github.io.MXBukkitLib
-name: MXLibPluginTester
-depend:
-  - MXBukkitLib
-commands:
-  mxtest: {}

@@ -1,6 +1,0 @@
-Premain-Class: cn.mcres.karlatemp.mxlib.instrumentation.Bootstrapper
-Can-Retransform-Classes: true
-Can-Redefine-Classes: true
-Can-Set-Native-Method-Prefix: true
-Manifest-Version: 1.0
-Implementation-Version: 2.0

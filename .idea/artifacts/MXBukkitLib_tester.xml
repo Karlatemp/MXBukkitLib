@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="MXBukkitLib:tester">
-    <output-path>$PROJECT_DIR$/dist</output-path>
-    <root id="archive" name="MXLibTester.jar">
-      <element id="module-output" name="PluginTester" />
-    </root>
-  </artifact>
-</component>

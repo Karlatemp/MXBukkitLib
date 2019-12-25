@@ -1,9 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="ClassStringConstReplacer:jar">
-    <output-path>$PROJECT_DIR$/dist</output-path>
-    <root id="archive" name="ClassStringConstReplacer.jar">
-      <element id="module-output" name="ClassStringConstReplacer" />
-      <element id="extracted-dir" path="G:/Java/JetBrains Java Annotations-13.0.jar" path-in-jar="/" />
-    </root>
-  </artifact>
-</component>
