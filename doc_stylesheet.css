@@ -622,7 +622,7 @@ h1.hidden {
 .block {
     display:block;
     margin:3px 10px 2px 0px;
-    color:#474747;
+    color:#3cf4ff;
 }
 .deprecatedLabel, .descfrmTypeLabel, .implementationLabel, .memberNameLabel, .memberNameLink,
 .moduleLabelInPackage, .moduleLabelInType, .overrideSpecifyLabel, .packageLabelInType,
