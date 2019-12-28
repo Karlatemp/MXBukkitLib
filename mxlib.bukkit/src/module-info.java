@@ -1,8 +1,11 @@
+/*
+ * Copyright (c) 2018-2019 Karlatemp. All rights reserved.
+ * Reserved.FileName: module-info.java@author: karlatemp@vip.qq.com: 2019/12/26 下午6:39@version: 2.0
+ */
 /**
- * Create at 2019/12/24 22:26
- * Copyright Karlatemp
- * MXLib $
- */module mxlib.bukkit {
+ * Here is toolkit for Bukkit/Spigot.
+ */
+module mxlib.bukkit {
     exports cn.mcres.karlatemp.mxlib.share;
     exports cn.mcres.karlatemp.mxlib.event.bukkit;
     exports cn.mcres.karlatemp.mxlib.logging.bukkit;
@@ -13,7 +16,7 @@
     exports cn.mcres.karlatemp.mxlib.share.system.cmds;
     requires mxlib.api;
     requires BungeeChatAPI;
-    requires JetBrains.Java.Annotations;
+    requires org.jetbrains.annotations;
     requires spigot.api;
     requires io.netty.transport;
     requires io.netty.buffer;

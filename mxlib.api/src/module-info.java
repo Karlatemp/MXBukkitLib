@@ -1,7 +1,10 @@
+/*
+ * Copyright (c) 2018-2019 Karlatemp. All rights reserved.
+ * Reserved.FileName: module-info.java@author: karlatemp@vip.qq.com: 2019/12/26 下午6:39@version: 2.0
+ */
+
 /**
- * Create at 2019/12/24 18:20
- * Copyright Karlatemp
- * MXLib $
+ * The api module. all interfaces and static tools in it.
  */
 open module mxlib.api {
 
@@ -13,6 +16,7 @@ open module mxlib.api {
     exports cn.mcres.karlatemp.mxlib.cmd.denied;
     exports cn.mcres.karlatemp.mxlib.configuration;
     exports cn.mcres.karlatemp.mxlib.data;
+    exports cn.mcres.karlatemp.mxlib.data.jimage;
     exports cn.mcres.karlatemp.mxlib.data.attribute;
     exports cn.mcres.karlatemp.mxlib.data.utils;
     exports cn.mcres.karlatemp.mxlib.encrypt;
@@ -40,7 +44,7 @@ open module mxlib.api {
     exports cn.mcres.karlatemp.mxlib.translate;
     exports cn.mcres.karlatemp.mxlib.util;
     exports cn.mcres.karlatemp.mxlib;
-    requires JetBrains.Java.Annotations;
+    requires org.jetbrains.annotations;
     requires java.base;
     requires java.logging;
     requires org.javassist;

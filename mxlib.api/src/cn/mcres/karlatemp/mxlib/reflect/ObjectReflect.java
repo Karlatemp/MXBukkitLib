@@ -7,6 +7,7 @@ package cn.mcres.karlatemp.mxlib.reflect;
 
 import cn.mcres.karlatemp.mxlib.tools.ThrowHelper;
 import cn.mcres.karlatemp.mxlib.tools.Toolkit;
+import cn.mcres.karlatemp.mxlib.tools.security.AccessToolkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -260,6 +261,7 @@ public class ObjectReflect<T> implements Reflect<T> {
             if (returnType != null && m.getReturnType() != returnType) {
                 throw breakUp;
             }
+            AccessToolkit.setAccessible(m, true);
             return new RMethodImpl(m).self(val);
         } catch (NoSuchMethodException ignore) {
         }
@@ -270,7 +272,7 @@ public class ObjectReflect<T> implements Reflect<T> {
                 if (returnType != null && method.getReturnType() != returnType) {
                     throw breakUp;
                 }
-                method.setAccessible(true);
+                AccessToolkit.setAccessible(method, true);
                 return new RMethodImpl(method).self(val);
             } catch (NoSuchMethodException ignore) {
             }

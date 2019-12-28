@@ -6,12 +6,14 @@
 package cn.mcres.karlatemp.mxlib.tools.security;
 
 import cn.mcres.karlatemp.mxlib.internal.AccessToolkitImpl;
+import cn.mcres.karlatemp.mxlib.reflect.RMethod;
 import cn.mcres.karlatemp.mxlib.reflect.Reflect;
 import cn.mcres.karlatemp.mxlib.tools.ThrowHelper;
 import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import cn.mcres.karlatemp.mxlib.tools.Unsafe;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.reflect.AccessibleObject;
 
 /**
@@ -45,6 +47,84 @@ public class AccessToolkit {
         return false;
     }
 
+    interface A {
+        void a(@NotNull AccessibleObject a, boolean b);
+    }
+
+    static A akm;
+
+    static {
+        akm = new A() {
+            @Override
+            public void a(@NotNull AccessibleObject a, boolean b) {
+                try {
+                    a.setAccessible(b);
+                } catch (Throwable t) {
+                    synchronized (AccessToolkit.class) {
+                        if (akm == this) {
+                            final RMethod<AccessibleObject, Boolean> set =
+                                    Reflect.ofClass(AccessibleObject.class).getMethod("setAccessible0", boolean.class, boolean.class);
+                            akm = new A() {
+                                @Override
+                                public void a(@NotNull AccessibleObject a, boolean b) {
+                                    try {
+                                        set.newContext().self(a).invoke(b);
+                                    } catch (Throwable t) {
+                                        synchronized (AccessToolkit.class) {
+                                            if (akm == this) {
+                                                final RMethod<AccessibleObject, Void> method = Reflect.ofClass(AccessibleObject.class)
+                                                        .getMethod("setAccessible0", void.class, AccessibleObject.class, boolean.class);
+                                                akm = new A() {
+                                                    @Override
+                                                    public void a(@NotNull AccessibleObject a, boolean b) {
+                                                        try {
+                                                            method.invoke(a, b);
+                                                        } catch (Throwable t) {
+                                                            synchronized (AccessToolkit.class) {
+                                                                if (akm == this) {
+                                                                    A uns = (a0, b0) -> {
+                                                                        throw new UnsupportedOperationException();
+                                                                    };
+                                                                    try {
+                                                                        final MethodHandle handle = Toolkit.Reflection.getRoot().findSetter(AccessibleObject.class, "override", boolean.class);
+                                                                        akm = new A() {
+                                                                            @Override
+                                                                            public void a(@NotNull AccessibleObject a, boolean b) {
+                                                                                try {
+                                                                                    handle.invoke(a, b);
+                                                                                } catch (Throwable throwable) {
+                                                                                    synchronized (AccessToolkit.class) {
+                                                                                        if (akm == this) {
+                                                                                            akm = uns;
+                                                                                        }
+                                                                                    }
+                                                                                    akm.a(a, b);
+                                                                                }
+                                                                            }
+                                                                        };
+                                                                    } catch (NoSuchFieldException | IllegalAccessException e) {
+                                                                        akm = uns;
+                                                                    }
+                                                                }
+                                                                akm.a(a, b);
+                                                            }
+                                                        }
+                                                    }
+                                                };
+                                            }
+                                        }
+                                        akm.a(a, b);
+                                    }
+                                }
+                            };
+                        }
+                    }
+                    akm.a(a, b);
+                }
+            }
+        };
+    }
+
     /**
      * Force set accessible
      *
@@ -55,27 +135,7 @@ public class AccessToolkit {
      * @since 2.7.1
      */
     public static <T extends AccessibleObject> T setAccessible(T object, boolean flag) {
-        try {
-            object.setAccessible(flag);
-        } catch (Throwable error) {
-            try {
-                Reflect.ofObject(object)
-                        .getMethod("setAccessible0", boolean.class, boolean.class)
-                        .invoke(flag); // JDK 12
-            } catch (Throwable error2) {
-                try {
-                    Reflect.ofClass(AccessibleObject.class)
-                            .getMethod("setAccessible0", void.class, AccessibleObject.class, boolean.class)
-                            .invoke(object, flag);
-                } catch (Throwable error3) {
-                    try {
-                        Toolkit.Reflection.getRoot().findSetter(AccessibleObject.class, "override", boolean.class).invoke(object, flag);
-                    } catch (Throwable error4) {
-                        return ThrowHelper.thrown(new LinkageError("Fail to set accessible for field " + object, error4));
-                    }
-                }
-            }
-        }
+        if (object != null) akm.a(object, flag);
         return object;
     }
 

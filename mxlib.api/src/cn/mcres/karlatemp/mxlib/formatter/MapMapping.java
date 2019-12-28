@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018-2019 Karlatemp. All rights reserved.
- * Reserved.FileName: MapMapping.java@author: karlatemp@vip.qq.com: 19-9-18 下午5:54@version: 2.0
+ * Reserved.FileName: MapMapping.java@author: karlatemp@vip.qq.com: 2019/12/26 下午10:05@version: 2.0
  */
 
 package cn.mcres.karlatemp.mxlib.formatter;
@@ -13,6 +13,7 @@ public class MapMapping<K, V> implements Replacer {
     public static <K, V> MapMapping<K, V> mapping(Map<K, V> map) {
         return new MapMapping<>(map);
     }
+
     private final Map<K, V> m;
 
     public MapMapping(Map<K, V> map) {
@@ -24,9 +25,19 @@ public class MapMapping<K, V> implements Replacer {
     }
 
     @Override
-    @SuppressWarnings("element-type-mismatch")
+    @SuppressWarnings({"element-type-mismatch", "SuspiciousMethodCalls"})
     public String apply(String t) {
         return String.valueOf(m.get(t));
+    }
+
+    @Override
+    public void apply(StringBuilder builder, String key) {
+        builder.append(apply(key));
+    }
+
+    @Override
+    public void apply(StringBuilder builder, int key) {
+        builder.append(getSlot(key));
     }
 
     @Override

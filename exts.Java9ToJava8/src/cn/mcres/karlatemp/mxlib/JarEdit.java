@@ -72,16 +72,34 @@ public class JarEdit {
                                 byte[] data = bos.toByteArray();
                                 ClassWriter cw = new ClassWriter(0);
                                 new ClassReader(data).accept(new ClassVisitor(Opcodes.ASM7, cw) {
+                                    boolean edit = false;
+
                                     @Override
                                     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
                                         if (name.equals("module-info"))
                                             super.visit(version, access, name, signature, superName, interfaces);
-                                        else
-                                            super.visit(Math.min(52, version), access, name, signature, superName, interfaces);
+                                        else {
+                                            edit = true;
+                                            super.visit(Opcodes.V1_8, access, name, signature, superName, interfaces);
+                                        }
+                                    }
+
+                                    @Override
+                                    public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
+                                        if (edit)
+                                            if ((access & Opcodes.ACC_SYNTHETIC) == 0 && (access & Opcodes.ACC_PRIVATE) != 0) {
+                                                access = (access & ~Opcodes.ACC_PRIVATE); // Package access
+                                            }
+                                        return super.visitField(access, name, descriptor, signature, value);
                                     }
 
                                     @Override
                                     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+                                        if (!edit)
+                                            return super.visitMethod(access, name, descriptor, signature, exceptions);
+                                        if ((access & Opcodes.ACC_SYNTHETIC) == 0 && (access & Opcodes.ACC_PRIVATE) != 0) {
+                                            access = (access & ~Opcodes.ACC_PRIVATE) | Opcodes.ACC_SYNTHETIC;
+                                        }
                                         return new MethodVisitor(api, super.visitMethod(access, name, descriptor, signature, exceptions)) {
                                             @Override
                                             public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {

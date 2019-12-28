@@ -7,6 +7,7 @@ package cn.mcres.karlatemp.mxlib.internal;
 
 import cn.mcres.karlatemp.mxlib.tools.ThrowHelper;
 import cn.mcres.karlatemp.mxlib.tools.Toolkit;
+import cn.mcres.karlatemp.mxlib.tools.Unsafe;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.invoke.MethodHandle;
@@ -29,6 +30,7 @@ class InternalDefineRF extends Toolkit.Reflection {
     @Override
     protected Class<?> defineClass0(ClassLoader loader, String name, @NotNull byte[] b, int off, int len, ProtectionDomain protectionDomain) throws ClassFormatError {
         try {
+            if (loader == null) return Unsafe.getUnsafe().defineClass(name, b, off, len, loader, protectionDomain);
             return (Class<?>) mh.invoke(loader, name, b, off, len, protectionDomain);
         } catch (Throwable throwable) {
             return ThrowHelper.thrown(throwable);

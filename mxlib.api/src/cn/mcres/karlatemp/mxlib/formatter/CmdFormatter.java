@@ -1,94 +1,76 @@
 /*
  * Copyright (c) 2018-2019 Karlatemp. All rights reserved.
- * Reserved.FileName: CmdFormatter.java@author: karlatemp@vip.qq.com: 19-9-18 下午5:54@version: 2.0
+ * Reserved.FileName: CmdFormatter.java@author: karlatemp@vip.qq.com: 2019/12/26 下午11:29@version: 2.0
  */
 
 package cn.mcres.karlatemp.mxlib.formatter;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.nio.CharBuffer;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.function.BiConsumer;
 
-public class CmdFormatter extends Formatter {
-
-    public static void main(String[] args) {
-        CmdFormatter cf = new CmdFormatter();
-
-        Map<String, String> m = new HashMap<>();
-        m.put("state", "Good");
-        m.put("name", "Karlatemp");
-
-        System.out.println(cf.format("Hey %% %namex% You Are %state%. Are you ok? %SHIT", mapping(m)));
-    }
-
+public class CmdFormatter extends Formatter implements BiConsumer<StringBuilder, String> {
     @Override
-    public String format(Locale l, String t, Replacer u) {
-        if (nullCheck(l, t, u)) {
-            return t;
-        }
-        final int size = t.length();
-        final CharBuffer sb = CharBuffer.wrap(t);
-        final char[] buf = new char[size];
-        final CharBuffer co = CharBuffer.allocate(size);
-        StringBuilder bui = new StringBuilder(size);
-        for (int i = 0; sb.remaining() > 0; i++) {
-            char c = sb.get();
-            switch (c) {
+    public FormatTemplate parse(@NotNull String template, @NotNull Replacer constants) {
+        FormatAction.ActionLink link = new FormatAction.ActionLink();
+        CharBuffer late = CharBuffer.wrap(template);
+        CharBuffer tmp = CharBuffer.allocate(template.length());
+        StringBuilder keyword = new StringBuilder();
+        while (late.hasRemaining()) {
+            char next = late.get();
+            switch (next) {
+                case '^': {
+                    do {
+                        int n = late.get();
+                        if (n == '\r') continue;
+                        break;
+                    } while (true);
+                    break;
+                }
                 case '%': {
-                    if (sb.remaining() > 0) {
-                        int end = 0;
-                        co.position(0);
-                        co.limit(size);
-                        for (int k = i + 1; sb.remaining() > 0; k++) {
-                            char cw = sb.get();
-                            if (cw == '%') {
-                                end = k;
-                                break;
-                            }
-                            co.put(cw);
+                    char n = late.get();
+                    if (n == '%') {
+                        keyword.append('%');
+                        break;
+                    }
+                    if (keyword.length() > 0) {
+                        link.append(keyword.toString());
+                        keyword.delete(0, keyword.length());
+                    }
+                    tmp.clear().put(n);
+                    boolean hasEnding = false;
+                    while (late.hasRemaining()) {
+                        char w = late.get();
+                        if (w == '%') {
+                            hasEnding = true;
+                            break;
                         }
-                        if (end == 0) {
-                            co.flip();
-                            int soff = co.remaining();
-                            if (soff > 0) {
-                                co.get(buf, 0, soff);
-                                bui.append('%').append(buf, 0, soff);
-                            }
-                        } else {
-                            co.flip();
-                            int ss = co.remaining();
-                            if (ss == 0) {
-                                bui.append('%');
-                                sb.limit(size);
-                            } else {
-                                co.get(buf, 0, ss);
-                                String key = new String(buf, 0, ss);
-                                System.out.println("KEY: " + key);
-                                if (u.containsKey(key)) {
-                                    bui.append(u.apply(key));
-                                    sb.position(end + 1);
-                                } else {
-                                    sb.position(i - 1);
-                                    int b = end - i + 2;
-                                    sb.get(buf, 0, b);
-                                    bui.append(buf, 0, b);
-                                }
-                            }
-                            sb.limit(size);
-                        }
-                        i = sb.position();
+                        tmp.put(w);
+                    }
+                    String key = tmp.flip().toString();
+                    if (!hasEnding) {
+                        link.append(key);
                     } else {
-                        bui.append('%');
+                        link.appendKey(key, this);
                     }
                     break;
                 }
                 default: {
-                    bui.append(c);
+                    keyword.append(next);
+                    break;
                 }
             }
         }
-        return bui.toString();
+        if (keyword.length() > 0) {
+            link.append(keyword.toString());
+        }
+
+        return new SimpleFormatTemplate(link);
     }
 
+    @Override
+    public void accept(StringBuilder builder, String s) {
+        builder.append('%').append(s).append('%');
+    }
 }

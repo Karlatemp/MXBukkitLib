@@ -38,6 +38,9 @@ public abstract class AbstractLogger implements ILogger {
     }
 
     private class PS extends InlinePrintStream {
+        protected PS() {
+        }
+
         @Override
         public void print(String s) {
             AbstractLogger.this.printf(s);
@@ -55,6 +58,9 @@ public abstract class AbstractLogger implements ILogger {
     }
 
     private class PR extends PS {
+        protected PR() {
+        }
+
         @Override
         public void print(String s) {
             AbstractLogger.this.error(s);

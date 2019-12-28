@@ -1,113 +1,79 @@
 /*
  * Copyright (c) 2018-2019 Karlatemp. All rights reserved.
- * Reserved.FileName: DefaultFormatter.java@author: karlatemp@vip.qq.com: 19-9-18 下午5:54@version: 2.0
+ * Reserved.FileName: DefaultFormatter.java@author: karlatemp@vip.qq.com: 2019/12/26 下午10:26@version: 2.0
  */
 
 package cn.mcres.karlatemp.mxlib.formatter;
 
+import cn.mcres.karlatemp.mxlib.tools.StringHelper;
+import org.jetbrains.annotations.NotNull;
+
 import java.nio.CharBuffer;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
-public class DefaultFormatter extends Formatter {
-
-    private char a(char next) {
-        switch (next) {
-            case 'n':
-                return '\n';
-            case 't':
-                return '\t';
-            case 'r':
-                return '\r';
-            default:
-                return next;
-        }
-    }
-
+public class DefaultFormatter extends Formatter implements BiConsumer<StringBuilder, String> {
     public static void main(String[] args) {
         DefaultFormatter f = new DefaultFormatter();
         Map<String, String> m = new HashMap<>();
         m.put("a", "WWW");
         m.put("b", "CCC");
         m.put("", "YOU");
-        m.put("{}", "MAN");
+        m.put("{}", "My CHUNK");
         m.put("CXK", "JNTM");
         Replacer r = mapping(m);
         System.out.println(f.format(null, "Welocome {b} to {a}, Have a nice day.", r));
-        System.out.println(f.format(null, "\\{FUCK {} LITTLE {\\{\\}}} {CXK} {VAR}", r));
+        System.out.println(f.format(null, "\\{Hey {} ,Here is {\\{\\}}} {CXK} {VAR}", r));
     }
 
     @Override
-    public String format(final Locale l, final String t, final Replacer u) {
-        if (nullCheck(l, t, u)) {
-            return t;
-        }
-        final int size = t.length();
-        final CharBuffer cb = CharBuffer.wrap(t);
+    public FormatTemplate parse(@NotNull String template, @NotNull Replacer constants) {
+        FormatAction.ActionLink link = new FormatAction.ActionLink();
+        final int size = template.length();
         final CharBuffer buffer = CharBuffer.allocate(size);
-        final char[] array = new char[size];
+        final CharBuffer late = CharBuffer.wrap(template);
+        // final char[] buffer2 = new char[size];
         final StringBuilder bui = new StringBuilder(size);
-        for (int i = 0; cb.remaining() > 0; i++) {
-//            cb.limit(size);
-            char c = cb.get();
-//            System.out.write(c);
+        for (; late.hasRemaining(); ) {
+            char c = late.get();
             switch (c) {
                 case '\\': {
-                    i++;
-                    if (cb.remaining() > 0) {
-                        bui.append(cb.get());
+                    if (late.hasRemaining()) {
+                        bui.append(p(late));
                     }
                     break;
                 }
                 case '{': {
-                    int to = 0;
-                    buffer.position(0);
-                    buffer.limit(size);
-                    for_a:
-                    for (int k = i + 1; cb.remaining() > 0; k++) {
-                        char a = cb.get();
-                        switch (a) {
+                    if (bui.length() > 0) {
+                        link.append(bui.toString());
+                        bui.delete(0, bui.length());
+                    }
+                    buffer.clear();
+                    boolean hasEnding = false;
+                    while (late.hasRemaining() && !hasEnding) {
+                        char next = late.get();
+                        switch (next) {
                             case '\\': {
-                                if (cb.remaining() > 0) {
-                                    buffer.put(a(cb.get()));
-                                }
+                                buffer.put(p(late));
                                 break;
                             }
                             case '}': {
-                                to = k;
-                                break for_a;
+                                hasEnding = true;
+                                break;
                             }
                             default: {
-                                buffer.put(a);
+                                buffer.put(next);
                             }
                         }
                     }
-                    if (to == 0) {
-                        bui.append('{');
-                        cb.position(i);
+                    buffer.flip();
+                    String key = buffer.toString();
+                    if (!hasEnding) {
+                        link.append(key);
                     } else {
-                        buffer.flip();
-                        int rem = buffer.remaining();
-                        buffer.get(array, 0, rem);
-                        String key = new String(array, 0, rem);
-//                        System.out.println("OPEN KEY: " + key);
-                        if (u.containsKey(key)) {
-                            bui.append(u.apply(key));
-                        } else {
-                            cb.position(i - 1);
-                            cb.limit(to);
-                            buffer.position(0);
-                            buffer.limit(size);
-                            buffer.put(cb);
-                            cb.limit(size);
-                            buffer.flip();
-                            rem = buffer.remaining();
-                            buffer.get(array, 0, rem);
-                            bui.append(array, 0, rem);
-                        }
+                        link.appendKey(key, this);
                     }
-                    i = cb.position();
                     break;
                 }
                 default: {
@@ -115,7 +81,30 @@ public class DefaultFormatter extends Formatter {
                 }
             }
         }
-        return bui.toString();
+        if (bui.length() > 0) {
+            link.append(bui.toString());
+        }
+        return new SimpleFormatTemplate(link);
     }
 
+    private char p(CharBuffer late) {
+        char next = late.get();
+        switch (next) {
+            case 'n':
+                return '\n';
+            case 't':
+                return '\t';
+            case 'r':
+                return '\r';
+            case 'u': {
+                return StringHelper.parseUnicode(late.get(), late.get(), late.get(), late.get());
+            }
+        }
+        return next;
+    }
+
+    @Override
+    public void accept(StringBuilder builder, String s) {
+        builder.append('{').append(s).append('}');
+    }
 }

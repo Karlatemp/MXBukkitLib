@@ -427,6 +427,29 @@ public class StringHelper {
         return s.trim().isEmpty();
     }
 
+    public static char parseUnicode(char c, char c1, char c2, char c3) {
+        //noinspection PointlessBitwiseExpression
+        return (char) (0 |
+                charHexToInt(c) << 12 |
+                charHexToInt(c1) << 8 |
+                charHexToInt(c2) << 4 |
+                charHexToInt(c3)
+        );
+    }
+
+    public static int charHexToInt(int charx) {
+        if (charx >= '0' && charx <= '9') {
+            return charx - '0';
+        }
+        if (charx >= 'A' && charx <= 'F') {
+            return charx - 'A' + 0xA;
+        }
+        if (charx >= 'a' && charx <= 'f') {
+            return charx - 'a' + 0xA;
+        }
+        return 0;
+    }
+
     public String nocolor() {
         return String.valueOf(str);
     }

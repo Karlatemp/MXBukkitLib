@@ -1,4 +1,4 @@
-cn.mcres.karlatemp.mxlib.shaerd.DefaultAutoConfig
+cn.mcres.karlatemp.mxlib.shared.DefaultAutoConfig
 cn.mcres.karlatemp.mxlib.unsafe.StaticAutoConfig
 cn.mcres.karlatemp.mxlib.share.PluginAutoConfig
 cn.mcres.karlatemp.mxlib.impl.ImplSetupAutoConfig
