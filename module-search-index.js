@@ -1,1 +1,1 @@
-moduleSearchIndex = [{"l":"mxlib.api"},{"l":"mxlib.bukkit"},{"l":"mxlib.core"}]
+moduleSearchIndex = [{"l":"mxlib.api"},{"l":"mxlib.bukkit"},{"l":"mxlib.command.api"},{"l":"mxlib.core"}]

@@ -41,7 +41,10 @@ cn.mcres.karlatemp.mxlib.module.chat
 cn.mcres.karlatemp.mxlib.module.namespace
 cn.mcres.karlatemp.mxlib.module.translate
 cn.mcres.karlatemp.mxlib.share
-cn.mcres.karlatemp.mxlib.share.system
-cn.mcres.karlatemp.mxlib.share.system.cmds
+module:mxlib.command.api
+cn.mcres.karlatemp.mxlib.command
+cn.mcres.karlatemp.mxlib.command.annoations
+cn.mcres.karlatemp.mxlib.command.exceptions
+cn.mcres.karlatemp.mxlib.command.internal
 module:mxlib.core
 cn.mcres.karlatemp.mxlib.shared
