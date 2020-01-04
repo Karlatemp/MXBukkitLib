@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
+@Deprecated
 public class SharedCommandProcessor implements ICommandProcessor {
     @Override
     public ICommand parse(@NotNull ICommandConfig config, @NotNull Package pck) {

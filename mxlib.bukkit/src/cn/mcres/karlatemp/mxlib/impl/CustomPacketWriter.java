@@ -9,9 +9,11 @@ import cn.mcres.karlatemp.mxlib.module.packet.RawPacket;
 import cn.mcres.karlatemp.mxlib.module.packet.PacketDataSerializer;
 import cn.mcres.karlatemp.mxlib.module.packet.UnsafeRawPacket;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 
+@ChannelHandler.Sharable
 public class CustomPacketWriter extends MessageToByteEncoder<RawPacket> {
     @Override
     public boolean acceptOutboundMessage(Object o) throws Exception {

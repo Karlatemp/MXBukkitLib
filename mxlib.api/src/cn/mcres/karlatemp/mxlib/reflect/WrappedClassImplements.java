@@ -25,6 +25,90 @@ import java.util.stream.Stream;
  * @since 2.8
  */
 public class WrappedClassImplements {
+    public static int putTypeInsn(Class<?> type, int slot, boolean isReturn, MethodVisitor visitor) {
+        if (type == void.class && !isReturn) throw new IllegalArgumentException();
+        if (type == double.class) {
+            if (isReturn)
+                visitor.visitInsn(Opcodes.DRETURN);
+            else
+                visitor.visitVarInsn(Opcodes.DLOAD, slot);
+            return slot + 2;
+        } else if (type == float.class) {
+            if (isReturn)
+                visitor.visitInsn(Opcodes.FRETURN);
+            else
+                visitor.visitVarInsn(Opcodes.FLOAD, slot);
+            return slot + 1;
+        } else if (type == int.class || type == short.class || type == boolean.class ||
+                type == byte.class || type == char.class) {
+            if (isReturn)
+                visitor.visitInsn(Opcodes.IRETURN);
+            else
+                visitor.visitVarInsn(Opcodes.ILOAD, slot);
+            return slot + 1;
+        } else if (type == long.class) {
+            if (isReturn)
+                visitor.visitInsn(Opcodes.LRETURN);
+            else
+                visitor.visitVarInsn(Opcodes.LLOAD, slot);
+            return slot + 2;
+        } else if (type == void.class) {
+            visitor.visitInsn(Opcodes.RETURN);
+            return slot + 1;
+        } else {
+            if (isReturn) {
+                visitor.visitInsn(Opcodes.ARETURN);
+            } else {
+                visitor.visitVarInsn(Opcodes.ALOAD, slot);
+            }
+            return slot + 1;
+        }
+    }
+
+    /**
+     * Fast create abstract class implement
+     *
+     * @param path   The implement name
+     * @param source The class source
+     * @return The implement class
+     * @since 2.11
+     */
+    public static ClassWriter AbstractClassInstance(String path, Class<?> source) {
+        ClassWriter cw = new ClassWriter(0);
+        // cw.visit(52, Opcodes.ACC_PUBLIC, path, null, source.getName().replace('.', '/'), null);
+        if (source.isInterface()) {
+            cw.visit(52, Opcodes.ACC_PUBLIC, path, null, "java/lang/Object", new String[]{
+                    source.getName().replace('.', '/')
+            });
+            publicObjectConstructor(cw, "java/lang/Object");
+        } else {
+            String a;
+            cw.visit(52, Opcodes.ACC_PUBLIC, path, null, a = source.getName().replace('.', '/'), null);
+            for (Constructor<?> c : source.getDeclaredConstructors()) {
+                if (Modifier.isPublic(c.getModifiers()) || Modifier.isProtected(c.getModifiers())) {
+                    String desc;
+                    final MethodVisitor visitor = cw.visitMethod(
+                            c.getModifiers(),
+                            "<init>",
+                            desc = Type.getConstructorDescriptor(c), null, null
+                    );
+                    visitor.visitCode();
+                    visitor.visitVarInsn(Opcodes.ALOAD, 0);
+                    int w = 1;
+                    for (Class<?> type : c.getParameterTypes()) {
+                        w = putTypeInsn(type, w, false, visitor);
+                    }
+                    visitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, a, "<init>", desc, false);
+                    visitor.visitInsn(Opcodes.RETURN);
+                    visitor.visitMaxs(w, w);
+                    visitor.visitEnd();
+                }
+            }
+        }
+//        publicObjectConstructor(cw, source.getName().replace('.', '/'));
+        return cw;
+    }
+
     public static Class<?> getRootAbstractClass(Class<?> own) {
         Class<?> bb = Object.class;
         for (Method m : own.getMethods()) {
@@ -131,24 +215,10 @@ public class WrappedClassImplements {
                     impl.visitFieldInsn(Opcodes.GETFIELD, createClass, field, desByteBuffer);
                     int stacks;
                     {
-                        Class[] params = m.getParameterTypes();
+                        Class<?>[] params = m.getParameterTypes();
                         int w = 1;
                         for (int i = 0; i < params.length; ) {
-                            Class type = params[i++];
-                            if (type == double.class) {
-                                impl.visitVarInsn(Opcodes.DLOAD, w);
-                                w += 2;
-                            } else if (type == float.class) {
-                                impl.visitVarInsn(Opcodes.FLOAD, w++);
-                            } else if (type == int.class || type == short.class || type == boolean.class ||
-                                    type == byte.class || type == char.class) {
-                                impl.visitVarInsn(Opcodes.ILOAD, w++);
-                            } else if (type == long.class) {
-                                impl.visitVarInsn(Opcodes.LLOAD, w);
-                                w += 2;
-                            } else {
-                                impl.visitVarInsn(Opcodes.ALOAD, w++);
-                            }
+                            w = putTypeInsn(params[i++], w, false, impl);
                         }
                         stacks = w;
                     }
@@ -158,21 +228,7 @@ public class WrappedClassImplements {
                                     Opcodes.INVOKEVIRTUAL, m.getDeclaringClass().getName().replace('.', '/'),
                             m.getName(), DR, m.getDeclaringClass().isInterface());
                     {
-                        Class type = m.getReturnType();
-                        if (type == double.class) {
-                            impl.visitInsn(Opcodes.DRETURN);
-                        } else if (type == float.class) {
-                            impl.visitInsn(Opcodes.FRETURN);
-                        } else if (type == int.class || type == short.class || type == boolean.class ||
-                                type == byte.class || type == char.class) {
-                            impl.visitInsn(Opcodes.IRETURN);
-                        } else if (type == long.class) {
-                            impl.visitInsn(Opcodes.LRETURN);
-                        } else if (type == void.class) {
-                            impl.visitInsn(Opcodes.RETURN);
-                        } else {
-                            impl.visitInsn(Opcodes.ARETURN);
-                        }
+                        putTypeInsn(m.getReturnType(), 0, true, impl);
                     }
                     impl.visitMaxs(stacks + 5, 1 + stacks);
                     impl.visitEnd();
@@ -245,7 +301,7 @@ public class WrappedClassImplements {
     }
 
     public enum MethodWrapperType {
-        OBJECT, INTERFACE, STATIC;
+        OBJECT, INTERFACE, STATIC
     }
 
     public static ClassWriter createMethodWrapper(

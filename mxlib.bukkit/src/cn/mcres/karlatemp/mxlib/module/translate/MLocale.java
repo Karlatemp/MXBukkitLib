@@ -158,6 +158,10 @@ public final class MLocale {
 
     static {
         MXBukkitLib.debug("[MLocale] module loaded.");
+        MXBukkitLib.debug(() -> {
+            MXBukkitLib.getLogger().printStackTrace(new Throwable().fillInStackTrace());
+            return "<StackTrace Dump>";
+        });
     }
 
     private static Plugin getCaller() {

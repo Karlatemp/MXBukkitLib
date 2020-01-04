@@ -48,6 +48,10 @@ public interface Replacer extends Function<String, String> {
         return sb.toString();
     }
 
+    default Object magicValue() {
+        return null;
+    }
+
     Replacer EMPTY = new Replacer() {
         @Override
         public boolean containsKey(String key) {

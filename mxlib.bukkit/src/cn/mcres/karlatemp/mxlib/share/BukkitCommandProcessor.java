@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 
+@Deprecated
 public class BukkitCommandProcessor extends SharedCommandProcessorImpl {
     @Override
     public ICommand boxingCommand(@NotNull Object command) {

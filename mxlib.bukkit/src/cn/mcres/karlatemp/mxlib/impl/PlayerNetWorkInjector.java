@@ -82,41 +82,12 @@ public class PlayerNetWorkInjector extends PacketSender implements Listener {
             // channel.pipeline().remove("mxlib_custom_packet_writer");
             // MXBukkitLib.debug(() -> "[PlayerNetWorkInjector] Removed Custom Packet Writer [" + player.getName() + "]");
             channel.pipeline().remove("mxlib_plugin_message_replacer");
+            channel.pipeline().remove("mxlib_custom_packet_writer");
         } else {
-            channel.pipeline().addAfter("encoder", "mxlib_plugin_message_replacer", new PluginMessageProvider(player));
+            channel.pipeline()
+                    .addAfter("encoder", "mxlib_custom_packet_writer", writer)
+                    .addBefore("encoder", "mxlib_plugin_message_replacer", new PluginMessageProvider(player));
 
-            //channel.pipeline().addBefore("encoder", "mxlib_custom_packet_writer", new CustomPacketWriter());
-            final ChannelHandler encoder = channel.pipeline().get("encoder");
-            if (encoder instanceof FilterMessageEncoder) {
-                FilterMessageEncoder filter = (FilterMessageEncoder) encoder;
-                List<MessageToByteEncoder> encoders = filter.encoders;
-                if (!encoders.contains(writer)) {
-                    try {
-                        encoders.add(0, writer);
-                    } catch (Throwable thr) {
-                        encoders = new ArrayList<>(encoders);
-                        encoders.add(0, writer);
-                        filter.encoders = encoders;
-                    }
-                }
-                if (!encoders.contains(writer)) {
-                    encoders = new ArrayList<>(encoders);
-                    encoders.add(0, writer);
-                    filter.encoders = encoders;
-                }
-            } else {
-                if (encoder instanceof MessageToByteEncoder) {
-                    channel.pipeline().replace("encoder", "encoder", new FilterMessageEncoder(writer, (MessageToByteEncoder) encoder));
-                } else {
-                    String str = String.valueOf(encoder);
-                    Class<?> c = encoder.getClass();
-                    if (!str.startsWith(c.getName())) {
-                        str += " (" + c.getName() + ")@" + Integer.toHexString(encoder.hashCode());
-                    }
-                    MXBukkitLib.getLogger().error("[PlayerNetWorkInjector] Failed to replace PacketEncoder " + str);
-                    return;
-                }
-            }
             MXBukkitLib.debug(() -> "[PlayerNetWorkInjector] Injected Custom Packet Writer [" + player.getName() + "]");
         }
     }

@@ -22,13 +22,13 @@ public class DefaultAutoConfig {
 
     @Bean
     IConfigurationProcessor processor() {
-        return new SharedConfigurationCommandProcessor();
+        return new SharedConfigurationProcessor();
     }
 
-    @Bean
+    /*@Bean
     ICommandProcessor commandProcessor() {
         return new SharedCommandProcessorImpl();
-    }
+    }*/
 
     @Bean
     MethodHandles.Lookup lookup() {

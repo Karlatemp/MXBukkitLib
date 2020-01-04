@@ -8,10 +8,8 @@ package cn.mcres.karlatemp.mxlib.share;
 import cn.mcres.karlatemp.mxlib.MXBukkitLib;
 import cn.mcres.karlatemp.mxlib.MXLib;
 import cn.mcres.karlatemp.mxlib.configuration.IConfigurationProcessor;
-import cn.mcres.karlatemp.mxlib.event.Event;
 import cn.mcres.karlatemp.mxlib.event.HandlerList;
 import cn.mcres.karlatemp.mxlib.exceptions.ScanException;
-import cn.mcres.karlatemp.mxlib.share.system.MXBukkitAutoConfig;
 import cn.mcres.karlatemp.mxlib.shared.ReadPropertiesAutoConfigs;
 import cn.mcres.karlatemp.mxlib.tools.IClassScanner;
 import org.bukkit.Bukkit;
@@ -20,9 +18,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -34,8 +29,10 @@ public class MXBukkitLibPluginStartup extends JavaPlugin {
     public static final List<Consumer<Boolean>> hooks = new ArrayList<>();
 
     static {
+        //noinspection deprecation
         ReadPropertiesAutoConfigs.resourceLoaders.add(res -> {
             List<InputStream> readers = new ArrayList<>();
+            // MXBukkitLib.debug("[AutoConfigResourceLoader] Fining resource " + res);
             for (Plugin p : Bukkit.getPluginManager().getPlugins()) {
                 final InputStream stream = p.getResource(res);
                 if (stream != null) {

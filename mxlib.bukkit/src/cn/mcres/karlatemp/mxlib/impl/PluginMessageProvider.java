@@ -7,6 +7,7 @@ package cn.mcres.karlatemp.mxlib.impl;
 
 import cn.mcres.karlatemp.mxlib.event.bukkit.BukkitPluginMessageSendEvent;
 import cn.mcres.karlatemp.mxlib.module.packet.PacketDataSerializer;
+import cn.mcres.karlatemp.mxlib.share.BukkitToolkit;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -14,6 +15,7 @@ import org.bukkit.entity.Player;
 
 public class PluginMessageProvider extends MessageToByteEncoder<ByteBuf> {
     private final Player owner;
+    private static int PID = BukkitToolkit.getPacketId("PacketPlayOutCustomPayload");
 
     public PluginMessageProvider(Player owner) {
         this.owner = owner;
@@ -29,7 +31,7 @@ public class PluginMessageProvider extends MessageToByteEncoder<ByteBuf> {
         PacketDataSerializer ip = PacketDataSerializer.fromByteBuf(input);
         PacketDataSerializer op = PacketDataSerializer.fromByteBuf(output);
         int id = ip.readVarInt();
-        if (id == 0x18) {
+        if (id == PID) {
             op.writeVarInt(id);
             String key = ip.readString(32767);
             int len = ip.readableBytes();

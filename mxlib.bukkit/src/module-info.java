@@ -12,8 +12,6 @@ module mxlib.bukkit {
     exports cn.mcres.karlatemp.mxlib.module.chat;
     exports cn.mcres.karlatemp.mxlib.module.namespace;
     exports cn.mcres.karlatemp.mxlib.module.translate;
-    exports cn.mcres.karlatemp.mxlib.share.system;
-    exports cn.mcres.karlatemp.mxlib.share.system.cmds;
     requires mxlib.api;
     requires BungeeChatAPI;
     requires org.jetbrains.annotations;

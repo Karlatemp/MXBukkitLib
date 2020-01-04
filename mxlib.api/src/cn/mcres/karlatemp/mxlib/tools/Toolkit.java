@@ -11,6 +11,8 @@ import cn.mcres.karlatemp.mxlib.cmd.ICommands;
 import cn.mcres.karlatemp.mxlib.internal.ClassLoaderGetter;
 import cn.mcres.karlatemp.mxlib.internal.UFRF;
 import cn.mcres.karlatemp.mxlib.internal.UnsafeInstaller;
+import cn.mcres.karlatemp.mxlib.util.FilesIterator;
+import cn.mcres.karlatemp.mxlib.util.IteratorSupplier;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,23 +29,61 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.security.Permission;
 import java.security.ProtectionDomain;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 /**
  * 一个工具集合
  */
-@SuppressWarnings("JavadocReference")
 public class Toolkit {
+    /**
+     * @param k   The entry key
+     * @param v   The entry value
+     * @param <K> The key type
+     * @param <V> The value type.
+     * @return A new Entry.
+     * @since 2.11
+     */
+    public static <K, V> Map.Entry<K, V> entry(K k, V v) {
+        return new Map.Entry<>() {
+            V vx = v;
+
+            @Override
+            public K getKey() {
+                return k;
+            }
+
+            @Override
+            public V getValue() {
+                return vx;
+            }
+
+            @Override
+            public V setValue(V value) {
+                V vv = vx;
+                vx = value;
+                return vv;
+            }
+        };
+    }
+
+    public static <T, V, M extends Map<T, V>> Collector<Map.Entry<T, V>, M, M> toMapCollector(Supplier<M> mapCreator) {
+        return Collector.of(mapCreator,
+                (map, entry) -> map.put(entry.getKey(), entry.getValue()),
+                (m1, m2) -> {
+                    m1.putAll(m2);
+                    return m1;
+                });
+    }
+
     /**
      * @param cb  The function to invoke.
      * @param <T> The type of the callable
@@ -55,7 +95,7 @@ public class Toolkit {
     public static <T> Callable<T> toCallable(Object cb) {
         if (cb == null) return null;
         if (cb instanceof Callable) {
-            return (Callable) cb;
+            return (Callable<T>) cb;
         }
         if (cb instanceof Runnable) {
             return () -> {
@@ -225,9 +265,7 @@ public class Toolkit {
     }
 
     public static <T> void fill(@NotNull T[] args, @Nullable T o) {
-        for (int i = 0; i < args.length; i++) {
-            args[i] = o;
-        }
+        Arrays.fill(args, o);
     }
 
     /**
@@ -240,7 +278,7 @@ public class Toolkit {
      * @param <T>    The type of array
      * @since 2.4
      */
-    public static <T> void fill(@NotNull T[] args, int off, int length, @Nullable T o) {
+    public static <T> void fill(T[] args, int off, int length, @Nullable T o) {
         for (int i = off; i < args.length && length-- > 0; i++) {
             args[i] = o;
         }
@@ -532,6 +570,141 @@ public class Toolkit {
             return ref.defineClass0(loader, name, b, off, len, protectionDomain);
         }
 
+        /**
+         * <p> The first class defined in a package determines the exact set of
+         * certificates that all subsequent classes defined in that package must
+         * contain.  The set of certificates for a class is obtained from the
+         * {@link java.security.CodeSource <tt>CodeSource</tt>} within the
+         * <tt>ProtectionDomain</tt> of the class.  Any classes added to that
+         * package must contain the same set of certificates or a
+         * <tt>SecurityException</tt> will be thrown.  Note that if
+         * <tt>name</tt> is <tt>null</tt>, this check is not performed.
+         * You should always pass in the <a href="#name">binary name</a> of the
+         * class you are defining as well as the bytes.  This ensures that the
+         * class you are defining is indeed the class you think it is.
+         *
+         * <p> The specified <tt>name</tt> cannot begin with "<tt>java.</tt>", since
+         * all classes in the "<tt>java.*</tt> packages can only be defined by the
+         * bootstrap class loader.  If <tt>name</tt> is not <tt>null</tt>, it
+         * must be equal to the <a href="#name">binary name</a> of the class
+         * specified by the byte array "<tt>b</tt>", otherwise a {@link
+         * NoClassDefFoundError <tt>NoClassDefFoundError</tt>} will be thrown. </p>
+         *
+         * @param loader           The loader to be executed
+         * @param name             The expected <a href="#name">binary name</a> of the class, or
+         *                         <tt>null</tt> if not known
+         * @param code             The bytes that make up the class data. The bytes in positions
+         *                         <tt>off</tt> through <tt>off+len-1</tt> should have the format
+         *                         of a valid class file as defined by
+         *                         <cite>The Java&trade; Virtual Machine Specification</cite>.
+         * @param protectionDomain The ProtectionDomain of the class
+         * @return The <tt>Class</tt> object created from the data,
+         * and optional <tt>ProtectionDomain</tt>.
+         * @throws ClassFormatError     If the data did not contain a valid class
+         * @throws NoClassDefFoundError If <tt>name</tt> is not equal to the <a href="#name">binary
+         *                              name</a> of the class specified by <tt>code</tt>
+         * @throws SecurityException    If an attempt is made to add this class to a package that
+         *                              contains classes that were signed by a different set of
+         *                              certificates than this class, or if <tt>name</tt> begins with
+         *                              "<tt>java.</tt>".
+         * @since 2.11
+         */
+        public static Class<?> defineClass(ClassLoader loader,
+                                           String name,
+                                           @NotNull byte[] code,
+                                           ProtectionDomain protectionDomain)
+                throws ClassFormatError {
+            return defineClass(loader, name, code, 0, code.length, protectionDomain);
+        }
+
+        /**
+         * <p> The first class defined in a package determines the exact set of
+         * certificates that all subsequent classes defined in that package must
+         * contain.  The set of certificates for a class is obtained from the
+         * {@link java.security.CodeSource <tt>CodeSource</tt>} within the
+         * <tt>ProtectionDomain</tt> of the class.  Any classes added to that
+         * package must contain the same set of certificates or a
+         * <tt>SecurityException</tt> will be thrown.  Note that if
+         * <tt>name</tt> is <tt>null</tt>, this check is not performed.
+         * You should always pass in the <a href="#name">binary name</a> of the
+         * class you are defining as well as the bytes.  This ensures that the
+         * class you are defining is indeed the class you think it is.
+         *
+         * <p> The specified <tt>name</tt> cannot begin with "<tt>java.</tt>", since
+         * all classes in the "<tt>java.*</tt> packages can only be defined by the
+         * bootstrap class loader.  If <tt>name</tt> is not <tt>null</tt>, it
+         * must be equal to the <a href="#name">binary name</a> of the class
+         * specified by the byte array "<tt>b</tt>", otherwise a {@link
+         * NoClassDefFoundError <tt>NoClassDefFoundError</tt>} will be thrown. </p>
+         *
+         * @param loader           The loader to be executed
+         * @param code             The bytes that make up the class data. The bytes in positions
+         *                         <tt>off</tt> through <tt>off+len-1</tt> should have the format
+         *                         of a valid class file as defined by
+         *                         <cite>The Java&trade; Virtual Machine Specification</cite>.
+         * @param protectionDomain The ProtectionDomain of the class
+         * @return The <tt>Class</tt> object created from the data,
+         * and optional <tt>ProtectionDomain</tt>.
+         * @throws ClassFormatError     If the data did not contain a valid class
+         * @throws NoClassDefFoundError If <tt>name</tt> is not equal to the <a href="#name">binary
+         *                              name</a> of the class specified by <tt>b</tt>
+         * @throws SecurityException    If an attempt is made to add this class to a package that
+         *                              contains classes that were signed by a different set of
+         *                              certificates than this class, or if <tt>name</tt> begins with
+         *                              "<tt>java.</tt>".
+         * @since 2.11
+         */
+        public static Class<?> defineClass(ClassLoader loader,
+                                           @NotNull byte[] code,
+                                           ProtectionDomain protectionDomain)
+                throws ClassFormatError {
+            return defineClass(loader, null, code, 0, code.length, protectionDomain);
+        }
+
+        /**
+         * <p> The first class defined in a package determines the exact set of
+         * certificates that all subsequent classes defined in that package must
+         * contain.  The set of certificates for a class is obtained from the
+         * {@link java.security.CodeSource <tt>CodeSource</tt>} within the
+         * <tt>ProtectionDomain</tt> of the class.  Any classes added to that
+         * package must contain the same set of certificates or a
+         * <tt>SecurityException</tt> will be thrown.  Note that if
+         * <tt>name</tt> is <tt>null</tt>, this check is not performed.
+         * You should always pass in the <a href="#name">binary name</a> of the
+         * class you are defining as well as the bytes.  This ensures that the
+         * class you are defining is indeed the class you think it is.
+         *
+         * <p> The specified <tt>name</tt> cannot begin with "<tt>java.</tt>", since
+         * all classes in the "<tt>java.*</tt> packages can only be defined by the
+         * bootstrap class loader.  If <tt>name</tt> is not <tt>null</tt>, it
+         * must be equal to the <a href="#name">binary name</a> of the class
+         * specified by the byte array "<tt>b</tt>", otherwise a {@link
+         * NoClassDefFoundError <tt>NoClassDefFoundError</tt>} will be thrown. </p>
+         *
+         * @param loader           The loader to be executed
+         * @param code             The bytes that make up the class data. The bytes in positions
+         *                         <tt>off</tt> through <tt>off+len-1</tt> should have the format
+         *                         of a valid class file as defined by
+         *                         <cite>The Java&trade; Virtual Machine Specification</cite>.
+         * @param protectionDomain The ProtectionDomain of the class
+         * @return The <tt>Class</tt> object created from the data,
+         * and optional <tt>ProtectionDomain</tt>.
+         * @throws ClassFormatError     If the data did not contain a valid class
+         * @throws NoClassDefFoundError If <tt>name</tt> is not equal to the <a href="#name">binary
+         *                              name</a> of the class specified by <tt>b</tt>
+         * @throws SecurityException    If an attempt is made to add this class to a package that
+         *                              contains classes that were signed by a different set of
+         *                              certificates than this class, or if <tt>name</tt> begins with
+         *                              "<tt>java.</tt>".
+         * @since 2.11
+         */
+        public static Class<?> defineClass(ClassLoader loader,
+                                           @NotNull ClassWriter code,
+                                           ProtectionDomain protectionDomain)
+                throws ClassFormatError {
+            return defineClass(loader, null, code.toByteArray(), protectionDomain);
+        }
+
         static {
             MethodHandles.Lookup lk;
             try {
@@ -560,7 +733,7 @@ public class Toolkit {
         @NotNull
         @Contract(pure = true)
         public static Class<?> getCallerClass() {
-            final Class[] ct = StackTrace.kit.ct();
+            final Class<?>[] ct = StackTrace.kit.ct();
             return ct[3];
         }
 
@@ -574,7 +747,7 @@ public class Toolkit {
         @Contract(pure = true)
         public static Class<?> getCallerClass(int point) {
             if (point < 0) return null;
-            final Class[] ct = StackTrace.kit.ct();
+            final Class<?>[] ct = StackTrace.kit.ct();
             int at = point + 3;
             if (at < ct.length)
                 return ct[at];
@@ -704,7 +877,7 @@ public class Toolkit {
                 field.getDeclaringClass().cast(this_);
                 offset = unsafe.objectFieldOffset(field);
             }
-            Class typ = field.getType();
+            Class<?> typ = field.getType();
             if (typ == boolean.class) {
                 unsafe.putBoolean(this_, offset, (boolean) value);
             } else if (typ == int.class) {
@@ -731,7 +904,7 @@ public class Toolkit {
             for (Field f : type.getDeclaredFields()) {
                 if (!Modifier.isStatic(f.getModifiers())) {
                     final long offset = unsafe.objectFieldOffset(f);
-                    Class typ = f.getType();
+                    Class<?> typ = f.getType();
                     if (typ == boolean.class) {
                         unsafe.putBoolean(to, offset, unsafe.getBoolean(from, offset));
                     } else if (typ == int.class) {
@@ -765,7 +938,7 @@ public class Toolkit {
      * 堆栈
      */
     public static class StackTrace {
-        Class c;
+        Class<?> c;
         StackTraceElement elm;
 
         @Override
@@ -775,7 +948,7 @@ public class Toolkit {
         }
 
         @Contract(pure = true)
-        public Class getContent() {
+        public Class<?> getContent() {
             return c;
         }
 
@@ -861,6 +1034,7 @@ public class Toolkit {
             public void checkMulticast(InetAddress maddr) {
             }
 
+            @SuppressWarnings("deprecation")
             @Override
             @Deprecated
             public void checkMulticast(InetAddress maddr, byte ttl) {
@@ -902,7 +1076,7 @@ public class Toolkit {
             }
 
             StackTrace[] classes() {
-                Class[] classes = StackTrace.getClassContext();
+                Class<?>[] classes = StackTrace.getClassContext();
                 StackTraceElement[] elements = new Throwable().getStackTrace();
                 StackTrace[] traces = new StackTrace[elements.length - 2];
 
@@ -919,7 +1093,7 @@ public class Toolkit {
 
                 for (; s < traces.length; ) {
                     StackTraceElement trace = elements[e_i++];
-                    Class c;
+                    Class<?> c;
                     // int cos = c_i;
                     c = classes[c_i];
                     if (!trace.getClassName().equals(c.getName())) {
@@ -935,7 +1109,7 @@ public class Toolkit {
                 return traces;
             }
 
-            Class[] ct() {
+            Class<?>[] ct() {
                 return this.getClassContext();
             }
         }
@@ -991,11 +1165,11 @@ public class Toolkit {
          * @return 堆栈列表(只有类)
          */
         @Contract(pure = true)
-        public static Class[] getClassContext() {
-            Class[] cc = kit.ct();
-            if (cc.length < 2) return new Class[0];
+        public static Class<?>[] getClassContext() {
+            Class<?>[] cc = kit.ct();
+            if (cc.length < 2) return new Class<?>[0];
             int x = cc.length - 2;
-            Class[] nw = new Class[x];
+            Class<?>[] nw = new Class<?>[x];
             System.arraycopy(cc, 2, nw, 0, x);
             return nw;
         }
@@ -1171,6 +1345,84 @@ public class Toolkit {
         public static void insertEmpty(long position, int size, @NotNull RandomAccessFile access) throws IOException {
             if (size < 1) return;
             insertData(position, ByteBuffer.allocateDirect(size), access, true);
+        }
+
+        /**
+         * Quick calculation of file/directory
+         *
+         * @param md   The meddage digest
+         * @param file The file or dir
+         * @return the digest
+         * @throws IOException Throw when make any exception.
+         * @since 2.11
+         */
+        public static byte[] digest(@NotNull MessageDigest md, @NotNull File file) throws IOException {
+            if (file.isDirectory()) {
+                int root = file.toString().length();
+                FilesIterator files = new FilesIterator(file, -1, false, false);
+                ByteArrayInputStream EMPTY = new ByteArrayInputStream(new byte[0]);
+                return digest(md, new IteratorSupplier<>(
+                        new Iterator<>() {
+                            private File current;
+
+                            @Override
+                            public boolean hasNext() {
+                                if (current == null)
+                                    return files.hasNext();
+                                return true;
+                            }
+
+                            @Override
+                            public InputStream next() {
+                                if (current != null) {
+                                    File f = current;
+                                    current = null;
+                                    if (f.isDirectory()) return EMPTY;
+                                    try {
+                                        return new FileInputStream(f);
+                                    } catch (FileNotFoundException e) {
+                                        throw new IOError(e);
+                                    }
+                                } else {
+                                    if (files.hasNext()) {
+                                        current = files.next();
+                                        return new ByteArrayInputStream(('.' + current.toString().substring(root)).getBytes(StandardCharsets.UTF_8));
+                                    }
+                                    return null;
+                                }
+                            }
+                        }
+                ), null);
+            }
+            return digest(md, new IteratorSupplier<>(
+                    Collections.singletonList(new FileInputStream(file)).iterator()
+            ), null);
+        }
+
+        /**
+         * Quick calculation of input streams.
+         *
+         * @param md     The message digest using.
+         * @param data   Streams.
+         * @param buffer reading buffer.
+         * @return Result
+         * @throws IOException Stream Reading Error.
+         */
+        public static byte[] digest(@NotNull MessageDigest md, @NotNull Supplier<? extends InputStream> data, @Nullable byte[] buffer) throws IOException {
+            if (buffer == null) {
+                buffer = new byte[2048];
+            }
+            while (true) {
+                var next = data.get();
+                if (next == null) break;
+                do {
+                    var length = next.read(buffer);
+                    if (length == -1) break;
+                    md.update(buffer, 0, length);
+                } while (true);
+                next.close();
+            }
+            return md.digest();
         }
     }
 }

@@ -50,12 +50,12 @@ public class PluginAutoConfig {
     }
 
 
-    @Bean
-    ICommandProcessor processor(ICommandProcessor p) {
-        if (BukkitCheck.bukkit)
-            return new BukkitCommandProcessor();
-        return p;
-    }
+//    @Bean
+//    ICommandProcessor processor(ICommandProcessor p) {
+//        if (BukkitCheck.bukkit)
+//            return new BukkitCommandProcessor();
+//        return p;
+//    }
 
     @Bean
     void zboot(IEnvironmentFactory factory) {

@@ -15,6 +15,5 @@ import java.io.Reader;
 
 public class PW {
     public static void main(String[] args) throws Throwable {
-        XMLStreamReader reader = XMLInputFactory.newDefaultFactory().createXMLStreamReader(Reader.nullReader());
     }
 }
