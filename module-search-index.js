@@ -1,1 +1,1 @@
-moduleSearchIndex = [{"l":"mxlib.api"},{"l":"mxlib.bukkit"},{"l":"mxlib.command.api"},{"l":"mxlib.common.class_info"},{"l":"mxlib.configuration"},{"l":"mxlib.core"}]
+moduleSearchIndex = [{"l":"mxlib.api"},{"l":"mxlib.bukkit"},{"l":"mxlib.command.api"},{"l":"mxlib.common.class_info"},{"l":"mxlib.common.plugin.class_definer"},{"l":"mxlib.configuration"},{"l":"mxlib.core"}]
