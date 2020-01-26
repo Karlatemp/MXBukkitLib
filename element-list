@@ -50,6 +50,7 @@ module:mxlib.common.class_info
 cn.mcres.karlatemp.mxlib.common.class_info
 cn.mcres.karlatemp.mxlib.common.class_info.internal
 module:mxlib.common.plugin.class_definer
+cn.mcres.karlatemp.mxlib.common.plugin_class_definer
 module:mxlib.configuration
 cn.mcres.karlatemp.mxlib.config
 module:mxlib.core
