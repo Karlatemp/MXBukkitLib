@@ -155,7 +155,7 @@ button {
     position:fixed;
     width:100%;
     z-index:999;
-    /* background-color:#ffffff; */
+    background-color:black;
 }
 .topNav {
     background-color:#438ccc;
@@ -261,7 +261,7 @@ ul.subNavList li {
 .indexNav {
     position:relative;
     font-size:12px;
-    background-color:#dee3e9;
+    background-color:#4d7a97;
 }
 .indexNav ul {
     margin-top:0;
@@ -622,7 +622,7 @@ h1.hidden {
 .block {
     display:block;
     margin:3px 10px 2px 0px;
-    color:#474747;
+    color:#3cf4ff;
 }
 .deprecatedLabel, .descfrmTypeLabel, .implementationLabel, .memberNameLabel, .memberNameLink,
 .moduleLabelInPackage, .moduleLabelInType, .overrideSpecifyLabel, .packageLabelInType,
