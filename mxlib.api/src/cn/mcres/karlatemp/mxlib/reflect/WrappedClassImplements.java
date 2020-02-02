@@ -26,43 +26,44 @@ import java.util.stream.Stream;
  */
 public class WrappedClassImplements {
     public static int putTypeInsn(Class<?> type, int slot, boolean isReturn, MethodVisitor visitor) {
-        if (type == void.class && !isReturn) throw new IllegalArgumentException();
-        if (type == double.class) {
-            if (isReturn)
-                visitor.visitInsn(Opcodes.DRETURN);
-            else
-                visitor.visitVarInsn(Opcodes.DLOAD, slot);
-            return slot + 2;
-        } else if (type == float.class) {
-            if (isReturn)
-                visitor.visitInsn(Opcodes.FRETURN);
-            else
-                visitor.visitVarInsn(Opcodes.FLOAD, slot);
-            return slot + 1;
-        } else if (type == int.class || type == short.class || type == boolean.class ||
-                type == byte.class || type == char.class) {
-            if (isReturn)
-                visitor.visitInsn(Opcodes.IRETURN);
-            else
-                visitor.visitVarInsn(Opcodes.ILOAD, slot);
-            return slot + 1;
-        } else if (type == long.class) {
-            if (isReturn)
-                visitor.visitInsn(Opcodes.LRETURN);
-            else
-                visitor.visitVarInsn(Opcodes.LLOAD, slot);
-            return slot + 2;
-        } else if (type == void.class) {
-            visitor.visitInsn(Opcodes.RETURN);
-            return slot + 1;
-        } else {
-            if (isReturn) {
-                visitor.visitInsn(Opcodes.ARETURN);
-            } else {
-                visitor.visitVarInsn(Opcodes.ALOAD, slot);
-            }
-            return slot + 1;
+        return putTypeInsn(Type.getType(type), slot, isReturn, visitor);
+    }
+
+    public static int putTypeInsn(Type type, int slot, boolean isReturn, MethodVisitor visitor) {
+        switch (type.getSort()) {
+            case Type.VOID:
+                if (!isReturn) throw new IllegalArgumentException();
+                visitor.visitInsn(Opcodes.RETURN);
+                break;
+            case Type.DOUBLE:
+                if (isReturn) visitor.visitInsn(Opcodes.DRETURN);
+                else visitor.visitVarInsn(Opcodes.DLOAD, slot);
+                break;
+            case Type.FLOAT:
+                if (isReturn) visitor.visitInsn(Opcodes.FRETURN);
+                else visitor.visitVarInsn(Opcodes.FLOAD, slot);
+                break;
+            case Type.INT:
+            case Type.SHORT:
+            case Type.BOOLEAN:
+            case Type.BYTE:
+            case Type.CHAR:
+                if (isReturn) visitor.visitInsn(Opcodes.IRETURN);
+                else visitor.visitVarInsn(Opcodes.ILOAD, slot);
+                break;
+            case Type.LONG:
+                if (isReturn) visitor.visitInsn(Opcodes.LRETURN);
+                else visitor.visitVarInsn(Opcodes.LLOAD, slot);
+                break;
+            case Type.OBJECT:
+            case Type.ARRAY:
+                if (isReturn) visitor.visitInsn(Opcodes.ARETURN);
+                else visitor.visitVarInsn(Opcodes.ALOAD, slot);
+                break;
+            default:
+                throw new IllegalArgumentException();
         }
+        return slot + type.getSize();
     }
 
     /**

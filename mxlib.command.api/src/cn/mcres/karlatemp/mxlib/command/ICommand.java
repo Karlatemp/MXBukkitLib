@@ -21,8 +21,6 @@ public interface ICommand {
 
     void tabCompile(Object sender, @NotNull List<String> result, @NotNull List<String> fillArguments, @NotNull List<String> args);
 
-    void doHelp(Object sender, @NotNull List<String> args, @NotNull List<String> fullArguments);
-
     String description();
 
     Map<String, CommandParameter> parameters();
@@ -37,4 +35,6 @@ public interface ICommand {
         if (isCommandSet()) return false;
         return !parameters().isEmpty();
     }
+
+    CommandProvider provider();
 }

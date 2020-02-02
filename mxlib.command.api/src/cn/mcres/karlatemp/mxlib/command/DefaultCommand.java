@@ -5,12 +5,20 @@
 
 package cn.mcres.karlatemp.mxlib.command;
 
+import cn.mcres.karlatemp.mxlib.MXBukkitLib;
 import cn.mcres.karlatemp.mxlib.command.annoations.*;
 import cn.mcres.karlatemp.mxlib.command.exceptions.ParserFailToParseException;
 import cn.mcres.karlatemp.mxlib.command.internal.DefaultParameterParser;
 import cn.mcres.karlatemp.mxlib.command.internal.Tools;
+import cn.mcres.karlatemp.mxlib.tools.ClassResourceLoaders;
+import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AnnotationNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodNode;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -73,7 +81,7 @@ public class DefaultCommand implements ICommand {
 
     public DefaultCommand(String name, String permission, String noPermissionMessage,
                           String description, String usage,
-                          Method method, Object self, CommandProvider provider) {
+                          Method method, Object self, @NotNull CommandProvider provider) {
         this.name = name;
         this.permission = permission;
         this.noPermissionMessage = noPermissionMessage;
@@ -81,8 +89,8 @@ public class DefaultCommand implements ICommand {
         this.usage = usage;
         this.method = method;
         this.self = self;
-        this.solts = parseSolts(method);
         this.provider = provider;
+        this.solts = parseSolts(method);
     }
 
     @Override
@@ -112,12 +120,14 @@ public class DefaultCommand implements ICommand {
                     } else {
                         s[i] = (sender, ag, un_parsed, full, fullCommandArgument, label_z) -> null;
                     }
+                    continue next;
                 } else if (a instanceof MProvider) {
                     if (types[i].isInstance(provider)) {
                         s[i] = (sender, ag, un_parsed, full, fullCommandArgument, label_z) -> provider;
                     } else {
                         s[i] = (sender, ag, un_parsed, full, fullCommandArgument, label_z) -> null;
                     }
+                    continue next;
                 } else if (a instanceof MSender) {
                     s[i] = (sender, ag, un_parsed, full, fullCommandArgument, label_z) -> sender;
                     if (paramType != null) {
@@ -159,6 +169,7 @@ public class DefaultCommand implements ICommand {
                     ag.description = par.description();
                     ag.require = par.require();
                     ag.type = type;
+                    override(i, annotations, ag);
                     this.args.put(ag.name, ag);
                     try {
                         ag.parser = par.parser().getConstructor().newInstance();
@@ -185,6 +196,59 @@ public class DefaultCommand implements ICommand {
             s[i] = (sender, ag, un_parsed, full, fullCommandArgument, label_z) -> DefaultParameterParser.getDefault(type);
         }
         return s;
+    }
+
+    private boolean scanned = false;
+    private MethodNode methodNode;
+
+    private static boolean override$a(Arguments UNR, String BUG) {
+        String str = BUG.toLowerCase();
+        if (str.endsWith(".notnull") | str.endsWith(".nonnull")) {
+            UNR.require = true;
+            return true;
+        } else if (str.endsWith(".nullable")) {
+            UNR.require = false;
+            return true;
+        }
+        return false;
+    }
+
+    private void override(int i, Annotation[][] annotations, Arguments ag) {
+        Annotation[] anno = annotations[i];
+        for (Annotation a : anno) { // Scan in visitable
+            if (override$a(ag, a.annotationType().getName())) return;
+        }
+        if (!scanned) {
+            scanned = true;
+            final byte[] found = MXBukkitLib.getBeanManager().getBeanNonNull(ClassResourceLoaders.class)
+                    .found(method.getDeclaringClass().getName(), Toolkit.Reflection.getClassLoader(method.getDeclaringClass()), MXBukkitLib.getBeanManager());
+            if (found == null) {
+                provider.logger().log(Level.WARNING, "[MXLibCommandSystem] Failed to load class source: " + method.getDeclaringClass());
+            } else {
+                ClassReader reader = new ClassReader(found);
+                var node = new ClassNode();
+                reader.accept(node, 0);
+                for (var s : node.methods) {
+                    if (s.name.equals(method.getName())) {
+                        if (s.desc.equals(Type.getMethodDescriptor(method))) {
+                            methodNode = s;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (methodNode != null) {
+            var ins = methodNode.invisibleParameterAnnotations;
+            if (ins != null) {
+                var ins0 = ins[i];
+                if (ins0 != null) {
+                    for (var anno0 : ins0) {
+                        if (override$a(ag, Type.getType(anno0.desc).getClassName())) return;
+                    }
+                }
+            }
+        }
     }
 
     protected final Object check(Object sender) {
@@ -263,7 +327,7 @@ public class DefaultCommand implements ICommand {
                     fillArguments, label);
         }
         try {
-            System.out.println(Arrays.toString(args));
+            // System.out.println(Arrays.toString(args));
             method.invoke(self, args);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
@@ -343,15 +407,13 @@ public class DefaultCommand implements ICommand {
     }
 
     @Override
-    public void doHelp(Object sender, @NotNull List<String> args, @NotNull List<String> fullArguments) {
-        sender = check(sender);
-        if (sender == null) return;
-
-    }
-
-    @Override
     public Map<String, CommandParameter> parameters() {
         if (args.isEmpty()) return Collections.emptyMap();
         return ImmutableMap.copyOf(this.args);
+    }
+
+    @Override
+    public CommandProvider provider() {
+        return provider;
     }
 }

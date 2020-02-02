@@ -109,7 +109,7 @@ public class CommandBuilder {
                     }
                     list = scanner.scan(source, new ArrayList<>());
                 } else {
-                    String pck = this.pck.getName();
+                    String pck = this.pck.getName() + ".";
                     list = scanner.scan(file, new ArrayList<>()).stream()
                             .filter(a -> a.startsWith(pck))
                             .collect(Collectors.toList());

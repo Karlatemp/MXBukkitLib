@@ -13,9 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -64,23 +62,39 @@ public class TranslateLoader {
     };
 
     private static void load(
-            Function<String, InputStream> resourceLoader,
+            Function<String, List<InputStream>> resourceLoader,
             String path,
             ResourceParser parser,
             LinkedTranslate link,
             BiConsumer<String, Throwable> errorCatch) {
-        InputStream resource = resourceLoader.apply(path);
-        if (resource != null) {
-            try {
-                link.translates.add(0, parser.parse(path, resource));
-            } catch (Throwable e) {
-                errorCatch.accept(path, e);
+        List<InputStream> streams = resourceLoader.apply(path);
+        if (streams != null) {
+            for (InputStream stream : streams) {
+                if (stream != null) {
+                    try (stream) {
+                        link.translates.add(0, parser.parse(path, stream));
+                    } catch (Throwable err) {
+                        errorCatch.accept(path, err);
+                    }
+                }
             }
         }
     }
 
-    public static MTranslate loadTranslate(
-            @NotNull Function<String, InputStream> resourceLoader,
+    /**
+     * Load translates from resource.
+     *
+     * @param resourceLoader Resources loader
+     * @param name           The path of resource.
+     * @param locale         The using locale
+     * @param suffix         The suffix of resource. Eg: ".json"
+     * @param resourceParser The parser of resource
+     * @param errorCatch     A Catcher
+     * @return Loaded translate.
+     * @since 2.12
+     */
+    public static MTranslate loadTranslates(
+            @NotNull Function<String, List<InputStream>> resourceLoader,
             @NotNull String name,
             Locale locale,
             @NotNull String suffix,
@@ -99,5 +113,19 @@ public class TranslateLoader {
             }
         }
         return link;
+    }
+
+    public static MTranslate loadTranslate(
+            @NotNull Function<String, InputStream> resourceLoader,
+            @NotNull String name,
+            Locale locale,
+            @NotNull String suffix,
+            @NotNull ResourceParser resourceParser,
+            @NotNull BiConsumer<String, Throwable> errorCatch) {
+        return loadTranslates(path -> {
+            final InputStream stream = resourceLoader.apply(path);
+            if (stream == null) return Collections.emptyList();
+            return Collections.singletonList(stream);
+        }, name, locale, suffix, resourceParser, errorCatch);
     }
 }

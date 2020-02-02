@@ -14,6 +14,7 @@ import cn.mcres.karlatemp.mxlib.bean.IBeanManager;
 import cn.mcres.karlatemp.mxlib.bean.IInjector;
 import cn.mcres.karlatemp.mxlib.configuration.ConfigurationProcessorPostLoadingMatcher;
 import cn.mcres.karlatemp.mxlib.configuration.IConfigurationProcessor;
+import cn.mcres.karlatemp.mxlib.exceptions.MessageDump;
 import cn.mcres.karlatemp.mxlib.exceptions.ScanException;
 import cn.mcres.karlatemp.mxlib.tools.*;
 import javassist.bytecode.AnnotationsAttribute;
@@ -25,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -255,9 +257,15 @@ public class SharedConfigurationProcessor implements IConfigurationProcessor {
                         MXBukkitLib.getLogger().error("[SharedConfigurationProcessor] [PostLoad] Cannot found byte code of class: " + cn);
                     } else {
                         try {
-                            ClassFile cf = new ClassFile(new DataInputStream(new ByteArrayInputStream(found)));
-                            if (!matcher.match(cf)) continue;
-                        } catch (Throwable ignore) {
+                            ClassFile cf = null;
+                            try {
+                                cf = new ClassFile(new DataInputStream(new ByteArrayInputStream(found)));
+                            } catch (EOFException ignore) {
+                            }
+                            if (cf != null) if (!matcher.match(cf)) continue;
+                        } catch (Throwable checkingError) {
+                            checkingError.addSuppressed(MessageDump.create(cn));
+                            errors = a(errors, checkingError);
                         }
                     }
                 }
@@ -267,7 +275,9 @@ public class SharedConfigurationProcessor implements IConfigurationProcessor {
                     if (si != null)
                         if (c.getDeclaredAnnotation(AutoInstall.class) != null)
                             si.install(c);
-                } catch (Throwable ignore) {
+                } catch (Throwable error) {
+                    error.addSuppressed(MessageDump.create(cn));
+                    errors = a(errors, error);
                 }
             }
         }

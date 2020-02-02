@@ -1,3 +1,10 @@
+2.12
+    Update MinecraftProtocolHelper
+    Add IDAddress class
+    Add PluginByteCode Overrider.
+    Add RAF Streams.
+    Add Configuration Module.
+    Fix CommandAPI Bug.
 2.11
     Add Command API
     Add Some Toolkit Methods

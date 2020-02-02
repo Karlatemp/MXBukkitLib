@@ -21,6 +21,7 @@ import java.util.*;
 public abstract class AbstractCommandProvider implements CommandProvider {
     public static CommandProvider getProvider(Class<? extends CommandProvider> providerClass, CommandProvider parent) {
         if (providerClass == CommandProvider.class) return parent;
+        if (parent.getClass() == providerClass) return parent;
         return CacheCommandProviders.getProvider(providerClass).withParent(parent);
     }
 
@@ -50,7 +51,7 @@ public abstract class AbstractCommandProvider implements CommandProvider {
                 throw new IllegalArgumentException(c + " not in package " + rp);
             }
             packages.computeIfAbsent(findCommandsPackage(
-                    cp, null, cname, classes
+                    package_, null, cname, classes
             ), a -> new ArrayList<>()).add(c);
         }
         {
@@ -81,7 +82,9 @@ public abstract class AbstractCommandProvider implements CommandProvider {
                     });
             for (Map.Entry<Package, List<Class<?>>> entry : pck.entrySet()) {
                 final Package key = entry.getKey();
-                CommandProvider provider1 = getProvider(key.getDeclaredAnnotation(MCommands.class).provider(), provider);
+                CommandProvider provider1 = getProvider(
+                        key.getDeclaredAnnotation(MCommands.class).provider(),
+                        provider);
                 final ICommand command = provider1.buildCommands(key, entry.getValue());
                 if (command != null) {
                     commandsImpl.register(command.getName(), command);
@@ -125,6 +128,7 @@ public abstract class AbstractCommandProvider implements CommandProvider {
         final MCommand command = commandClass.getDeclaredAnnotation(MCommand.class);
         if (command != null) {
             CommandProvider provider = getProvider(command.provider(), this);
+            if (provider != this) return provider.buildCommand(commandClass);
             try {
                 Method target = null;
                 {
@@ -142,8 +146,8 @@ public abstract class AbstractCommandProvider implements CommandProvider {
                     return null; // Need throw a exception?
                 }
                 AccessToolkit.setAccessible(target, true);
-                final Object o = MXBukkitLib.getBeanManager().getBeanNonNull(IObjectCreator.class)
-                        .newInstance(commandClass);
+                final Object o = Modifier.isStatic(target.getModifiers()) ?
+                        null : MXBukkitLib.getBeanManager().getBeanNonNull(IObjectCreator.class).newInstance(commandClass);
                 return new DefaultCommand(
                         command.name().isEmpty() ? commandClass.getSimpleName() : command.name(),
                         command.permission(),

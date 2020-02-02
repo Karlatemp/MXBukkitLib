@@ -8,23 +8,28 @@ package cn.mcres.gyhhy.MXLib.legacy;
 import cn.mcres.gyhhy.MXLib.Core;
 import cn.mcres.gyhhy.MXLib.event.EventHelper;
 import cn.mcres.gyhhy.MXLib.event.NetURIConnectEvent;
+import cn.mcres.gyhhy.MXLib.http.WebHelper;
 import cn.mcres.gyhhy.MXLib.system.VMHelper;
 import cn.mcres.gyhhy.MXLib.yggdrasil.Yggdrasil;
 import cn.mcres.karlatemp.mxlib.MXBukkitLib;
 import cn.mcres.karlatemp.mxlib.annotations.Bean;
 import cn.mcres.karlatemp.mxlib.annotations.Configuration;
 import cn.mcres.karlatemp.mxlib.bean.IEnvironmentFactory;
+import cn.mcres.karlatemp.mxlib.event.Event;
+import cn.mcres.karlatemp.mxlib.event.HandlerList;
 import cn.mcres.karlatemp.mxlib.event.network.URLConnectEvent;
 import cn.mcres.karlatemp.mxlib.files.DefaultFileListenerProvider;
 import cn.mcres.karlatemp.mxlib.files.FileListenerProvider;
 import cn.mcres.karlatemp.mxlib.impl.UpdateModule;
 import cn.mcres.karlatemp.mxlib.impl.VersionInfo;
 import cn.mcres.karlatemp.mxlib.module.chat.BungeeChatAPI;
+import cn.mcres.karlatemp.mxlib.network.NetManager;
 import cn.mcres.karlatemp.mxlib.network.NetWorkManager;
 import cn.mcres.karlatemp.mxlib.share.BukkitToolkit;
 import cn.mcres.karlatemp.mxlib.share.MXBukkitLibPluginStartup;
 import cn.mcres.karlatemp.mxlib.share.$MXBukkitLibConfiguration;
 import cn.mcres.karlatemp.mxlib.tools.Pointer;
+import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -35,6 +40,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 import java.lang.instrument.Instrumentation;
 import java.net.URI;
 import java.net.URL;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -79,7 +85,21 @@ public class LegacyAutoConfig {
             MXBukkitLibPluginStartup.hooks.add(NetWorkManager::install);
             NetWorkManager.install(true);
             URLConnectEvent.handlers.register(ev -> {
-                NetURIConnectEvent ev0 = new NetURIConnectEvent(URI.create(ev.getURL().toExternalForm()), BukkitToolkit.getCallerPlugin(1));
+                Plugin plugin = null;
+                var context = Toolkit.StackTrace.getClassContext();
+                for (int i = 5; i < context.length; i++) {
+                    var ct = context[i];
+                    if (ct == HandlerList.class || Event.class.isAssignableFrom(ct)
+                            || ct == NetManager.URLStreamHandler$class || WebHelper.class.isAssignableFrom(ct)
+                            || ct == NetManager.URLStreamHandlerProvider$class) {
+                        continue;
+                    }
+                    int i0 = i;
+                    // MXBukkitLib.debug(() -> "ST: " + i0 + ", " + ct);
+                    plugin = BukkitToolkit.getPluginByClass(ct);
+                    if (plugin != null) break;
+                }
+                NetURIConnectEvent ev0 = new NetURIConnectEvent(URI.create(ev.getURL().toExternalForm()), plugin);
                 ev0.setCancelled(ev.isCancelled());
                 ev0.setCancelThrow(ev.getCancel());
                 EventHelper.fireEvent(ev0);
@@ -162,5 +182,10 @@ public class LegacyAutoConfig {
             }
         });
         return fileListenerProvider;
+    }
+
+    @Bean
+    void CommandAPIBootstrap() {
+        cn.mcres.karlatemp.mxlib.impl.cmd.Bootstrap.load();
     }
 }

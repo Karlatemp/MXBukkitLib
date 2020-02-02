@@ -24,6 +24,7 @@ import java.util.List;
  */
 public class BukkitCommandExecutor implements CommandExecutor, TabCompleter {
     private final ICommand cmd;
+    public static final String PLAYER_TAB_COMPLETE = "$({PLAYER_LIST})";
 
     public BukkitCommandExecutor(@NotNull ICommand cmd) {
         this.cmd = cmd;
@@ -39,6 +40,11 @@ public class BukkitCommandExecutor implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
         List<String> result = new ArrayList<>();
         cmd.tabCompile(commandSender, result, Arrays.asList(strings), new ArrayList<>(Arrays.asList(strings)));
+        if (result.size() == 1) {
+            if (result.get(0).equals(PLAYER_TAB_COMPLETE)) {
+                return null;
+            }
+        }
         return result;
     }
 }

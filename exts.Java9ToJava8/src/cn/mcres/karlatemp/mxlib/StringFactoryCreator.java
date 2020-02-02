@@ -14,19 +14,17 @@ import java.util.HashMap;
 
 public class StringFactoryCreator implements Opcodes {
 
-    public static byte[] dump(String className, int ver) {
+    public static void dump(String className, int ver, ClassVisitor visitor) {
         try {
             ClassReader reader = new ClassReader(StringFactoryCreator.class.getResourceAsStream("J8StringFactory.class"));
-            ClassWriter cw = new ClassWriter(0);
             HashMap<String, String> mapping = new HashMap<>();
-            reader.accept(new ClassVisitor(Opcodes.ASM7, new ClassRemapper(cw, new SimpleRemapper(mapping))) {
+            reader.accept(new ClassVisitor(Opcodes.ASM7, new ClassRemapper(visitor, new SimpleRemapper(mapping))) {
                 @Override
                 public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
                     mapping.put(name, className);
                     super.visit(ver, access, name, signature, superName, interfaces);
                 }
             }, 0);
-            return cw.toByteArray();
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }

@@ -12,6 +12,7 @@ import cn.mcres.karlatemp.mxlib.tools.IClassScanner;
 import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import cn.mcres.karlatemp.mxlib.translate.FunctionTranslate;
 import cn.mcres.karlatemp.mxlib.translate.LinkedTranslate;
+import cn.mcres.karlatemp.mxlib.translate.MTranslate;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -22,6 +23,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
@@ -39,13 +41,19 @@ public final class MLocale {
     private static final Gson g = new Gson();
     private static final TransLateSetting DEFAULT_SETTING = new TransLateSetting().load();
 
+    public static MTranslate getTranslate(Plugin p) {
+        MTranslate t = translates.get(p);
+        if (t == null) return loadTranslate(p);
+        return t;
+    }
+
     static class TransLateSetting {
         enum Type {
             Properties {
                 @Override
-                Function<String, String> read(File file) throws IOException {
+                Function<String, String> read(InputStream fis) throws IOException {
                     java.util.Properties p = new Properties();
-                    try (FileInputStream fis = new FileInputStream(file)) {
+                    try (fis) {
                         try (InputStreamReader reader = new InputStreamReader(fis, StandardCharsets.UTF_8)) {
                             p.load(reader);
                         }
@@ -79,8 +87,8 @@ public final class MLocale {
                 }
 
                 @Override
-                Function<String, String> read(File file) throws IOException {
-                    try (FileInputStream fis = new FileInputStream(file)) {
+                Function<String, String> read(InputStream fis) throws IOException {
+                    try (fis) {
                         try (InputStreamReader reader = new InputStreamReader(fis, StandardCharsets.UTF_8)) {
                             Map<String, Object> map = g.fromJson(reader, new TypeToken<Map<String, Object>>() {
                             }.getType());
@@ -91,18 +99,20 @@ public final class MLocale {
             },
             Yaml {
                 @Override
-                Function<String, String> read(File file) throws IOException {
-                    YamlConfiguration yc = new YamlConfiguration();
-                    try {
-                        yc.load(file);
-                    } catch (InvalidConfigurationException e) {
-                        throw new IOException(e);
+                Function<String, String> read(InputStream file) throws IOException {
+                    try (file) {
+                        YamlConfiguration yc = new YamlConfiguration();
+                        try {
+                            yc.load(new InputStreamReader(file, StandardCharsets.UTF_8));
+                        } catch (InvalidConfigurationException e) {
+                            throw new IOException(e);
+                        }
+                        return yc::getString;
                     }
-                    return yc::getString;
                 }
             };
 
-            abstract Function<String, String> read(File file) throws IOException;
+            abstract Function<String, String> read(InputStream file) throws IOException;
         }
 
         String type; // One of "properties", "json", "yaml", default "yaml"
@@ -172,10 +182,20 @@ public final class MLocale {
                              String lst, Plugin plugin) {
         File using = new File(root, prefix + lst + suffix);
         MXBukkitLib.debug(() -> "[MLocale] Loading translate for " + plugin + " with file " + using);
+        {
+            InputStream stream = plugin.getResource("META-INF/lang" + lst + suffix);
+            if (stream != null) {
+                try (stream) {
+                    link.getTranslates().add(0, new FunctionTranslate(setting.mode.read(stream)));
+                } catch (IOException e) {
+                    plugin.getLogger().log(Level.SEVERE, "[MXBukkitLib] Error in loading translate locale " + lst, e);
+                }
+            }
+        }
         if (using.isFile()) {
             try {
                 link.getTranslates().add(0,
-                        new FunctionTranslate(setting.mode.read(using))
+                        new FunctionTranslate(setting.mode.read(new FileInputStream(using)))
                 );
             } catch (IOException e) {
                 plugin.getLogger().log(Level.SEVERE, "[MXBukkitLib] Error in loading translate locale " + lst + " (" + using + ")", e);
@@ -183,15 +203,14 @@ public final class MLocale {
         } else {
             InputStream stream = plugin.getResource("META-INF/lang" + lst + suffix);
             if (stream != null) {
-                try (InputStream str = stream) {
+                try (stream) {
                     new File(using, "..").mkdirs();
                     using.createNewFile();
-                    try (FileOutputStream fos = new FileOutputStream(using)) {
-                        Toolkit.IO.writeTo(str, fos);
+                    try (var output = new FileOutputStream(using)) {
+                        Toolkit.IO.writeTo(stream, output);
                     }
-                    link.getTranslates().add(0, new FunctionTranslate(setting.mode.read(using)));
-                } catch (IOException e) {
-                    plugin.getLogger().log(Level.SEVERE, "[MXBukkitLib] Error in saving translate locale " + lst + " (" + using + ")", e);
+                } catch (IOException error) {
+                    plugin.getLogger().log(Level.SEVERE, "[MXBukkitLib] Error in saving translate locale " + lst + " (" + using + ")", error);
                 }
             }
         }
@@ -245,8 +264,16 @@ public final class MLocale {
                 }
             }
         }
-        translates.put(plugin, translate);
-        return translate;
+        {
+            WrappedTranslate wrapped = (WrappedTranslate) translates.get(plugin);
+            if (wrapped == null) {
+                wrapped = new WrappedTranslate(translate, plugin);
+                translates.put(plugin, wrapped);
+                return wrapped;
+            }
+            wrapped.mapped = translate;
+            return wrapped;
+        }
     }
 
     public static BTranslate reloadTranslate() {

@@ -5,18 +5,31 @@
 
 package cn.mcres.karlatemp.mxlib.command;
 
+import cn.mcres.karlatemp.mxlib.MXBukkitLib;
+import cn.mcres.karlatemp.mxlib.share.BukkitToolkit;
+import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import cn.mcres.karlatemp.mxlib.translate.MTranslate;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BaseCommandProvider extends AbstractCommandProvider {
     protected CommandProvider parent;
     protected MTranslate translate;
+    protected Logger logger;
+    protected HelpTemplate helpTemplate;
+
 
     public BaseCommandProvider(CommandProvider parent, MTranslate translate) {
+        this(parent, translate, Logger.getGlobal());
+    }
+
+    public BaseCommandProvider(CommandProvider parent, MTranslate translate, Logger logger) {
         this.parent = parent;
         this.translate = translate;
+        this.logger = logger;
     }
 
     public BaseCommandProvider(CommandProvider parent) {
@@ -46,7 +59,7 @@ public class BaseCommandProvider extends AbstractCommandProvider {
     @NotNull
     @Override
     public CommandProvider withParent(CommandProvider provider) {
-        return new BaseCommandProvider(provider);
+        return Toolkit.Reflection.allocObject(getClass()).copy(provider);
     }
 
     @Override
@@ -85,9 +98,28 @@ public class BaseCommandProvider extends AbstractCommandProvider {
         }
     }
 
+    protected BaseCommandProvider copy(CommandProvider provider) {
+        this.parent = provider;
+        this.translate = provider.translate();
+        this.logger = provider.logger();
+        this.helpTemplate = provider.getHelp();
+        return this;
+    }
+
+    @Override
+    public Logger logger() {
+        return logger;
+    }
+
+    @Override
+    public MTranslate translate() {
+        return translate;
+    }
+
     @Override
     public HelpTemplate getHelp() {
         if (parent != null) return parent.getHelp();
-        return new HelpTemplate();
+        if (helpTemplate != null) return helpTemplate;
+        return helpTemplate = new HelpTemplate();
     }
 }

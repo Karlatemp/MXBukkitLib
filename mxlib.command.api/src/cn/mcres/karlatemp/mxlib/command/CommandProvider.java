@@ -5,11 +5,13 @@
 
 package cn.mcres.karlatemp.mxlib.command;
 
+import cn.mcres.karlatemp.mxlib.translate.MTranslate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The commands provider
@@ -88,6 +90,10 @@ public interface CommandProvider {
      */
     void sendMessage(Level level, Object sender, String message);
 
+    default void sendMessage(Level level, Object sender, Object message) {
+        sendMessage(level, sender, String.valueOf(message));
+    }
+
     /**
      * Try send a translate message to sender.
      *
@@ -113,4 +119,15 @@ public interface CommandProvider {
      * @return The template using.
      */
     HelpTemplate getHelp();
+
+    /**
+     * Get Provider's Logger
+     */
+    Logger logger();
+
+    MTranslate translate();
+
+    default String parse_message(String desc) {
+        return desc;
+    }
 }

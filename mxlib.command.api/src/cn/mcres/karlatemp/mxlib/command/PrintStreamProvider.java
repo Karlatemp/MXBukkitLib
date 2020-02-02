@@ -15,7 +15,7 @@ public class PrintStreamProvider extends BaseCommandProvider {
 
     @Override
     public Object resolveSender(Object sender, Class<?> toClass) {
-        if (toClass == null || PrintStream.class.isAssignableFrom(toClass)) {
+        if (toClass == null || toClass.isInstance(sender)) {
             if (sender instanceof PrintStream)
                 return sender;
         }

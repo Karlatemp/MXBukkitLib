@@ -9,21 +9,30 @@ import cn.mcres.karlatemp.mxlib.impl.InternalClasses;
 import cn.mcres.karlatemp.mxlib.module.chat.RFT;
 import cn.mcres.karlatemp.mxlib.reflect.RMethod;
 import cn.mcres.karlatemp.mxlib.reflect.Reflect;
+import cn.mcres.karlatemp.mxlib.reflect.WrappedClassImplements;
 import cn.mcres.karlatemp.mxlib.tools.MinecraftKey;
 import cn.mcres.karlatemp.mxlib.tools.Toolkit;
+import cn.mcres.karlatemp.mxlib.tools.security.AccessToolkit;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.java.JavaPluginLoader;
 import org.bukkit.plugin.messaging.ChannelNameTooLongException;
 import org.bukkit.plugin.messaging.Messenger;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -56,8 +65,7 @@ public class BukkitToolkit {
                     }
                 }
             }
-            //noinspection ConstantConditions
-            plugin.setAccessible(true);
+            AccessToolkit.setAccessible(plugin, true);
             pfield = plugin;
         } catch (Throwable thr) {
             throw new ExceptionInInitializerError(thr);
@@ -337,6 +345,56 @@ public class BukkitToolkit {
         } catch (ClassNotFoundException e) {
             throw new NoClassDefFoundError(e.toString());
         }
+    }
+
+
+    private static final Function<Object, Object> getFile$impl;
+
+    static {
+//        Toolkit.Reflection.getRoot().findVirtual()
+        String cname = "org/bukkit/plugin/java/MXLib$JavaPlugin$FileGetter";
+        Function<Object, Object> a;
+        try {
+            //noinspection unchecked
+            a = (Function<Object, Object>) Toolkit.Reflection.allocObject(Class.forName(cname.replace('/', '.')));
+        } catch (Throwable err) {
+            ClassWriter cw = new ClassWriter(0);
+            cw.visit(52, Opcodes.ACC_PUBLIC, cname, null, "java/lang/Object", new String[]{"java/util/function/Function"});
+            final MethodVisitor met = cw.visitMethod(Opcodes.ACC_PUBLIC, "apply", "(Ljava/lang/Object;)Ljava/lang/Object;", null, null);
+            met.visitCode();
+            met.visitVarInsn(Opcodes.ALOAD, 1);
+            met.visitTypeInsn(Opcodes.CHECKCAST, "org/bukkit/plugin/java/JavaPlugin");
+            met.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "org/bukkit/plugin/java/JavaPlugin", "getFile", "()Ljava/io/File;", false);
+            met.visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Object");
+            met.visitInsn(Opcodes.ARETURN);
+            met.visitMaxs(2, 2);
+            met.visitEnd();
+            //noinspection unchecked
+            a = (Function<Object, Object>) Toolkit.Reflection.allocObject(
+                    Toolkit.Reflection.defineClass(JavaPlugin.class.getClassLoader(), cw, null)
+            );
+        }
+        getFile$impl = a;
+    }
+
+    /**
+     * @param p Get Plugin's file
+     * @return The file of plugin
+     * @since 2.12
+     */
+    public static File getFile(JavaPlugin p) {
+        return (File) getFile$impl.apply(p);
+    }
+
+    public static Plugin getPluginByLoader(ClassLoader jpl) {
+        if (PluginClassLoader.isInstance(jpl)) {
+            try {
+                return (Plugin) pfield.get(jpl);
+            } catch (IllegalAccessException e) {
+                return null;
+            }
+        }
+        return null;
     }
 
     @SuppressWarnings("unchecked")

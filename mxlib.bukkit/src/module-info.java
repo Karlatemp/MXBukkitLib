@@ -5,7 +5,7 @@
 /**
  * Here is toolkit for Bukkit/Spigot.
  */
-module mxlib.bukkit {
+open module mxlib.bukkit {
     exports cn.mcres.karlatemp.mxlib.share;
     exports cn.mcres.karlatemp.mxlib.event.bukkit;
     exports cn.mcres.karlatemp.mxlib.logging.bukkit;
@@ -13,6 +13,7 @@ module mxlib.bukkit {
     exports cn.mcres.karlatemp.mxlib.module.namespace;
     exports cn.mcres.karlatemp.mxlib.module.translate;
     requires mxlib.api;
+    requires mxlib.common.maven;
     requires BungeeChatAPI;
     requires org.jetbrains.annotations;
     requires spigot.api;
@@ -23,5 +24,6 @@ module mxlib.bukkit {
     requires com.google.gson;
     requires mxlib.core;
     requires io.netty.common;
+    requires org.objectweb.asm;
 
 }

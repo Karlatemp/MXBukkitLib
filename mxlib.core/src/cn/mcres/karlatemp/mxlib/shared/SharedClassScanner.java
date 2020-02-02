@@ -6,6 +6,8 @@
 package cn.mcres.karlatemp.mxlib.shared;
 
 import cn.mcres.karlatemp.mxlib.exceptions.ScanException;
+import cn.mcres.karlatemp.mxlib.internal.IHookedJarURLStreamHandler;
+import cn.mcres.karlatemp.mxlib.network.NetManager;
 import cn.mcres.karlatemp.mxlib.tools.CharCompiler;
 import cn.mcres.karlatemp.mxlib.tools.IClassScanner;
 import cn.mcres.karlatemp.mxlib.tools.UnclosedInputStream;
@@ -170,6 +172,26 @@ public class SharedClassScanner implements IClassScanner {
                             }
                         } catch (IOException ioe) {
                             throw new ScanException(ioe.toString(), ioe);
+                        }
+                    }
+                }
+                break;
+            }
+            default: {
+                var handler = NetManager.getHandler(url);
+                if (handler instanceof IHookedJarURLStreamHandler) {
+                    var jar = ((IHookedJarURLStreamHandler) handler).getJar();
+                    var path = url.getFile().substring(1);
+                    int l = path.lastIndexOf('/');
+                    if (l != -1) path = path.substring(0, l + 1);
+                    var itor = jar.entries().asIterator();
+                    while (itor.hasNext()) {
+                        var next = itor.next();
+                        var name = next.getName();
+                        if (name.endsWith(".class")) {
+                            if (name.startsWith(path)) {
+                                list.add(name.substring(0, name.length() - 6).replace('/', '.'));
+                            }
                         }
                     }
                 }

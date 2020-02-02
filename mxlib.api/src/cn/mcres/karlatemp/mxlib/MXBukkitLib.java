@@ -10,9 +10,11 @@ import cn.mcres.karlatemp.mxlib.bean.IBeanManager;
 import cn.mcres.karlatemp.mxlib.event.core.MXLibBootEvent;
 import cn.mcres.karlatemp.mxlib.logging.ILogger;
 import cn.mcres.karlatemp.mxlib.logging.MessageFactoryAnsi;
+import cn.mcres.karlatemp.mxlib.logging.PrefixSupplier;
 import cn.mcres.karlatemp.mxlib.logging.PrintStreamLogger;
 import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -52,8 +54,13 @@ public class MXBukkitLib {
      * <p>
      * 使用此字段获取你所使用的MXBukkitLib版本
      */
-    public static final String BUILD_VERSION = "2.11";
-    private static final boolean DEBUG = System.getProperty("mxlib.debug") != null;
+    public static final String BUILD_VERSION = "2.12";
+    /**
+     * Is MXLib Debug Mode open
+     *
+     * @since 2.12
+     */
+    public static final boolean DEBUG = System.getProperty("mxlib.debug") != null;
 
     public static String getCurrentVersion() {
         return BUILD_VERSION;
@@ -118,7 +125,18 @@ public class MXBukkitLib {
 
     public static ILogger getLogger() {
         if (logger == null)
-            return logger = new PrintStreamLogger(new MessageFactoryAnsi(), "[MXBukkitLib] ", System.out);
+            return logger = new PrintStreamLogger(new MessageFactoryAnsi(), new PrefixSupplier() {
+                @Override
+                public @NotNull String get(boolean error, @Nullable String line, @Nullable Level level, @Nullable LogRecord record) {
+                    if (record != null) {
+                        var logger = record.getLoggerName();
+                        if (logger != null) {
+                            return "[MXBukkitLib] [" + logger + "] ";
+                        }
+                    }
+                    return "[MXBukkitLib] ";
+                }
+            }, System.out);
         return logger;
     }
 

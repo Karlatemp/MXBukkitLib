@@ -5,6 +5,8 @@
 
 package cn.mcres.karlatemp.mxlib.reflect;
 
+import cn.mcres.karlatemp.mxlib.tools.Toolkit;
+
 import java.util.function.Supplier;
 
 public interface RField<O, R> extends Supplier<R> {
@@ -32,5 +34,15 @@ public interface RField<O, R> extends Supplier<R> {
             return typeOfT.cast(ret);
         }
         return (T) ret;
+    }
+
+    /**
+     * Copy context.
+     *
+     * @return New context for this method.
+     * @since 2.12
+     */
+    default RField<O, R> newContext() {
+        return Toolkit.Reflection.clone(this);
     }
 }

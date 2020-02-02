@@ -5,15 +5,38 @@
 
 package cn.mcres.karlatemp.mxlib.command;
 
+import cn.mcres.karlatemp.mxlib.MXBukkitLib;
+import cn.mcres.karlatemp.mxlib.share.BukkitToolkit;
+import cn.mcres.karlatemp.mxlib.translate.MTranslate;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintStream;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class BukkitCommandProvider extends BaseCommandProvider {
     public BukkitCommandProvider(CommandProvider parent) {
-        super(parent);
+        this(parent, null);
+    }
+
+    public BukkitCommandProvider() {
+        this(null);
+    }
+
+    public BukkitCommandProvider(CommandProvider provider, MTranslate translate, Logger logger) {
+        super(provider, translate, logger);
+    }
+
+    private /*synthetic*/ static Logger a(Plugin p) {
+        if (p == null) return MXBukkitLib.getAsJavaLogger();
+        return p.getLogger();
+    }
+
+    public BukkitCommandProvider(CommandProvider provider, MTranslate translate) {
+        this(provider, translate, a(BukkitToolkit.getCallerPlugin()));
     }
 
     @Override

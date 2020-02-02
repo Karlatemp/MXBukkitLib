@@ -45,6 +45,7 @@ public class HelpTemplate {
         StringBuilder sb = new StringBuilder();
         @SuppressWarnings("unchecked")
         Map<String, CommandParameter> params = (Map<String, CommandParameter>) r.magicValue();
+        CommandProvider provider = (CommandProvider) r.magicValue();
         int max = 0;
         for (String p : params.keySet()) {
             max = Math.max(max, p.length());
@@ -53,7 +54,7 @@ public class HelpTemplate {
             String n = parameter.getKey();
             sb.append("§6-").append(n);
             sb.append(EMPTY, 0, max - n.length());
-            sb.append("§f:§c ").append(parameter.getValue().description());
+            sb.append("§f:§c ").append(provider.parse_message(parameter.getValue().description()));
             if (parameter.getValue().require()) {
                 sb.append("§c(require)");
             }
@@ -63,6 +64,7 @@ public class HelpTemplate {
     }, COMMANDS = (l, r) -> {
         StringBuilder sb = new StringBuilder();
         @SuppressWarnings("unchecked") Map<String, ICommand> cmds = (Map<String, ICommand>) r.magicValue();
+        CommandProvider provider = (CommandProvider) r.magicValue();
         int max = 0;
         for (String p : cmds.keySet()) {
             max = Math.max(max, p.length());
@@ -71,7 +73,7 @@ public class HelpTemplate {
             String n = parameter.getKey();
             sb.append("\n§6").append(n);
             sb.append(EMPTY, 0, max - n.length());
-            sb.append("§f:§c ").append(parameter.getValue().description());
+            sb.append("§f:§c ").append(provider.parse_message(parameter.getValue().description()));
         }
         return sb.toString();
     };
@@ -92,7 +94,7 @@ public class HelpTemplate {
                 }
             }
         }));
-        provider.sendMessage(Level.ALL, sender, "§6" + command.description());
+        provider.sendMessage(Level.ALL, sender, "§6" + provider.parse_message(command.description()));
         if (command instanceof ICommands) {
             final Map<String, ICommand> subCommands = ((ICommands) command).getSubCommands();
             List<String> cmds = subCommands.keySet().stream().sorted().collect(Collectors.toList());
@@ -112,8 +114,13 @@ public class HelpTemplate {
                 if (start >= 0 && start < pages) {
                     List<String> filt = cmds.subList(start * pageSize, Math.min(cmds.size(), (start + 1) * pageSize));
                     provider.sendMessage(Level.ALL, sender, COMMANDS.format(null, new AbstractReplacer() {
+                        boolean a;
+
                         @Override
                         public Object magicValue() {
+                            if (!(a = !a)) {
+                                return provider;
+                            }
                             return subCommands.entrySet().stream().filter(a -> filt.contains(a.getKey())).collect(
                                     Toolkit.toMapCollector(HashMap::new)
                             );
@@ -133,9 +140,11 @@ public class HelpTemplate {
             provider.sendMessage(Level.ALL, sender, "§c" + command.usage() + "\n");
             if (parameters != null && !parameters.isEmpty()) {
                 provider.sendMessage(Level.ALL, sender, PARAMETERS.format(null, new AbstractReplacer() {
+                    boolean a;
+
                     @Override
                     public Object magicValue() {
-                        return parameters;
+                        return (a = !a) ? parameters : provider;
                     }
                 }));
             }

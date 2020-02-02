@@ -34,10 +34,12 @@ import java.security.Permission;
 import java.security.ProtectionDomain;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -326,9 +328,17 @@ public class Toolkit {
     /**
      * 反射工具
      */
+    @SuppressWarnings("Java9ReflectionClassVisibility")
     public abstract static class Reflection {
         private static final MethodHandles.Lookup root;
         static Reflection ref;
+        public static final Class<?> MethodAccessor, FieldAccessor, ConstructorAccessor;
+        public static final Function<Method, Object> MethodAccessorGetter;
+        public static final Function<Constructor<?>, Object> ConstructorAccessorGetter;
+        public static final BiConsumer<Method, Object> MethodAccessorSetter;
+        public static final BiConsumer<Constructor<?>, Object> ConstructorAccessorSetter;
+        public static final BiConsumer<Field, Object> FieldAccessorSetter;
+        public static final Function<Field, Object> FieldAccessorGetter;
 
         /**
          * 这只能用来判断使用哪种方法{@link Object#getClass()}
@@ -722,6 +732,126 @@ public class Toolkit {
             }
             root = lk;
             ref = UnsafeInstaller.installReflection();
+            Class<?> x;
+            try {
+                x = Class.forName("jdk.internal.reflect.MethodAccessor");
+            } catch (Throwable a) {
+                try {
+                    x = Class.forName("sun.reflect.MethodAccessor");
+                } catch (ClassNotFoundException e) {
+                    throw new ExceptionInInitializerError(e);
+                }
+            }
+            MethodAccessor = x;
+            try {
+                x = Class.forName("jdk.internal.reflect.FieldAccessor");
+            } catch (ClassNotFoundException a) {
+                try {
+                    x = Class.forName("sun.reflect.FieldAccessor");
+                } catch (ClassNotFoundException nf) {
+                    throw new ExceptionInInitializerError(nf);
+                }
+            }
+            FieldAccessor = x;
+            try {
+                x = Class.forName("jdk.internal.reflect.ConstructorAccessor");
+            } catch (ClassNotFoundException a) {
+                try {
+                    x = Class.forName("sun.reflect.ConstructorAccessor");
+                } catch (ClassNotFoundException nf) {
+                    throw new ExceptionInInitializerError(nf);
+                }
+            }
+            ConstructorAccessor = x;
+            try {
+                var mg = lk.findGetter(Method.class, "methodAccessor", MethodAccessor);
+                var acquireMethodAccessor = lk.findVirtual(Method.class, "acquireMethodAccessor",
+                        MethodType.methodType(MethodAccessor));
+                MethodAccessorGetter = met -> {
+                    try {
+                        var acc = mg.invoke(met);
+                        if (acc == null) return acquireMethodAccessor.invoke(met);
+                        return acc;
+                    } catch (Error | RuntimeException r) {
+                        throw r;
+                    } catch (Throwable thr) {
+                        throw new RuntimeException(thr);
+                    }
+                };
+                var get = lk.findVirtual(Field.class, "getFieldAccessor", MethodType.methodType(
+                        FieldAccessor, Object.class
+                ));
+                FieldAccessorGetter = fie -> {
+                    try {
+                        return get.invoke(fie, null);
+                    } catch (RuntimeException | Error re) {
+                        throw re;
+                    } catch (Throwable throwable) {
+                        throw new RuntimeException(throwable);
+                    }
+                };
+                var ms = lk.findSetter(Method.class, "methodAccessor", MethodAccessor);
+                MethodAccessorSetter = (method, accessor) -> {
+                    if (method == null) throw new NullPointerException("method");
+                    if (accessor != null) {
+                        MethodAccessor.cast(accessor);
+                    }
+                    try {
+                        ms.invoke(method, accessor);
+                    } catch (RuntimeException | Error e) {
+                        throw e;
+                    } catch (Throwable throwable) {
+                        throw new RuntimeException(throwable);
+                    }
+                };
+                var no = lk.findSetter(Field.class, "fieldAccessor", FieldAccessor);
+                var oo = lk.findSetter(Field.class, "overrideFieldAccessor", FieldAccessor);
+                FieldAccessorSetter = (field, accessor) -> {
+                    Objects.requireNonNull(field, "field");
+                    if (accessor != null) {
+                        FieldAccessor.cast(accessor);
+                    }
+                    try {
+                        //noinspection deprecation
+                        if (field.isAccessible()) {
+                            oo.invoke(field, accessor);
+                        } else {
+                            no.invoke(field, accessor);
+                        }
+                    } catch (Error | RuntimeException re) {
+                        throw re;
+                    } catch (Throwable thr) {
+                        throw new RuntimeException(thr);
+                    }
+                };
+                var ccg = lk.findGetter(Constructor.class, "constructorAccessor", ConstructorAccessor);
+                var aqc = lk.findVirtual(Constructor.class, "acquireConstructorAccessor", MethodType.methodType(ConstructorAccessor));
+                ConstructorAccessorGetter = con -> {
+                    try {
+                        var acc = ccg.invoke(con);
+                        if (acc == null) acc = aqc.invoke(con);
+                        return acc;
+                    } catch (Error | RuntimeException err) {
+                        throw err;
+                    } catch (Throwable throwable) {
+                        throw new RuntimeException(throwable);
+                    }
+                };
+                var cgs = lk.findSetter(Constructor.class, "constructorAccessor", ConstructorAccessor);
+                ConstructorAccessorSetter = (con, acc) -> {
+                    Objects.requireNonNull(con, "constructor");
+                    if (acc != null) ConstructorAccessor.cast(acc);
+                    try {
+                        cgs.invoke(con, acc);
+                    } catch (Error | RuntimeException err) {
+                        throw err;
+                    } catch (Throwable throwable) {
+                        throw new RuntimeException(throwable);
+                    }
+                };
+            } catch (Throwable thr) {
+                throw new ExceptionInInitializerError(thr);
+            }
         }
 
         /**
@@ -798,7 +928,7 @@ public class Toolkit {
                 }
             }
             if (type.isArray()) {
-                Object array = Array.newInstance(type, Array.getLength(object));
+                Object array = Array.newInstance(type.getComponentType(), Array.getLength(object));
                 //noinspection SuspiciousSystemArraycopy
                 System.arraycopy(object, 0, array, 0, Array.getLength(array));
                 return (T) array;
@@ -870,13 +1000,14 @@ public class Toolkit {
             long offset;
             Unsafe unsafe = Unsafe.getUnsafe();
             if (Modifier.isStatic(field.getModifiers())) {
-                this_ = field.getDeclaringClass();
+                this_ = unsafe.staticFieldBase(field);
                 offset = unsafe.staticFieldOffset(field);
             } else {
                 Objects.requireNonNull(this_);
                 field.getDeclaringClass().cast(this_);
                 offset = unsafe.objectFieldOffset(field);
             }
+            if (value != null && !field.getType().isPrimitive()) field.getType().cast(value);
             Class<?> typ = field.getType();
             if (typ == boolean.class) {
                 unsafe.putBoolean(this_, offset, (boolean) value);
@@ -897,6 +1028,14 @@ public class Toolkit {
             } else {
                 unsafe.putReference(this_, offset, value);
             }
+        }
+
+        public static void copyValues(Object from, Object to) {
+            if (from.getClass().isInstance(to)) {
+                clone$copy(from.getClass(), from, to);
+                return;
+            }
+            throw new UnsupportedOperationException(to + "not cast to " + from.getClass());
         }
 
         private static void clone$copy(Class<?> type, Object from, Object to) {
@@ -1076,37 +1215,28 @@ public class Toolkit {
             }
 
             StackTrace[] classes() {
-                Class<?>[] classes = StackTrace.getClassContext();
-                StackTraceElement[] elements = new Throwable().getStackTrace();
-                StackTrace[] traces = new StackTrace[elements.length - 2];
-
-                /*
-                System.out.println("ELMS- ");
-                Stream.of(elements).forEach(System.out::println);
-                System.out.println("CLASSES- ");
-                Stream.of(classes).forEach(System.out::println);
-                System.out.println("---\n");
-                */
-
-                int c_length_ed = classes.length - 1;
-                int e_i = 2, c_i = 2, s = 0;
-
-                for (; s < traces.length; ) {
-                    StackTraceElement trace = elements[e_i++];
-                    Class<?> c;
-                    // int cos = c_i;
-                    c = classes[c_i];
-                    if (!trace.getClassName().equals(c.getName())) {
-                        // System.out.println("NW: " + c_i + ", " + cos);
-                        c_i--;
-                        c = classes[c_i];
-                    }
-                    if (c_i < c_length_ed)
-                        c_i++;
-                    // System.out.println("E:" + e_i + ", C:" + cos + ", c " + c + ", t " + trace);
-                    traces[s++] = create(c, trace);
+                var cs = Stream.of(Toolkit.StackTrace.getClassContext()).skip(3).filter(c -> c.getName().indexOf('/') == -1).collect(
+                        Collectors.toList()
+                );
+                var st = Arrays.asList(new Throwable().getStackTrace());
+                var i1 = cs.iterator();
+                var i2 = st.iterator();
+                i2.next();
+                i2.next();
+                i2.next();
+                var list = new ArrayList<StackTrace>();
+                while (i1.hasNext()) {
+                    var c = i1.next();
+                    StackTraceElement elm;
+                    do {
+                        elm = i2.next();
+                    } while (!elm.getClassName().equals(c.getName()));
+                    var st0 = new StackTrace();
+                    st0.c = c;
+                    st0.elm = elm;
+                    list.add(st0);
                 }
-                return traces;
+                return list.toArray(new StackTrace[0]);
             }
 
             Class<?>[] ct() {
@@ -1115,6 +1245,15 @@ public class Toolkit {
         }
 
         static final $ToolKit kit;
+        static StackTrace IMPL;
+
+        public String getMethodName() {
+            return null;
+        }
+
+        public MethodType getMethodType() {
+            return null;
+        }
 
         static {
             MethodHandles.Lookup lk = Reflection.getRoot();
@@ -1146,7 +1285,49 @@ public class Toolkit {
                     System.setSecurityManager(old);
                 }
             }
+            IMPL = new StackTrace();
             kit = tk;
+            try {
+                Class.forName("java.lang.StackWalker");
+                IMPL = new StackTrace() {
+                    StackWalker walker = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
+
+                    @Override
+                    StackTrace[] st() {
+                        return walker.walk(frames -> frames.skip(2).map(info -> new StackTrace() {
+                            @Override
+                            public String toString() {
+                                return info.toString() + '#' + info.getDeclaringClass();
+                            }
+
+                            @Override
+                            public Class<?> getContent() {
+                                return info.getDeclaringClass();
+                            }
+
+                            @Override
+                            public StackTraceElement getStackTraceElement() {
+                                return info.toStackTraceElement();
+                            }
+
+                            @Override
+                            public String getMethodName() {
+                                return info.getMethodName();
+                            }
+
+                            @Override
+                            public MethodType getMethodType() {
+                                return info.getMethodType();
+                            }
+                        }).toArray(StackTrace[]::new));
+                    }
+                };
+            } catch (Throwable ignore) {
+            }
+        }
+
+        StackTrace[] st() {
+            return kit.classes();
         }
 
         /**
@@ -1156,7 +1337,7 @@ public class Toolkit {
          */
         @Contract(pure = true)
         public static StackTrace[] getStackTraces() {
-            return kit.classes();
+            return IMPL.st();
         }
 
         /**

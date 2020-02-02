@@ -49,8 +49,10 @@ public class DefaultCommands implements ICommands {
             throw new IllegalArgumentException("Cannot resolve sender");
         }
         if (provider.hasPermission(sender, getPermission())) {
+            String path = String.join(" ", Tools.getInvokePath(arguments, fillArguments));
             if (arguments.isEmpty()) {
-                provider.sendMessage(Level.WARNING, sender, "Please type \"" + label + " help\" for help.");
+                provider.translate(Level.WARNING, sender, "command.no.argument", label, path);
+                // provider.sendMessage(Level.WARNING, sender, "Please type \"" + label + " help\" for help.");
             } else {
                 if (arguments.get(0).equals(helpInd)) {
                     if (Tools.processHelp(helpInd, arguments, fillArguments, sender, provider, this, label)) {
@@ -63,7 +65,7 @@ public class DefaultCommands implements ICommands {
                     if (Tools.processHelp(helpInd, arguments, fillArguments, sender, provider, this, label)) {
                         return;
                     }
-                    provider.sendMessage(Level.WARNING, sender, "Unknown sub command " + sub);
+                    provider.translate(Level.WARNING, sender, "command.not.found", label, sub, path);
                 } else {
                     arguments.remove(0);
                     cmd.invoke(sender, label, arguments, fillArguments);
@@ -118,11 +120,6 @@ public class DefaultCommands implements ICommands {
         }
     }
 
-    @Override
-    public void doHelp(Object sender, @NotNull List<String> args, @NotNull List<String> fullArguments) {
-
-    }
-
     @NotNull
     public Map<String, ICommand> getSubCommands() {
         return ImmutableMap.copyOf(commands);
@@ -140,5 +137,10 @@ public class DefaultCommands implements ICommands {
                 ((DefaultCommands) ic.getValue()).dump(prefix + '\t', stream);
             }
         }
+    }
+
+    @Override
+    public CommandProvider provider() {
+        return provider;
     }
 }

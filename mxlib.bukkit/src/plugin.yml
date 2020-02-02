@@ -1,6 +1,6 @@
 name: MXBukkitLib
 main: cn.mcres.karlatemp.mxlib.share.MXBukkitLibPluginStartup
-version: 2.10
+version: 2.12
 author: Karlatemp
 load: STARTUP
 commands:
