@@ -8,6 +8,7 @@ package cn.mcres.karlatemp.mxlib;
 import cn.mcres.karlatemp.mxlib.reflect.WrappedClassImplements;
 import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import cn.mcres.karlatemp.mxlib.util.IteratorSupplier;
+import cn.mcres.karlatemp.mxlib.util.RAFOutputStream;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.*;
 
@@ -34,11 +35,39 @@ public class JarEdit {
 
 
     public static void mk(File f, File output, Predicate<String> filter) throws IOException {
-        File tmp = new File("out/temp." + f.getName());
-        new File(tmp, "..").mkdirs();
-        tmp.createNewFile();
-        temps.add(tmp);
         ZipFile zip = new ZipFile(f);
+        class ExportedChecker extends MethodVisitor {
+            boolean nonExported = false;
+
+            ExportedChecker() {
+                super(Opcodes.ASM7);
+            }
+
+            @Override
+            public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+                if (descriptor.equals("Lcn/mcres/karlatemp/mxlib/annotations/UnExported;")) {
+                    nonExported = true;
+                    return null;
+                }
+                return null;
+            }
+
+            void run(Collection<AnnotationNode> a, Collection<AnnotationNode> b) {
+                run(a);
+                run(b);
+            }
+
+            void run(Collection<AnnotationNode> a) {
+                if (a != null) {
+                    for (var node : a) {
+                        if ("Lcn/mcres/karlatemp/mxlib/annotations/UnExported;".equals(node.desc)) {
+                            nonExported = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
         class CMember {
             boolean isInterface;
             String name, desc, owner;
@@ -46,6 +75,9 @@ public class JarEdit {
             boolean setExist, getExist;
             boolean isStatic;
             String wrappedConsDesc;
+            boolean notExported;
+            MethodNode method;
+            FieldNode field;
 
             CMember(String name, String desc, String owner) {
                 this.name = name;
@@ -81,6 +113,7 @@ public class JarEdit {
             }
         }
         var privates = new HashMap<String, CAccess>();
+        var fullNodes = new HashMap<String, CAccess>();
         var access = new HashMap<String, ClassNode>();
         var allFieldAccess = new HashSet<CMember>();
         var allMethodAccess = new HashSet<CMember>();
@@ -95,14 +128,22 @@ public class JarEdit {
                     nodes.put(node.name, node);
                     var ca = new CAccess();
                     privates.put(node.name, ca);
+                    var fa = new CAccess();
+                    fullNodes.put(node.name, fa);
                     if (node.methods != null) for (var method : node.methods) {
+                        var checker = new ExportedChecker();
+                        checker.run(method.invisibleAnnotations, method.visibleAnnotations);
                         if (method.name.equals("<init>")) {
                             method.access &= ~Opcodes.ACC_PRIVATE;
+                            if (checker.nonExported) method.access |= Opcodes.ACC_SYNTHETIC;
                             continue;
                         }
+                        var method0 = new CMember(method.name, method.desc, node.name);
+                        method0.isStatic = (method.access & Opcodes.ACC_STATIC) != 0;
+                        method0.notExported = checker.nonExported;
+                        method0.method = method;
+                        fa.methods.add(method0);
                         if ((method.access & Opcodes.ACC_PRIVATE) != 0) {
-                            var method0 = new CMember(method.name, method.desc, node.name);
-                            method0.isStatic = (method.access & Opcodes.ACC_STATIC) != 0;
                             if ((node.access & Opcodes.ACC_INTERFACE) != 0) {
                                 if ((method.access & Opcodes.ACC_ABSTRACT) != 0) {
                                     method0.isInterface = true;
@@ -112,8 +153,13 @@ public class JarEdit {
                         }
                     }
                     if (node.fields != null) for (var field : node.fields) {
+                        var checker = new ExportedChecker();
+                        checker.run(field.invisibleAnnotations, field.visibleAnnotations);
+                        var field0 = new CMember(field.name, field.desc, node.name);
+                        field0.field = field;
+                        field0.notExported = checker.nonExported;
+                        fa.fields.add(field0);
                         if ((field.access & Opcodes.ACC_PRIVATE) != 0) {
-                            var field0 = new CMember(field.name, field.desc, node.name);
                             field0.isStatic = (field.access & Opcodes.ACC_STATIC) != 0;
                             ca.fields.add(field0);
                         }
@@ -170,6 +216,10 @@ public class JarEdit {
             for (var field : allFieldAccess) {
                 var node = nodes.get(field.owner);
                 if (node == null) continue;
+                if (field.notExported) {
+                    field.field.access |= Opcodes.ACC_SYNTHETIC;
+                    field.field.name = field.openName = "?" + UUID.randomUUID() + "?" + index++;
+                }
                 if (field.getExist) {
                     var acc = node.visitMethod(
                             Opcodes.ACC_SYNTHETIC | (field.isStatic ? Opcodes.ACC_STATIC : 0),
@@ -215,27 +265,12 @@ public class JarEdit {
             for (var method : allMethodAccess) {
                 var node = nodes.get(method.owner);
                 if (node == null) continue;
-                if (method.name.equals("<init>")) {
-                    String desc = Type.getMethodDescriptor(
-                            Type.getObjectType(method.owner), Type.getArgumentTypes(method.desc)
-                    );
-                    var cons = node.visitMethod(Opcodes.ACC_SYNTHETIC | Opcodes.ACC_STATIC,
-                            method.openName = "access$cons$" + index++, desc, null, null);
-                    // NEW cn/mcres/karlatemp/mxlib/tools/EmptyStream
-                    // DUP
-                    // INVOKESPECIAL cn/mcres/karlatemp/mxlib/tools/EmptyStream.<init> ()V
-                    cons.visitTypeInsn(Opcodes.NEW, method.owner);
-                    cons.visitInsn(Opcodes.DUP);
-                    int slot = 0;
-                    for (var arg : Type.getArgumentTypes(method.desc)) {
-                        slot = WrappedClassImplements.putTypeInsn(
-                                arg, slot, false, cons
-                        );
-                    }
-                    slot++;
-                    cons.visitMethodInsn(Opcodes.INVOKESPECIAL, method.owner, "<init>", method.desc, false);
-                    cons.visitInsn(Opcodes.ARETURN);
-                    cons.visitMaxs(slot + 1, slot);
+                if (method.notExported) {
+                    var acc = method.method.access;
+                    acc &= ~Opcodes.ACC_PRIVATE;
+                    acc |= Opcodes.ACC_SYNTHETIC;
+                    method.method.access = acc;
+                    method.method.name = method.openName = "?" + index++ + "w" + UUID.randomUUID() + "$";
                     continue;
                 }
                 var mtt = node.visitMethod(Opcodes.ACC_SYNTHETIC | (method.isStatic ? Opcodes.ACC_STATIC : 0),
@@ -259,9 +294,30 @@ public class JarEdit {
                 );
                 mtt.visitMaxs(slot + rt.getSize(), slot);
             }
+            for (var full : fullNodes.values()) {
+                for (var field : full.fields) {
+                    if (field.notExported) {
+                        if (field.openName == null) {
+                            field.field.access |= Opcodes.ACC_SYNTHETIC;
+                            field.field.name = field.openName = "?" + UUID.randomUUID() + "?" + index++;
+                        }
+                    }
+                }
+                for (var method : full.methods) {
+                    if (method.notExported) {
+                        if (method.openName == null) {
+                            var acc = method.method.access;
+                            acc &= ~Opcodes.ACC_PRIVATE;
+                            acc |= Opcodes.ACC_SYNTHETIC;
+                            method.method.access = acc;
+                            method.method.name = method.openName = "?" + index++ + "x" + UUID.randomUUID() + "$";
+                        }
+                    }
+                }
+            }
         }
         {
-            for (var node : access.values()) {
+            for (var node : nodes.values()) {
                 for (var met : node.methods) {
                     var instructions = met.instructions;
                     if (instructions != null) {
@@ -269,73 +325,37 @@ public class JarEdit {
                             var inst = instructions.get(i);
                             if (inst instanceof MethodInsnNode) {
                                 var m = (MethodInsnNode) inst;
-                                if (m.owner.equals(node.name)) continue;
-                                var ownClass = privates.get(m.owner);
+                                var self = m.owner.equals(node.name);
+                                var ownClass = fullNodes.get(m.owner);
                                 if (ownClass != null) {
                                     var find = ownClass.find(m.name, m.desc, m.owner, false);
                                     if (find != null) {
+                                        if (self && !find.notExported) continue;
                                         if (find.openName != null) {
-                                            var x = m.name;
+                                            System.out.println(node.name + "." + met.name + "#" + m.name + "->" + find.openName);
                                             m.name = find.openName;
-                                            if (x.equals("<init>")) {
-                                                // System.err.println(node.name + "," + m.owner + ", " + x + " " + m.desc);
-                                                boolean removed = false;
-                                                {
-                                                    AbstractInsnNode watching = m;
-                                                    do {
-                                                        var xw = watching.getPrevious();
-                                                        watching = xw;
-                                                        if (xw instanceof TypeInsnNode) {
-                                                            var tin = (TypeInsnNode) xw;
-                                                            if (tin.getOpcode() == Opcodes.NEW) {
-                                                                if (tin.desc.equals(m.owner)) {
-                                                                    var next = tin.getNext();
-                                                                    if (next instanceof InsnNode) {
-                                                                        if (next.getOpcode() == Opcodes.DUP) {
-                                                                            i--;
-                                                                            instructions.remove(next);
-                                                                        }
-                                                                    }
-                                                                    instructions.remove(tin);
-                                                                    i--;
-                                                                    m.setOpcode(Opcodes.INVOKESTATIC);
-                                                                    m.desc = Type.getMethodDescriptor(Type.getObjectType(m.owner), Type.getArgumentTypes(m.desc));
-                                                                    removed = true;
-                                                                    break;
-                                                                }
-                                                            }
-                                                        }
-                                                    } while (watching != null);
-                                                }
-                                                if (!removed) {
-                                                    // Extend Method.
-                                                    if (find.wrappedConsDesc == null) {
-                                                        find.wrappedConsDesc = createWrappedConsDesc(
-                                                                nodes.get(m.owner), m.desc
-                                                        );
-                                                    }
-                                                    m.name = "<init>";
-                                                    m.desc = find.wrappedConsDesc;
-                                                    instructions.insert(m.getPrevious(), new InsnNode(Opcodes.ACONST_NULL));
-                                                    i++;
-                                                    met.maxStack++;
-                                                }
-                                            }
                                         }
                                     }
                                 }
                             } else if (inst instanceof FieldInsnNode) {
                                 var f0 = (FieldInsnNode) inst;
-                                if (f0.owner.equals(node.name)) continue;
-                                var ownClass = privates.get(f0.owner);
+                                var self = f0.owner.equals(node.name);
+                                var ownClass = fullNodes.get(f0.owner);
                                 if (ownClass != null) {
                                     var find = ownClass.find(f0.name, f0.desc, f0.owner, true);
                                     if (find != null) {
+                                        if (self && !find.notExported) continue;
+                                        if (self && find.openName != null) {
+                                            f0.name = find.openName;
+                                            continue;
+                                        }
                                         var isGet = f0.getOpcode() == Opcodes.GETSTATIC || f0.getOpcode() == Opcodes.GETFIELD;
+                                        var name = isGet ? find.openGetName : find.openSetName;
+                                        if (name == null) continue;
                                         instructions.set(inst, new MethodInsnNode(
                                                 find.isStatic ? Opcodes.INVOKESTATIC : Opcodes.INVOKEVIRTUAL,
                                                 f0.owner,
-                                                isGet ? find.openGetName : find.openSetName,
+                                                name,
                                                 isGet ? "()" + f0.desc : "(" + f0.desc + ")V", false
                                         ));
                                     }
@@ -372,6 +392,15 @@ public class JarEdit {
                                     );
                                 }
                             }
+                            if (inst instanceof MethodInsnNode) {
+                                var mi = (MethodInsnNode) inst;
+                                if (mi.owner.equals("java/lang/Thread"))
+                                    if (mi.desc.equals("()V")) {
+                                        if (mi.name.equals("onSpinWait")) {
+                                            mi.owner = factoryName;
+                                        }
+                                    }
+                            }
                         }
                     }
                 }
@@ -381,22 +410,7 @@ public class JarEdit {
             nodes.put(factory.name, factory);
         }
         {
-            for (var node : nodes.values()) {
-                for (var met : node.methods) {
-                    var ma = met.visibleAnnotations;
-                    if (ma != null) {
-                        ma.replaceAll(opt -> {
-                            if (opt.desc.equals("Lcn/mcres/karlatemp/mxlib/annotations/LambdaFromHidden;")) {
-                                opt.desc = "Ljava/lang/invoke/LambdaForm$Hidden;";
-                            }
-                            return opt;
-                        });
-                    }
-                }
-            }
-        }
-        {
-            try (var out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(tmp)))) {
+            try (var out = new ZipOutputStream(new RAFOutputStream(new RandomAccessFile(output, "rw")))) {
                 var write = new ConcurrentLinkedQueue<String>();
                 for (var node : nodes.values()) {
                     var path = node.name + ".class";
@@ -414,8 +428,6 @@ public class JarEdit {
                 }
             }
         }
-        Files.deleteIfExists(output.toPath());
-        Files.move(tmp.toPath(), output.toPath());
     }
 
     private static String createWrappedConsDesc(ClassNode node, String desc) {

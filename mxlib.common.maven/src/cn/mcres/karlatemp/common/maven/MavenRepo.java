@@ -66,4 +66,8 @@ public class MavenRepo {
         dejaVu(dejaVu, all);
         return all;
     }
+
+    public String inline() {
+        return group + ':' + artifact + ':' + version + '@' + location;
+    }
 }

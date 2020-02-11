@@ -26,13 +26,18 @@
 package cn.mcres.karlatemp.mxlib.tools; /*jdk.internal.misc*/
 
 import cn.mcres.karlatemp.mxlib.MXBukkitLib;
+import cn.mcres.karlatemp.mxlib.annotations.UnExported;
 import cn.mcres.karlatemp.mxlib.internal.UFRF;
 import cn.mcres.karlatemp.mxlib.internal.UnsafeInstaller;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Console;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.security.ProtectionDomain;
 import java.util.Objects;
 
@@ -60,7 +65,9 @@ import java.util.Objects;
  * @since 2.7
  */
 public abstract class Unsafe {
+    @UnExported
     private static volatile boolean installed;
+    @UnExported
     private static transient Unsafe INSTALLED;
 
     static {
@@ -77,12 +84,15 @@ public abstract class Unsafe {
     /**
      * Call by MXLib Internal Code
      */
+    @UnExported
     public static void $finishUnsafeInit() {
         installed = true;
     }
 
+    @UnExported
     private static boolean gotted;
 
+    @UnExported
     private static Unsafe install() {
         if (installed) throw new IllegalStateException();
         return UnsafeInstaller.install();
@@ -125,7 +135,10 @@ public abstract class Unsafe {
                 if (console != null) {
                     console.printf(message);
                 } else {
-                    System.err.println(message);
+                    try (var err = new FileOutputStream(FileDescriptor.err)) {
+                        err.write(message.getBytes(StandardCharsets.UTF_8));
+                    } catch (IOException ignore) {
+                    }
                 }
             }
         }

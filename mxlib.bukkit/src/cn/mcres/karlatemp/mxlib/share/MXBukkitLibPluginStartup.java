@@ -25,11 +25,12 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Repositories({
-        "com.google.guava:guava:26.0-jre",
-        "io.netty:netty-all:4.1.43.Final",
-        "org.yaml:snakeyaml:1.25",
+        // "com.google.guava:guava:26.0-jre",
+        // "io.netty:netty-all:4.1.43.Final",
+        // "org.yaml:snakeyaml:1.25",
         "com.google.code.gson:gson:2.8.0"
 })
 public class MXBukkitLibPluginStartup extends JavaPlugin {
@@ -91,12 +92,20 @@ public class MXBukkitLibPluginStartup extends JavaPlugin {
         try {
             MXLib.boot();
         } catch (Throwable thr) {
-            getLogger().log(Level.SEVERE, null, thr);
+            if (MXBukkitLib.DEBUG)
+                getLogger().log(Level.SEVERE, null, thr);
+            else getLogger().log(Level.INFO, "Here is some internal exception. Enable MXLib Debug Mode to watch then.");
         }
         IClassScanner scanner = MXBukkitLib.getBeanManager().getBeanNonNull(IClassScanner.class);
         try {
             MXBukkitLib.getBeanManager().getBeanNonNull(IConfigurationProcessor.class).load(
                     scanner.scan(getFile(), new ArrayList<>())
+                            .stream()
+                            .filter(entry -> {
+                                if (entry.contains("internal")) return false;
+                                return entry.startsWith("cn.mcres.");
+                            })
+                            .collect(Collectors.toList())
             );
         } catch (Throwable e) {
             getLogger().log(Level.SEVERE, e.toString(), e);

@@ -16,7 +16,7 @@ import org.bukkit.plugin.*;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.*;
 import org.objectweb.asm.tree.ClassNode;
 
 import java.io.File;
@@ -38,12 +38,66 @@ public class HookedPluginLoader implements PluginLoader {
     static final Field JP_server;
     static final Field JP_file;
 
+    static class AS extends MethodVisitor {
+        private final String desc;
+        AnnArrayScan scan = new AnnArrayScan();
+
+        AS(String desc) {
+            super(Opcodes.ASM5);
+            this.desc = desc;
+        }
+
+        @Override
+        public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+            if (desc.equals(descriptor)) return scan;
+            return null;
+        }
+    }
+
+    static class CS extends ClassVisitor {
+        private final String desc;
+        AnnArrayScan scan = new AnnArrayScan();
+
+        public CS(String desc) {
+            super(Opcodes.ASM5);
+            this.desc = desc;
+        }
+
+        @Override
+        public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+            if (desc.equals(descriptor)) return scan;
+            return null;
+        }
+    }
+
+    static class AnnArrayScan extends AnnotationVisitor {
+        Collection<String> values = new ArrayList<>();
+
+        AnnArrayScan() {
+            super(Opcodes.ASM5);
+        }
+
+        @Override
+        public void visit(String name, Object value) {
+            if (name == null) values.add(String.valueOf(value));
+        }
+
+        @Override
+        public AnnotationVisitor visitArray(String name) {
+            if (name.equals("value")) return this;
+            return null;
+        }
+    }
+
     static {
         Field a = null, b = null, c = null;
         try {
             a = JavaPluginLoader.class.getDeclaredField("server");
             b = JavaPlugin.class.getDeclaredField("server");
             c = JavaPlugin.class.getDeclaredField("file");
+            Class.forName(AS.class.getName());
+            Class.forName(CS.class.getName());
+            Class.forName(AnnArrayScan.class.getName());
         } catch (Throwable ignore) {
         }
         JPL_server = a;
@@ -83,22 +137,12 @@ public class HookedPluginLoader implements PluginLoader {
                 ClassReader asm = new ClassReader(stream);
                 var node = new ClassNode();
                 asm.accept(node, 0);
-                var anno = node.visibleAnnotations;
-                if (anno != null) {
-                    for (var a0 : anno) {
-                        if (a0.desc.equals("cn/mcres/karlatemp/common/maven/annotations/MavenLocations")) {
-                            var vs = a0.values;
-                            if (vs.size() < 2) continue;
-                            var list = vs.get(1);
-                            BukkitHookToolkit.TKIMPL.REGUSER(((Collection<String>) list).toArray());
-                        } else if (a0.desc.equals("cn/mcres/karlatemp/common/maven/annotations/Repositories")) {
-                            var vs = a0.values;
-                            if (vs.size() < 2) continue;
-                            var list = vs.get(1);
-                            BukkitHookToolkit.TKIMPL.LOADREPO(((Collection<String>) list).toArray());
-                        }
-                    }
-                }
+                var ML = new CS("Lcn/mcres/karlatemp/common/maven/annotations/MavenLocations;");
+                var Repos = new CS("Lcn/mcres/karlatemp/common/maven/annotations/Repositories;");
+                node.accept(ML);
+                node.accept(Repos);
+                BukkitHookToolkit.TKIMPL.REGUSER(ML.scan.values.toArray());
+                BukkitHookToolkit.TKIMPL.LOADREPO(Repos.scan.values.toArray());
                 //var server = Toolkit.Reflection.getObjectValue(parent, JPL_server);
                 //try {
                     /*if (WrappedServerBuilder.constructor != null) {

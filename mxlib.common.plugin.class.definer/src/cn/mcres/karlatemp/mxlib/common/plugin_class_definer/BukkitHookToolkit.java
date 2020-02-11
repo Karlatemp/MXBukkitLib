@@ -171,9 +171,12 @@ public class BukkitHookToolkit {
             };
             MLG = ML;
             loader = new MavenLoader(MavenLoader.URLClassLoaderAddURL((URLClassLoader) TKIMPL.class.getClassLoader()));
+            loader.logger = new MLogger("Repo Loading", null, ML);
             LOCALHOST.logger = new MLogger("Localhost Repo", null, ML);
-            if (MXBukkitLib.DEBUG)
+            if (MXBukkitLib.DEBUG) {
                 LOCALHOST.logger.setLevel(Level.ALL);
+                loader.logger.setLevel(Level.ALL);
+            }
             FULL.register(LOCALHOST);
             FULL.register(USER_REMOTE);
             FULL.register(SYS_FINALLY_REMOTE);

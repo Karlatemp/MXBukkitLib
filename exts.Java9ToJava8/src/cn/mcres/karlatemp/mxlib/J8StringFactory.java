@@ -118,4 +118,7 @@ public class J8StringFactory {
         }
         return new J8StringFactory(chars, constants, aCount);
     }
+
+    public static void onSpinWait() {
+    }
 }

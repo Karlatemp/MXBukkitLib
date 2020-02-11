@@ -49,6 +49,8 @@ open module mxlib.api {
     requires java.logging;
     requires org.javassist;
     requires org.objectweb.asm;
+    requires org.objectweb.asm.tree;
+    requires org.objectweb.asm.commons;
     requires spigot.api;
     requires com.google.gson;
     requires io.netty.codec.http;

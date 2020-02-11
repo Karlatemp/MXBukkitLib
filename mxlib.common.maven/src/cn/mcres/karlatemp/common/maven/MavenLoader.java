@@ -17,10 +17,13 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 import java.util.function.BiConsumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MavenLoader {
     private final Consumer<URL> URLRegisterer;
     private static final BiConsumer<Object, Object> URLClassLoaderRegisterer;
+    public Logger logger;
 
     static {
         MagicAccessorMarkerLoader.load();
@@ -56,6 +59,11 @@ public class MavenLoader {
             return;
         }
         repos.add(repo);
+        if (logger != null) {
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE, "Loading " + repo.inline());
+            }
+        }
         if (repo.location != null)
             URLRegisterer.accept(repo.location);
         if (repo.depends != null)
