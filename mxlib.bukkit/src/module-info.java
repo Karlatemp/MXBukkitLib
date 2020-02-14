@@ -25,5 +25,7 @@ open module mxlib.bukkit {
     requires mxlib.core;
     requires io.netty.common;
     requires org.objectweb.asm;
+    requires mxlib.logging;
+    requires mxlib.message;
 
 }

@@ -13,6 +13,7 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,7 @@ public class DefaultCommands implements ICommands {
     private final String permissionMessage;
     private final CommandProvider provider;
     private final String description;
+    private final TabCompileMode tabCompileMode;
 
     @Override
     public String description() {
@@ -32,11 +34,20 @@ public class DefaultCommands implements ICommands {
                            String permissionMessage,
                            String description,
                            CommandProvider provider) {
+        this(name, permission, permissionMessage, description, provider, TabCompileMode.CONTAINS);
+    }
+
+    public DefaultCommands(String name, String permission,
+                           String permissionMessage,
+                           String description,
+                           CommandProvider provider,
+                           TabCompileMode tabCompileMode) {
         this.name = name;
         this.permission = permission;
         this.permissionMessage = permissionMessage;
         this.description = description;
         this.provider = provider;
+        this.tabCompileMode = tabCompileMode;
     }
 
     protected Map<String, ICommand> commands = new HashMap<>();
@@ -105,15 +116,52 @@ public class DefaultCommands implements ICommands {
     public void tabCompile(Object sender, @NotNull List<String> result, @NotNull List<String> fillArguments, @NotNull List<String> args) {
         sender = provider.resolveSender(sender, null);
         if (sender != null) {
+            var atomicSender = sender;
             if (!args.isEmpty()) {
                 if (args.size() == 1) {
-                    String test = args.remove(0);
-                    result.addAll(commands.keySet().stream().filter(a -> a.contains(test))
-                            .sorted().collect(Collectors.toList()));
+                    String test = args.remove(0).toLowerCase();
+                    commands.entrySet().stream().map(entry -> {
+                        final ICommand value = entry.getValue();
+                        final String key = entry.getKey();
+                        if (provider.hasPermission(atomicSender, value.getPermission())) {
+                            switch (tabCompileMode) {
+                                case CONTAINS:
+                                    if (!key.contains(test)) return null;
+                                    break;
+                                case NONE:
+                                    return null;
+                                case ENDS_WITH:
+                                    if (!key.endsWith(test)) return null;
+                                    break;
+                                case STARTS_WITH:
+                                    if (!key.startsWith(test)) return null;
+                                    break;
+                                default:
+                                    throw new UnsupportedOperationException("Unknown Tab Compile Type: " + tabCompileMode);
+                            }
+                            return key;
+                        }
+                        return null;
+                    }).filter(Objects::nonNull)
+                            .sorted((s1, s2) -> {
+                                if (tabCompileMode == TabCompileMode.CONTAINS || tabCompileMode == TabCompileMode.ENDS_WITH) {
+                                    boolean a = s1.startsWith(test);
+                                    boolean b = s2.startsWith(test);
+                                    if (a | b) {
+                                        if (a) {
+                                            if (!b) {
+                                                return -1;
+                                            }
+                                        } else return 1;
+                                    }
+                                }
+                                return s1.compareTo(s2);
+                            }).forEach(result::add);
                     return;
                 }
                 ICommand ic = getSubCommand(args.remove(0));
                 if (ic != null) {
+                    if (!provider.hasPermission(sender, ic.getPermission())) return;
                     ic.tabCompile(sender, result, fillArguments, args);
                 }
             }

@@ -39,7 +39,8 @@ public abstract class AbstractCommandProvider implements CommandProvider {
                 commands.permission(),
                 commands.noPermissionMessage(),
                 commands.description(),
-                provider
+                provider,
+                commands.tabCompileMode()
         );
         for (Class<?> c : classes) {
             Package cp = c.getPackage();

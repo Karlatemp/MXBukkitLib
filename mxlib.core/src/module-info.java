@@ -13,6 +13,7 @@ open module mxlib.core {
     requires java.instrument;
     requires java.logging;
     requires com.google.gson;
+    requires mxlib.logging;
     provides cn.mcres.karlatemp.mxlib.MXLibBootProvider with
             cn.mcres.karlatemp.mxlib.shared.SharedMXLibBootProvider,
             cn.mcres.karlatemp.mxlib.shared.SharedMXLibBootProvider.AutoConfigurationProcessor;

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: mxlib.api
 Bundle-SymbolicName: mxlib.api
-Bundle-Version: 2.13
-Implementation-Version: 2.13
+Bundle-Version: 2.13.1
+Implementation-Version: 2.13.1
 Main-Class: cn.mcres.karlatemp.mxlib.MXBukkitLib
 Implementation-Vendor: Karlatemp

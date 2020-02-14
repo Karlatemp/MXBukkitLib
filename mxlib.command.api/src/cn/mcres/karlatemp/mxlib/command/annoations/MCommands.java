@@ -6,6 +6,7 @@
 package cn.mcres.karlatemp.mxlib.command.annoations;
 
 import cn.mcres.karlatemp.mxlib.command.CommandProvider;
+import cn.mcres.karlatemp.mxlib.command.TabCompileMode;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -44,4 +45,6 @@ public @interface MCommands {
      * @return The provider using.
      */
     Class<? extends CommandProvider> provider() default CommandProvider.class;
+
+    TabCompileMode tabCompileMode() default TabCompileMode.CONTAINS;
 }

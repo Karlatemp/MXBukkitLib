@@ -9,7 +9,10 @@ import cn.mcres.karlatemp.mxlib.MXBukkitLib;
 import cn.mcres.karlatemp.mxlib.tools.ThrowHelper;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -19,6 +22,37 @@ import java.util.function.Consumer;
  * @since 2.2
  */
 public class HandlerList<E extends Event> {
+    public HandlerList() {
+        this(true);
+    }
+
+    private static final ConcurrentLinkedQueue<WeakReference<HandlerList<?>>> handlers = new ConcurrentLinkedQueue<>();
+
+    public HandlerList(boolean register) {
+        if (register) {
+            handlers.add(new WeakReference<>(this));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void unregisterAll(EventHandler<?> handler) {
+        invoke(HandlerList::unregister, handler);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static <T> void invoke(BiConsumer<HandlerList, T> func, T param) {
+        final Iterator<WeakReference<HandlerList<?>>> iterator = handlers.iterator();
+        while (iterator.hasNext()) {
+            var next = iterator.next();
+            if (next.isEnqueued()) iterator.remove();
+            else {
+                final HandlerList<?> list = next.get();
+                if (list == null) iterator.remove();
+                else func.accept(list, param);
+            }
+        }
+    }
+
     public interface ErrorCatch {
         void accept(@NotNull Event posing, @NotNull EventHandler invoking, @NotNull Throwable error);
     }

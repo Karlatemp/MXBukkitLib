@@ -36,5 +36,6 @@ open module mxlib.common.plugin.class_definer {
     requires org.objectweb.asm;
     requires org.objectweb.asm.commons;
     requires mxlib.common.maven;
+    requires mxlib.logging;
     exports cn.mcres.karlatemp.mxlib.common.plugin_class_definer;
 }

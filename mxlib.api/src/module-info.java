@@ -29,14 +29,8 @@ open module mxlib.api {
     exports cn.mcres.karlatemp.mxlib.formatter;
     exports cn.mcres.karlatemp.mxlib.interfaces;
     exports cn.mcres.karlatemp.mxlib.internal;
-    exports cn.mcres.karlatemp.mxlib.logging;
-    exports cn.mcres.karlatemp.mxlib.module.packet;
-    exports cn.mcres.karlatemp.mxlib.nbt;
-    exports cn.mcres.karlatemp.mxlib.nbt.visitor;
     exports cn.mcres.karlatemp.mxlib.network;
     exports cn.mcres.karlatemp.mxlib.reflect;
-    exports cn.mcres.karlatemp.mxlib.remote;
-    exports cn.mcres.karlatemp.mxlib.remote.netty;
     exports cn.mcres.karlatemp.mxlib.scheduler;
     exports cn.mcres.karlatemp.mxlib.tools;
     exports cn.mcres.karlatemp.mxlib.tools.module;
@@ -67,4 +61,5 @@ open module mxlib.api {
     requires java.naming;
     requires jdk.naming.dns;
     requires com.mojang.brigadier;
+    requires mxlib.logging;
 }
