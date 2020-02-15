@@ -5,8 +5,6 @@
 
 package cn.mcres.karlatemp.mxlib.command.annoations;
 
-import cn.mcres.karlatemp.mxlib.command.CommandParamParser;
-import cn.mcres.karlatemp.mxlib.command.internal.DefaultParameterParser;
 
 import java.lang.annotation.*;
 import java.util.List;
@@ -40,12 +38,8 @@ public @interface MParameter {
      */
     String name();
 
+    String[] alias() default {};
+
     String description() default "";
 
-    /**
-     * The param parser
-     *
-     * @return The parser of this parameter.
-     */
-    Class<? extends CommandParamParser> parser() default DefaultParameterParser.class;
 }

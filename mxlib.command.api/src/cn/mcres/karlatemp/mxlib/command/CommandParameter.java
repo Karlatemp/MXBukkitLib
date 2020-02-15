@@ -35,13 +35,6 @@ public interface CommandParameter {
     String description();
 
     /**
-     * Get the parameter parser.
-     *
-     * @return The parser.
-     */
-    CommandParamParser parser();
-
-    /**
      * Does this parameter must exists?
      *
      * @return Need exists.

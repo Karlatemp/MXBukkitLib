@@ -12,6 +12,7 @@ open module mxlib.command.api {
     requires org.objectweb.asm;
     requires org.objectweb.asm.tree;
     requires mxlib.bukkit;
+    requires mxlib.arguments;
     exports cn.mcres.karlatemp.mxlib.command.internal;
     exports cn.mcres.karlatemp.mxlib.command.annoations;
     exports cn.mcres.karlatemp.mxlib.command.exceptions;
