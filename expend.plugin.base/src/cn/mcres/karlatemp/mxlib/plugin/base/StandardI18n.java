@@ -26,6 +26,7 @@ public class StandardI18n {
         map.put("argument.missing", "Need %s arguments or more.");
         map.put("world.not.found", "Unknown world \"%s\"");
         map.put("player.not.found", "Unknown player \"%s\"");
+        map.put("payload", "%s");
         map.put("no.permission", "Sorry, but you don't have permission to perform that.");
         en_us = new I18n(EN_US = Collections.unmodifiableMap(map));
         var map2 = new HashMap<>(map);
