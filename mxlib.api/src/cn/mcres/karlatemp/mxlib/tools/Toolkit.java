@@ -314,6 +314,22 @@ public class Toolkit {
         if (o == null) return false;
         if (o instanceof String) {
             String s = String.valueOf(o);
+            switch (s) {
+                case "true":
+                case "1":
+                case "[]":
+                case "{}":
+                case "yes":
+                case "y":
+                case "Y":
+                    return true;
+                case "false":
+                case "no":
+                case "n":
+                case "N":
+                case "0":
+                    return false;
+            }
             return !s.trim().isEmpty();
         }
         if (o instanceof Number) {
@@ -512,7 +528,7 @@ public class Toolkit {
 
         @Contract("null, _ -> null; !null, _ -> !null")
         public static <T extends AccessibleObject> T setAccess(T accessibleObject, boolean b) {
-            if (accessibleObject != null) accessibleObject.setAccessible(b);
+            if (accessibleObject != null) AccessToolkit.setAccessible(accessibleObject, b);
             return accessibleObject;
         }
 
