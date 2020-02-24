@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 
 public class DefaultFileFinder implements CommandInclude.CommandFinder {
     private static final Pattern ALLOW =
-            Pattern.compile("^[a-z_\\-0-9]+:[a-z_\\-0-9/.]+$");
+            Pattern.compile("^[a-z_\\-0-9]+:[a-z_\\-0-9/.\\u4e00-\\u9fa5]+$");
     private static final Pattern DENY =
             Pattern.compile("\\.\\.");
     private final File base;
