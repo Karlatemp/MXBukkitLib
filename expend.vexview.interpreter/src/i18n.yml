@@ -1,0 +1,6 @@
+"no.data": "Empty Configuration [%s]"
+"invalid.hud": "Invalid hud [%s]"
+"invalid.hud.exception": "Error in loading hud[%s]: %s"
+"invalid.tag.exception": "Error in loading tag[%s]: %s"
+"failed.to.parse.gui": "Error in parsing gui[%s]: %s"
+"invalid.configuration": "Invalid configuration[%s]: %s"

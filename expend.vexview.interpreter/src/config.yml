@@ -1,0 +1,5 @@
+# 使用缓存, 设置成true减少磁盘读写占用
+# 如果你正在编写新的内容请将其设置成false以实时加载
+cache: true
+# 无法加载时是否在后台输出错误
+dump_errors: false

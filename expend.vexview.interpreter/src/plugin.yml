@@ -1,0 +1,11 @@
+main: cn.mcres.karlatemp.vit.PM
+name: Vit
+version: "1.0"
+author: Karlatemp
+commands:
+  vit: {}
+depend:
+  - VexView
+permissions:
+  "vit.command":
+    default: op

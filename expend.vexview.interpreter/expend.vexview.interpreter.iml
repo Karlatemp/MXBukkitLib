@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="spigot-api-1.9" level="application" />
+    <orderEntry type="library" name="com.google.guava:guava:28.1-jre" level="application" />
+    <orderEntry type="module" module-name="expend.vexview.builders" />
+    <orderEntry type="library" name="org.jetbrains.annotations-17.0.0" level="application" />
+    <orderEntry type="library" name="VexView2.4" level="application" />
+    <orderEntry type="library" name="PlaceholderAPI" level="application" />
+    <orderEntry type="module" module-name="expend.plugin.base" />
+    <orderEntry type="module" module-name="mxlib.interpreter" />
+  </component>
+</module>
