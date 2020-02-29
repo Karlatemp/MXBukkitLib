@@ -69,7 +69,7 @@ public class UpdateModule {
                     temp.delete();
                 }
             };
-            WebHelper.http("https://dev.tencent.com/u/GYHHY/p/MXBukkitLib/git/raw/master/dist/MXBukkitLib.jar")
+            WebHelper.http("https://gyhhy.coding.net/p/MXBukkitLib/d/MXBukkitLib/git/raw/master/dist/MXBukkitLib.jar")
                     .response(fc).onCatch((w) -> {
                 WebHelper.http("https://github.com/Karlatemp/MXBukkitLib/raw/master/dist/MXBukkitLib.jar")
                         .response(fc).onCatch((wx) -> {
