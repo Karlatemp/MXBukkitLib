@@ -1,6 +1,9 @@
 /*
  * Copyright (c) 2018-2020 Karlatemp. All rights reserved.
- * Reserved.FileName: PropertiesConfiguration.java@author: karlatemp@vip.qq.com: 2020/1/26 下午12:10@version: 2.0
+ * @author Karlatemp <karlatemp@vip.qq.com> <https://github.com/Karlatemp>
+ * @create 2020/02/29 15:57:22
+ *
+ * MXLib/mxlib.configuration/PropertiesConfiguration.java
  */
 
 package cn.mcres.karlatemp.mxlib.config;
