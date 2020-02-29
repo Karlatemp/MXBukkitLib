@@ -11,7 +11,7 @@
  * @since 2.12
  */
 module mxlib.configuration {
-    requires mxlib.api;
+    // requires mxlib.api;
     requires org.yaml.snakeyaml;
     requires org.jetbrains.annotations;
     requires com.google.common;

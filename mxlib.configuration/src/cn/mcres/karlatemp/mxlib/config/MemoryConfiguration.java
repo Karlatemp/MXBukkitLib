@@ -5,8 +5,6 @@
 
 package cn.mcres.karlatemp.mxlib.config;
 
-import cn.mcres.karlatemp.mxlib.tools.UnclosedInputStream;
-import cn.mcres.karlatemp.mxlib.tools.UnclosedOutputStream;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;

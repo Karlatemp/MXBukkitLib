@@ -5,8 +5,6 @@
 
 package cn.mcres.karlatemp.mxlib.config;
 
-import cn.mcres.karlatemp.mxlib.tools.UnclosedReader;
-import cn.mcres.karlatemp.mxlib.tools.UnclosedWriter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
