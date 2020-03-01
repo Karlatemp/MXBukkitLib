@@ -49,14 +49,14 @@ class SR {
                 Type.getInternalName(Wrapper.class),
                 "defineClass",
                 "(Ljava/lang/Object;Ljava/lang/String;[BIILjava/lang/ClassLoader;Ljava/security/ProtectionDomain;)Ljava/lang/Class;",
-                WrappedClassImplements.genImplementClassName("cn.mcres.karlatemp.mxlib.internal", null),
+                WrappedClassImplements.genImplementClassName("cn.mcres.karlatemp.unsafe", null),
                 "sun/misc/Unsafe",
                 "defineClass", WrappedClassImplements.MethodWrapperType.OBJECT
         ).toByteArray(), clazz2 = WrappedClassImplements.createMethodWrapper(
                 Type.getInternalName(Wrapper.class),
                 "defineClass",
                 "(Ljava/lang/Object;Ljava/lang/String;[BIILjava/lang/ClassLoader;Ljava/security/ProtectionDomain;)Ljava/lang/Class;",
-                WrappedClassImplements.genImplementClassName("cn.mcres.karlatemp.mxlib.internal", null),
+                WrappedClassImplements.genImplementClassName("cn.mcres.karlatemp.unsafe", null),
                 "sun/misc/Unsafe",
                 "defineClass0", WrappedClassImplements.MethodWrapperType.OBJECT
         ).toByteArray();

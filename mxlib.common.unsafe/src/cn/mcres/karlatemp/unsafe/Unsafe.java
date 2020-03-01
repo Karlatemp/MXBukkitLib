@@ -90,7 +90,7 @@ public abstract class Unsafe {
             }
             return new JDKUnsafe();
         } catch (Throwable ignore) {
-             ignore.printStackTrace();
+             // ignore.printStackTrace();
         }
         return new SunUnsafe();
     }
