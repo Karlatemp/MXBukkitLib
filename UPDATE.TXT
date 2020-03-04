@@ -1,3 +1,7 @@
+2.14.2
+    Fix Plugin loading security domain missing.
+    One of forge server patch.
+    Updating Exception fixed.
 2.14.1
     Fix Coding.net Repository Error
 2.14
