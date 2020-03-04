@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 
 public class LoggerInject extends PrintStreamLogger implements Listener, EventExecutor {
 
-    private static final LoggerInject instance = new LoggerInject(null, MXBukkitLib.getBeanManager().getOptional(IMessageFactory.class).orElse(new BukkitMessageFactory()), null, System.out, System.err);
+    private static final LoggerInject instance = new LoggerInject(System.out, MXBukkitLib.getBeanManager().getOptional(IMessageFactory.class).orElse(new BukkitMessageFactory()), null, System.out, System.out);
     private static final MLoggerHandler handler = new MLoggerHandler(instance);
     private static final RegisteredListener listener = new RegisteredListener(instance, instance, EventPriority.LOWEST, MXBukkitLibPluginStartup.plugin, false) {
         @Override
