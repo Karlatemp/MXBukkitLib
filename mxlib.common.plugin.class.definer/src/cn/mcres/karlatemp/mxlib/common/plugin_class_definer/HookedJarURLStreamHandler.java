@@ -10,6 +10,7 @@ import cn.mcres.karlatemp.mxlib.internal.IHookedJarURLStreamHandler;
 import cn.mcres.karlatemp.mxlib.tools.CharCompiler;
 import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,15 +24,17 @@ import java.util.zip.ZipEntry;
 
 public class HookedJarURLStreamHandler extends URLStreamHandler implements IHookedJarURLStreamHandler {
     private final JarFile jar;
+    private final URL jarFileURL;
 
     private static class JRConnection extends JarURLConnection {
         private JarEntry path;
         private InputStream stream;
         private JarFile file;
+        private URL jarFileURL;
 
-        private static JRConnection create(JarEntry entry, JarFile file, URL hook) {
+        private static JRConnection create(JarEntry entry, JarFile file, URL hook, URL jarFileURL) {
             JRConnection connection = Toolkit.Reflection.allocObject(JRConnection.class);
-            connection.init(entry, file, hook);
+            connection.init(entry, file, hook, jarFileURL);
             return connection;
         }
 
@@ -45,15 +48,21 @@ public class HookedJarURLStreamHandler extends URLStreamHandler implements IHook
         }
 
         @Override
+        public URL getJarFileURL() {
+            return jarFileURL;
+        }
+
+        @Override
         public JarEntry getJarEntry() throws IOException {
             return path;
         }
 
-        private void init(JarEntry entry, JarFile file, URL url) {
+        private void init(JarEntry entry, JarFile file, URL url, URL jarFileURL) {
             this.path = entry;
             this.file = file;
             this.url = url;
             this.jarFileURLConnection = null;
+            this.jarFileURL = jarFileURL;
         }
 
         @Override
@@ -94,6 +103,11 @@ public class HookedJarURLStreamHandler extends URLStreamHandler implements IHook
 
     public HookedJarURLStreamHandler(JarFile jar) {
         this.jar = jar;
+        try {
+            jarFileURL = new URL("jar:" + new File(jar.getName()).toURI().toASCIIString() + "!/");
+        } catch (MalformedURLException mal) {
+            throw new RuntimeException(mal);
+        }
     }
 
     @Override
@@ -101,7 +115,7 @@ public class HookedJarURLStreamHandler extends URLStreamHandler implements IHook
         String path = CharCompiler.decode(u.getFile().substring(1));
         final JarEntry entry = jar.getJarEntry(path);
         if (entry == null) throw new FileNotFoundException(path);
-        return JRConnection.create(entry, jar, u);
+        return JRConnection.create(entry, jar, u, jarFileURL);
     }
 
     public JarFile getJar() {
