@@ -96,7 +96,7 @@ public class VersionInfo {
                 System.err.println("Checkup error from github.");
             }
             WebHelper.http(
-                    "https://gyhhy.coding.net/p/MXBukkitLib/d/MXBukkitLib/git/blob/master/UPDATE.TXT"
+                    "https://gyhhy.coding.net/p/MXBukkitLib/d/MXBukkitLib/git/raw/master/UPDATE.TXT"
             ).response(func).onCatch((tw) -> {
                 try {
                     MXBukkitLibPluginStartup.plugin.getLogger().log(Level.SEVERE, null, tw);
