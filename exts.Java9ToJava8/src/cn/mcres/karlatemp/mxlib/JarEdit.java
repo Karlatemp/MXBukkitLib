@@ -375,6 +375,9 @@ public class JarEdit {
             }
             for (var node : nodes.values()) {
                 node.version = Opcodes.V1_8;
+                node.nestHostClass = null;
+                node.nestMembers = null;
+                node.module = null;
                 for (var met : node.methods) {
                     var is = met.instructions;
                     if (is != null) {
