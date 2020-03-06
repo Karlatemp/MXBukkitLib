@@ -52,7 +52,7 @@ public class VersionInfo {
                         .append(
                                 ""
                                         + "This lib is out of style.\n"
-                                        + "Please download the latest from https://gyhhy.coding.net/p/MXBukkitLib/d/MXBukkitLib/git/blob/master/dist/MXBukkitLib.jar\n"
+                                        + "Please download the latest from https://gyhhy.coding.net/p/MXBukkitLib/d/MXBukkitLib/git/raw/master/dist/MXBukkitLib.jar\n"
                                         + "or https://github.com/GYHHY/MXBukkitLib/blob/master/dist/MXBukkitLib.jar\n"
                                         + "Current version: ")
                         .append(MXAPI.getVersion()).append("\nLastest version: ").append(lastest).append('\n');

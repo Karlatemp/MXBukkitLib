@@ -1,3 +1,6 @@
+2.14.3
+    URLEncoder/URLDecoder
+    Exception JarFile closing fix.
 2.14.2
     Fix Plugin loading security domain missing.
     One of forge server patch.

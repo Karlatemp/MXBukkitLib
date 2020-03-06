@@ -89,7 +89,7 @@ public class CharCompiler {
         for (i = '0'; i <= '9'; i++) {
             dontNeedEncoding.set(i);
         }
-        dontNeedEncoding.set(' ');
+        // dontNeedEncoding.set(' ');
         /* encoding a space to a + is done
                                     * in the encode() method */
         dontNeedEncoding.set('-');
@@ -112,9 +112,7 @@ public class CharCompiler {
     public static Charset getCharset(String name) throws UnsupportedEncodingException {
         try {
             return Charset.forName(name);
-        } catch (IllegalCharsetNameException e) {
-            throw new UnsupportedEncodingException(name);
-        } catch (UnsupportedCharsetException e) {
+        } catch (IllegalCharsetNameException | UnsupportedCharsetException e) {
             throw new UnsupportedEncodingException(name);
         }
     }

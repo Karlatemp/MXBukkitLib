@@ -205,22 +205,21 @@ public class Options {
 //            System.out.println(conn.getClass());
             if (conn instanceof JarURLConnection) {
                 JarURLConnection juc = (JarURLConnection) conn;
-                try (JarFile jf = juc.getJarFile()) {
-                    jf.stream().filter((je) -> {
-                        String name = je.getName();
-                        if (name.endsWith(".class")) {
-                            if (name.replaceFirst("^/", "").replaceAll("/", ".").startsWith(pn)) {
-                                return true;
-                            }
+                JarFile jf = juc.getJarFile();
+                jf.stream().filter((je) -> {
+                    String name = je.getName();
+                    if (name.endsWith(".class")) {
+                        if (name.replaceFirst("^/", "").replaceAll("/", ".").startsWith(pn)) {
+                            return true;
                         }
-                        return false;
-                    }).forEach((je) -> {
-                        names.add(
-                                pt.matcher(
-                                        je.getName().replaceFirst("^/", "").replaceAll("/", ".")
-                                ).replaceFirst(""));
-                    });
-                }
+                    }
+                    return false;
+                }).forEach((je) -> {
+                    names.add(
+                            pt.matcher(
+                                    je.getName().replaceFirst("^/", "").replaceAll("/", ".")
+                            ).replaceFirst(""));
+                });
             } else if (pc.equals("file")) {
                 File f = RefUtil.get(conn, "file");
                 File dir = new File(f, "..");

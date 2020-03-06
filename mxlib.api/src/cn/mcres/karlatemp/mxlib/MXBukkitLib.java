@@ -54,7 +54,7 @@ public class MXBukkitLib {
      * <p>
      * 使用此字段获取你所使用的MXBukkitLib版本
      */
-    public static final String BUILD_VERSION = "2.14.2";
+    public static final String BUILD_VERSION = "2.14.3";
     /**
      * Is MXLib Debug Mode open
      *

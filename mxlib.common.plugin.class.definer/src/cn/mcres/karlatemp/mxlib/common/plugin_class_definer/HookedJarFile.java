@@ -5,6 +5,7 @@
 
 package cn.mcres.karlatemp.mxlib.common.plugin_class_definer;
 
+import cn.mcres.karlatemp.mxlib.MXBukkitLib;
 import cn.mcres.karlatemp.mxlib.event.Event;
 import cn.mcres.karlatemp.mxlib.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
@@ -128,5 +129,13 @@ public class HookedJarFile extends JarFile {
     @Override
     public synchronized InputStream getInputStream(ZipEntry ze) throws IOException {
         return Event.post(new JarStreamGetEvent(() -> getInputStream0(ze), handlers, ze)).stream().get();
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (MXBukkitLib.DEBUG) {
+            MXBukkitLib.getLogger().printStackTrace(new Throwable("Hooked Jar File closed: " + getName()));
+        }
+        super.close();
     }
 }
