@@ -36,7 +36,7 @@ public class $MXBukkitLibConfiguration {
     }
 
     public static class $Update {
-        public boolean autoupdate = true;
+        public boolean autoupdate = false;
         public boolean enable = true;
     }
 
@@ -57,7 +57,7 @@ public class $MXBukkitLibConfiguration {
     public $Events events = new $Events();
 
     public static class $Logger {
-        public boolean enable = true;
+        public boolean enable = false;
         public boolean alignment = true;// 对齐
     }
 

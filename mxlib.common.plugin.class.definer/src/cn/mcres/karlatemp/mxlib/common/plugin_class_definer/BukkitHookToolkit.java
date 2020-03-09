@@ -77,8 +77,9 @@ public class BukkitHookToolkit {
         try {
             Class.forName("org.bukkit.Bukkit").getMethod("getLogger").invoke(null);
             hook = new TKIMPL();
-        } catch (Throwable ignore) {
-            ignore.printStackTrace();
+        } catch (Throwable exception) {
+            if (MXBukkitLib.DEBUG)
+                MXBukkitLib.getLogger().printStackTrace(exception);
         }
         instance = hook;
         try {
@@ -153,6 +154,9 @@ public class BukkitHookToolkit {
         private static final ILogger MLG;
 
         static {
+            if(Boolean.getBoolean("mxlib.disable.definer")){
+                throw new ExceptionInInitializerError("Module disabled");
+            }
             var ML = new AbstractBaseLogger(new MessageFactoryImpl()) {
                 @Override
                 protected void writeLine(String pre, String message, boolean error) {

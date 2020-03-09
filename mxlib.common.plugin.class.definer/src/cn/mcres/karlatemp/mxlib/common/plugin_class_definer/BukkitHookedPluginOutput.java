@@ -8,6 +8,7 @@ package cn.mcres.karlatemp.mxlib.common.plugin_class_definer;
 import cn.mcres.karlatemp.mxlib.MXBukkitLib;
 import cn.mcres.karlatemp.mxlib.event.EventHandler;
 import cn.mcres.karlatemp.mxlib.share.BukkitToolkit;
+import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -22,10 +23,7 @@ import org.bukkit.plugin.Plugin;
 import org.objectweb.asm.*;
 import cn.mcres.karlatemp.mxlib.logging.Ansi;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
@@ -121,6 +119,12 @@ public class BukkitHookedPluginOutput implements EventHandler<BukkitHookToolkit.
         process(CON_SRM, sender, raw, BukkitToolkit.getCallerPlugin());
     }
 
+    public static byte[] readAll(InputStream stream) throws IOException {
+        ByteArrayOutputStream os = new ByteArrayOutputStream(Math.max(1024, stream.available()));
+        Toolkit.IO.writeTo(stream, os);
+        return os.toByteArray();
+    }
+
     @Override
     public void post(BukkitHookToolkit.PluginPreLoadEvent event) {
         MXBukkitLib.debug(() -> "[BHPO] Plugin load: " + event.getTarget());
@@ -129,7 +133,13 @@ public class BukkitHookedPluginOutput implements EventHandler<BukkitHookToolkit.
                 // MXBukkitLib.debug(() -> "[BHPO] Resolving class for " + event.getTarget() + " " + loadEvent.getPath());
                 loadEvent.resolve(source -> {
                     var open = source.get();
-                    var reader = new ClassReader(open);
+                    var stream_data = readAll(open);
+                    ClassReader reader;
+                    try {
+                        reader = new ClassReader(new ByteArrayInputStream(stream_data));
+                    } catch (Throwable ignore) {
+                        return new ByteArrayInputStream(stream_data);
+                    }
                     var writer = new ClassWriter(0);
                     var vs = new ClassVisitor(Opcodes.ASM7, writer) {
                         String path;

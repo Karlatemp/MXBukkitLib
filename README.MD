@@ -16,3 +16,9 @@ MXLib 内置了下面的库 | MXLib Built in the flowing libraries.
 # 文档 | Documents
 * [Wiki \[cn-zh\]](https://karlatemp.github.io/MXBukkitLibWiki/)
 * [JavaDoc](https://karlatemp.github.io/MXBukkitLib)
+
+# 参数
+```text
+-Dmxlib.debug - 开启DEBUG
+-Dmxlib.disable.definer - 禁用Bukkit-插件字节码修改功能
+```
