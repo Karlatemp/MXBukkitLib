@@ -48,4 +48,14 @@ public class IPAddress {
             return "";
         }
     }
+
+    @Override
+    public String toString() {
+        return "IPAddress{" +
+                "port=" + port +
+                ", host='" + host + '\'' +
+                ", sourcePort=" + sourcePort +
+                ", sourceHost='" + sourceHost + '\'' +
+                '}';
+    }
 }
