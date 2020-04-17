@@ -78,14 +78,20 @@ public class MinecraftProtocolHelper {
             @NotNull ListPingCallback listPingCallback,
             boolean ms) throws InterruptedException {
         final EventLoopGroup group = PipelineUtils.newEventLoopGroup();
-        Channel c = new Bootstrap()
-                .channel(PipelineUtils.getChannel())
-                .group(group)
-                .remoteAddress(address.getHost(), address.getPort())
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
-                .handler(new ChannelInboundHandlerAdapter()).connect().sync().channel().pipeline()
-                .addLast(new ReadTimeoutHandler(10000L, TimeUnit.MILLISECONDS))
-                .channel();
+        Channel c;
+        try {
+            c = new Bootstrap()
+                    .channel(PipelineUtils.getChannel())
+                    .group(group)
+                    .remoteAddress(address.getHost(), address.getPort())
+                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
+                    .handler(new ChannelInboundHandlerAdapter()).connect().sync().channel().pipeline()
+                    .addLast(new ReadTimeoutHandler(10000L, TimeUnit.MILLISECONDS))
+                    .channel();
+        } catch (Throwable any) {
+            listPingCallback.done(null, 0, any);
+            return;
+        }
         ping(c, address.getSourceHost(), address.getPort(), listPingCallback.before(ListPingCallback.shutdown(group)), ms);
     }
 
@@ -98,14 +104,20 @@ public class MinecraftProtocolHelper {
      * @since 2.12
      */
     public static void ping(EventLoopGroup group, IPAddress address, @NotNull ListPingCallback callback, boolean ms) throws InterruptedException {
-        Channel c = new Bootstrap()
-                .channel(PipelineUtils.getChannel())
-                .group(group)
-                .remoteAddress(address.getHost(), address.getPort())
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
-                .handler(new ChannelInboundHandlerAdapter()).connect().sync().channel().pipeline()
-                .addLast(new ReadTimeoutHandler(10000L, TimeUnit.MILLISECONDS))
-                .channel();
+        Channel c;
+        try {
+            c = new Bootstrap()
+                    .channel(PipelineUtils.getChannel())
+                    .group(group)
+                    .remoteAddress(address.getHost(), address.getPort())
+                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
+                    .handler(new ChannelInboundHandlerAdapter()).connect().sync().channel().pipeline()
+                    .addLast(new ReadTimeoutHandler(10000L, TimeUnit.MILLISECONDS))
+                    .channel();
+        } catch (Throwable any) {
+            callback.done(null, 0, any);
+            return;
+        }
         ping(c, address.getSourceHost(), address.getPort(), callback, ms);
 
     }
@@ -126,14 +138,21 @@ public class MinecraftProtocolHelper {
             @NotNull ListPingCallback listPingCallback,
             boolean ms) throws InterruptedException {
         final EventLoopGroup group = PipelineUtils.newEventLoopGroup();
-        Channel c = new Bootstrap()
-                .channel(PipelineUtils.getChannel())
-                .group(group)
-                .remoteAddress(srvHost, srcPort)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
-                .handler(new ChannelInboundHandlerAdapter()).connect().sync().channel().pipeline()
-                .addLast(new ReadTimeoutHandler(10000L, TimeUnit.MILLISECONDS))
-                .channel();
+        Channel c;
+        try {
+            c = new Bootstrap()
+                    .channel(PipelineUtils.getChannel())
+                    .group(group)
+                    .remoteAddress(srvHost, srcPort)
+                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
+                    .handler(new ChannelInboundHandlerAdapter()).connect().sync().channel().pipeline()
+                    .addLast(new ReadTimeoutHandler(10000L, TimeUnit.MILLISECONDS))
+                    .channel();
+        } catch (Throwable any) {
+            group.shutdownNow();
+            listPingCallback.done(null, 0, any);
+            return;
+        }
         ping(c, host, port, listPingCallback.before(ListPingCallback.shutdown(group)), ms);
     }
 
@@ -152,7 +171,7 @@ public class MinecraftProtocolHelper {
             if (var2 > 0) {
                 String var3 = host.substring(1, var2);
                 String var4 = host.substring(var2 + 1).trim();
-                if (var4.startsWith(":") && !var4.isEmpty()) {
+                if (var4.startsWith(":")) {
                     var4 = var4.substring(1);
                     var1 = new String[2];
                     var1[0] = var3;
