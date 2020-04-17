@@ -15,5 +15,6 @@
     <orderEntry type="library" name="PlaceholderAPI" level="application" />
     <orderEntry type="module" module-name="expend.plugin.base" />
     <orderEntry type="module" module-name="mxlib.interpreter" />
+    <orderEntry type="library" name="BCCAPI" level="project" />
   </component>
 </module>

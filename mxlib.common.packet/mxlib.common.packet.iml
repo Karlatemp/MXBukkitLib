@@ -8,5 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="org.jetbrains.annotations-17.0.0" level="application" />
+    <orderEntry type="library" name="BCCAPI" level="project" />
   </component>
 </module>

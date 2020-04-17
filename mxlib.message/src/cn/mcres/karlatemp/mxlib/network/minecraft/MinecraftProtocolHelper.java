@@ -70,13 +70,12 @@ public class MinecraftProtocolHelper {
      * @param address          The connect address
      * @param listPingCallback The callback
      * @param ms               Need check connect delay
-     * @throws InterruptedException Thread Interrupted
      * @since 2.12
      */
     public static void ping(
             IPAddress address,
             @NotNull ListPingCallback listPingCallback,
-            boolean ms) throws InterruptedException {
+            boolean ms) {
         final EventLoopGroup group = PipelineUtils.newEventLoopGroup();
         Channel c;
         try {
@@ -100,10 +99,9 @@ public class MinecraftProtocolHelper {
      * @param address  The connect address
      * @param callback The callback
      * @param ms       Need check delay
-     * @throws InterruptedException Thread Interrupted
      * @since 2.12
      */
-    public static void ping(EventLoopGroup group, IPAddress address, @NotNull ListPingCallback callback, boolean ms) throws InterruptedException {
+    public static void ping(EventLoopGroup group, IPAddress address, @NotNull ListPingCallback callback, boolean ms) {
         Channel c;
         try {
             c = new Bootstrap()
@@ -129,14 +127,13 @@ public class MinecraftProtocolHelper {
      * @param srcPort          The connect port
      * @param listPingCallback The callback
      * @param ms               Does check delay?
-     * @throws InterruptedException Thread Interrupted
      * @since 2.12
      */
     public static void ping(
             String host, int port,
             String srvHost, int srcPort,
             @NotNull ListPingCallback listPingCallback,
-            boolean ms) throws InterruptedException {
+            boolean ms) {
         final EventLoopGroup group = PipelineUtils.newEventLoopGroup();
         Channel c;
         try {
@@ -343,13 +340,33 @@ public class MinecraftProtocolHelper {
             callback.done(null, 0, new IllegalAccessException("Only support TCP channel."));
             return;
         }
+        ping(channel, address, port, callback, ms, 498);
+    }
+
+    /**
+     * Fast ping server.
+     *
+     * @param channel  The channel using. Must TPC protocol.
+     * @param address  The remote address
+     * @param port     The ping port.
+     * @param callback The callback for connection.
+     * @param ms       Need check delay?
+     * @param protocol Protocol using.
+     */
+    public static void ping(
+            @NotNull Channel channel, @NotNull String address, int port,
+            @NotNull ListPingCallback callback, boolean ms, int protocol) {
+        if (channel instanceof DatagramChannel) {
+            callback.done(null, 0, new IllegalAccessException("Only support TCP channel."));
+            return;
+        }
         channel.pipeline()
                 .addLast(new MinecraftPacketMessageEncoder())
                 .addLast(new MinecraftPacketMessageDecoder())
                 .addLast(NettyHelper.createHooker(channel));
         PacketDataSerializer p = PacketDataSerializer.fromByteBuf(Unpooled.buffer(5000));
         p.writeVarInt(0);
-        p.writeVarInt(498);
+        p.writeVarInt(protocol);
         p.writeString(address);
         p.writeShort(port);
         p.writeVarInt(1);
