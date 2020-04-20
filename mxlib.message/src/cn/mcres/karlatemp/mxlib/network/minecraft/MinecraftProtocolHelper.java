@@ -266,10 +266,18 @@ public class MinecraftProtocolHelper {
 
         default @NotNull ListPingCallback once() {
             AtomicReference<ListPingCallback> current = new AtomicReference<>(this);
-            return (result, ms, err) -> {
-                var current0 = current.get();
-                if (current0 == null) return;
-                if (current.compareAndSet(current0, null)) current0.done(result, ms, err);
+            return new ListPingCallback() {
+                @Override
+                public void done(ByteBuf result, long ms, Throwable err) {
+                    var current0 = current.get();
+                    if (current0 == null) return;
+                    if (current.compareAndSet(current0, null)) current0.done(result, ms, err);
+                }
+
+                @Override
+                public @NotNull ListPingCallback once() {
+                    return this;
+                }
             };
         }
     }
