@@ -32,7 +32,7 @@ import java.util.logging.LogRecord;
  */
 public class AlignmentPrefixSupplier implements PrefixSupplier {
     // private static final PrintStream s = System.out;
-    private AtomicInteger
+    protected AtomicInteger
             lvln = new AtomicInteger(4),
             prln = new AtomicInteger(0);
     private PrefixSupplier parent;

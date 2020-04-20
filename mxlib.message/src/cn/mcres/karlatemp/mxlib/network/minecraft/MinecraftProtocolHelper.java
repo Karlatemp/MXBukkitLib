@@ -30,6 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Fast query MinecraftServer status
@@ -223,7 +224,7 @@ public class MinecraftProtocolHelper {
          * @return A callback run event group shutdown.
          * @since 1.12
          */
-        static ListPingCallback shutdown(@NotNull EventLoopGroup group) {
+        static @NotNull ListPingCallback shutdown(@NotNull EventLoopGroup group) {
             return run(group::shutdownGracefully);
         }
 
@@ -234,7 +235,7 @@ public class MinecraftProtocolHelper {
          * @return The build-in callback
          * @since 2.12
          */
-        static ListPingCallback run(Runnable runnable) {
+        static @NotNull ListPingCallback run(@NotNull Runnable runnable) {
             return (result, ms, err) -> runnable.run();
         }
 
@@ -245,7 +246,7 @@ public class MinecraftProtocolHelper {
          * @return The build-in callback.
          * @since 2.12
          */
-        default ListPingCallback before(@NotNull ListPingCallback before) {
+        default @NotNull ListPingCallback before(@NotNull ListPingCallback before) {
             return before.then(this);
         }
 
@@ -256,10 +257,19 @@ public class MinecraftProtocolHelper {
          * @return The build-in callback
          * @since 2.12
          */
-        default ListPingCallback then(@NotNull ListPingCallback then) {
+        default @NotNull ListPingCallback then(@NotNull ListPingCallback then) {
             return (result, ms, err) -> {
                 done(result, ms, err);
                 then.done(result, ms, err);
+            };
+        }
+
+        default @NotNull ListPingCallback once() {
+            AtomicReference<ListPingCallback> current = new AtomicReference<>(this);
+            return (result, ms, err) -> {
+                var current0 = current.get();
+                if (current0 == null) return;
+                if (current.compareAndSet(current0, null)) current0.done(result, ms, err);
             };
         }
     }
@@ -346,31 +356,45 @@ public class MinecraftProtocolHelper {
     /**
      * Fast ping server.
      *
-     * @param channel  The channel using. Must TPC protocol.
-     * @param address  The remote address
-     * @param port     The ping port.
-     * @param callback The callback for connection.
-     * @param ms       Need check delay?
-     * @param protocol Protocol using.
+     * @param channel   The channel using. Must TPC protocol.
+     * @param address   The remote address
+     * @param port      The ping port.
+     * @param callback0 The callback for connection.
+     * @param ms        Need check delay?
+     * @param protocol  Protocol using.
      */
     public static void ping(
             @NotNull Channel channel, @NotNull String address, int port,
             @NotNull ListPingCallback callback, boolean ms, int protocol) {
+        var callback0 = callback.once();
         if (channel instanceof DatagramChannel) {
             channel.close();
-            callback.done(null, 0, new IllegalAccessException("Only support TCP channel."));
+            callback0.done(null, 0, new IllegalAccessException("Only support TCP channel."));
             return;
         }
         channel.pipeline()
-                .addLast(new MinecraftPacketMessageEncoder())
-                .addLast(new MinecraftPacketMessageDecoder())
                 .addLast(new ChannelInboundHandlerAdapter() {
+                    private boolean exceptioned;
+
                     @Override
                     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+                        if (exceptioned) return;
+                        exceptioned = true;
                         ctx.channel().close();
-                        callback.done(null, 0, cause);
+                        callback0.done(null, 0, cause);
+                    }
+
+                    @Override
+                    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+                        if (exceptioned) {
+                            ctx.channel().close();
+                            return;
+                        }// No More READ.
+                        super.channelRead(ctx, msg);
                     }
                 })
+                .addLast(new MinecraftPacketMessageEncoder())
+                .addLast(new MinecraftPacketMessageDecoder())
                 .addLast(NettyHelper.createHooker(channel));
         PacketDataSerializer p = PacketDataSerializer.fromByteBuf(Unpooled.buffer(5000));
         p.writeVarInt(0);
@@ -386,7 +410,7 @@ public class MinecraftProtocolHelper {
                     if (f1.isSuccess()) {
                         NettyHelper.readMessage(channel, (NettyHelper.MessageCallback<ByteBuf>) (message, error) -> {
                             if (error != null) {
-                                callback.done(null, 0, error);
+                                callback0.done(null, 0, error);
                                 return;
                             }
                             PacketDataSerializer serializer = PacketDataSerializer.fromByteBuf(message);
@@ -403,22 +427,22 @@ public class MinecraftProtocolHelper {
                                     if (fx.isSuccess()) {
                                         NettyHelper.readMessage(channel, (NettyHelper.MessageCallback<ByteBuf>) (message1, error1) -> {
                                             long a = System.currentTimeMillis() - now;
-                                            callback.done(cp, a, error1);
+                                            callback0.done(cp, a, error1);
                                         });
                                     } else {
-                                        callback.done(cp, 0, fx.cause());
+                                        callback0.done(cp, 0, fx.cause());
                                     }
                                 });
                             } else {
-                                callback.done(des, 0, null);
+                                callback0.done(des, 0, null);
                             }
                         });
                     } else {
-                        callback.done(null, 0, f1.cause());
+                        callback0.done(null, 0, f1.cause());
                     }
                 });
             } else {
-                callback.done(null, 0, f.cause());
+                callback0.done(null, 0, f.cause());
             }
         });
     }
