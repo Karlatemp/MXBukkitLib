@@ -357,12 +357,20 @@ public class MinecraftProtocolHelper {
             @NotNull Channel channel, @NotNull String address, int port,
             @NotNull ListPingCallback callback, boolean ms, int protocol) {
         if (channel instanceof DatagramChannel) {
+            channel.close();
             callback.done(null, 0, new IllegalAccessException("Only support TCP channel."));
             return;
         }
         channel.pipeline()
                 .addLast(new MinecraftPacketMessageEncoder())
                 .addLast(new MinecraftPacketMessageDecoder())
+                .addLast(new ChannelInboundHandlerAdapter() {
+                    @Override
+                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+                        ctx.channel().close();
+                        callback.done(null, 0, cause);
+                    }
+                })
                 .addLast(NettyHelper.createHooker(channel));
         PacketDataSerializer p = PacketDataSerializer.fromByteBuf(Unpooled.buffer(5000));
         p.writeVarInt(0);
