@@ -364,12 +364,12 @@ public class MinecraftProtocolHelper {
     /**
      * Fast ping server.
      *
-     * @param channel   The channel using. Must TPC protocol.
-     * @param address   The remote address
-     * @param port      The ping port.
-     * @param callback0 The callback for connection.
-     * @param ms        Need check delay?
-     * @param protocol  Protocol using.
+     * @param channel  The channel using. Must TPC protocol.
+     * @param address  The remote address
+     * @param port     The ping port.
+     * @param callback The callback for connection.
+     * @param ms       Need check delay?
+     * @param protocol Protocol using.
      */
     public static void ping(
             @NotNull Channel channel, @NotNull String address, int port,
@@ -381,35 +381,55 @@ public class MinecraftProtocolHelper {
             return;
         }
         channel.pipeline()
+                .addLast(new MinecraftPacketMessageEncoder())
+                .addLast(new MinecraftPacketMessageDecoder())
                 .addLast(new ChannelInboundHandlerAdapter() {
-                    private boolean exceptioned;
+                    private int step;
+                    private ByteBuf motd;
+                    private long now;
 
                     @Override
                     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-                        if (exceptioned) return;
-                        exceptioned = true;
+                        callback0.done(motd, -1, cause);
                         ctx.channel().close();
-                        callback0.done(null, 0, cause);
                     }
 
                     @Override
                     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                        if (exceptioned) {
-                            ctx.channel().close();
+                        if (!(msg instanceof ByteBuf)) {
+                            super.channelRead(ctx, msg);
                             return;
-                        }// No More READ.
-                        super.channelRead(ctx, msg);
+                        }
+                        PacketDataSerializer serializer = PacketDataSerializer.fromByteBuf((ByteBuf) msg);
+                        if (step++ == 0) { // Motd
+                            serializer.readVarInt();
+                            motd = serializer.readBytes(serializer.readVarInt()).duplicate();
+                            if (ms) {
+                                PacketDataSerializer data = PacketDataSerializer.fromByteBuf(Unpooled.buffer(1 + Long.BYTES));
+                                data.writeVarInt(1);
+                                data.writeLong(now = System.currentTimeMillis());
+                                channel.writeAndFlush(data).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+                            } else {
+                                callback0.done(motd, -1, null);
+                                ctx.channel().close();
+                            }
+                        } else {
+                            callback0.done(motd, System.currentTimeMillis() - now, null);
+                            ctx.channel().close();
+                        }
                     }
-                })
-                .addLast(new MinecraftPacketMessageEncoder())
-                .addLast(new MinecraftPacketMessageDecoder())
-                .addLast(NettyHelper.createHooker(channel));
+                });
         PacketDataSerializer p = PacketDataSerializer.fromByteBuf(Unpooled.buffer(5000));
         p.writeVarInt(0);
         p.writeVarInt(protocol);
         p.writeString(address);
         p.writeShort(port);
         p.writeVarInt(1);
+        channel.writeAndFlush(p).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        PacketDataSerializer pw = PacketDataSerializer.fromByteBuf(Unpooled.buffer(1));
+        pw.writeVarInt(0);
+        channel.writeAndFlush(pw).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
+        /*
         NettyHelper.sendMessage(channel, p, f -> {
             if (f.isSuccess()) {
                 PacketDataSerializer pw = PacketDataSerializer.fromByteBuf(Unpooled.buffer(1));
@@ -453,6 +473,7 @@ public class MinecraftProtocolHelper {
                 callback0.done(null, 0, f.cause());
             }
         });
+         */
     }
 
     private static ByteBuf readNullTerminatedString(ByteBuf b) {
