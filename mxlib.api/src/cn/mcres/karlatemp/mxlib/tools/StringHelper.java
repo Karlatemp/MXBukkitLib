@@ -16,10 +16,7 @@ package cn.mcres.karlatemp.mxlib.tools;
  * and open the template in the editor.
  */
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Administrator
@@ -93,11 +90,12 @@ public class StringHelper {
     }
 
     public static String byteArrayToHexString(byte[] b) {
-        StringBuffer resultSb = new StringBuffer();
-        for (int i = 0; i < b.length; i++) {
-            resultSb.append(byteToHexString(b[i]));
+        var builder = new StringBuilder();
+        for (var byte_ : b) {
+            builder.append(hexDigit[(byte_ >> 4) & 0xF]);
+            builder.append(hexDigit[byte_ & 0xF]);
         }
-        return resultSb.toString();
+        return builder.toString();
     }
 
     public static String byteToHexString(byte b) {
