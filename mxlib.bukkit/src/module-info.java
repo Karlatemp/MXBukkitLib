@@ -14,7 +14,7 @@ open module mxlib.bukkit {
     exports cn.mcres.karlatemp.mxlib.module.translate;
     requires mxlib.api;
     requires mxlib.common.maven;
-    requires BungeeChatAPI;
+    // requires BungeeChatAPI;
     requires org.jetbrains.annotations;
     requires spigot.api;
     requires io.netty.transport;
@@ -27,5 +27,6 @@ open module mxlib.bukkit {
     requires org.objectweb.asm;
     requires mxlib.logging;
     requires mxlib.message;
+    requires bungeecord.chat;
 
 }

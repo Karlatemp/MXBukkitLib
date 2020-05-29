@@ -57,9 +57,9 @@ open module mxlib.api {
     requires io.netty.handler;
     requires io.netty.common;
     requires io.netty.transport.epoll;
-    requires BungeeChatAPI;
     requires java.naming;
     requires jdk.naming.dns;
     requires com.mojang.brigadier;
     requires mxlib.logging;
+    requires bungeecord.chat;
 }
