@@ -5,11 +5,11 @@
 
 package cn.mcres.karlatemp.mxlib.share;
 
+import cn.mcres.karlatemp.mxlib.MXBukkitLib;
 import cn.mcres.karlatemp.mxlib.impl.InternalClasses;
 import cn.mcres.karlatemp.mxlib.module.chat.RFT;
 import cn.mcres.karlatemp.mxlib.reflect.RMethod;
 import cn.mcres.karlatemp.mxlib.reflect.Reflect;
-import cn.mcres.karlatemp.mxlib.reflect.WrappedClassImplements;
 import cn.mcres.karlatemp.mxlib.tools.MinecraftKey;
 import cn.mcres.karlatemp.mxlib.tools.Toolkit;
 import cn.mcres.karlatemp.mxlib.tools.security.AccessToolkit;
@@ -19,9 +19,7 @@ import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.plugin.java.JavaPluginLoader;
 import org.bukkit.plugin.messaging.ChannelNameTooLongException;
 import org.bukkit.plugin.messaging.Messenger;
 import org.jetbrains.annotations.Contract;
@@ -30,7 +28,6 @@ import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -245,7 +242,9 @@ public class BukkitToolkit {
         }
         from += 2;// Skip class BukkitToolkit and getCallerPlugin(int)'s caller.
         Class[] traces = Toolkit.StackTrace.getClassContext();
+        MXBukkitLib.debug("[BukkitToolkit] Scanning caller plugin...");
         for (; from < traces.length; from++) {
+            MXBukkitLib.debug("[BukkitToolkit] Trace - " + from + "\t- " + traces[from]);
             Plugin p = getPluginByClass(traces[from]);
             if (p != null) return p;
         }

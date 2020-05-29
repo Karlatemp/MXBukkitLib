@@ -15,7 +15,6 @@ import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -26,7 +25,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 public class DefaultCommand implements ICommand {
     private final String name;
@@ -233,7 +231,9 @@ public class DefaultCommand implements ICommand {
                     spec.putAttribute(SPEC_Annotation, ann);
                     spec.putAttribute(SPEC_Slot, new AtomicInteger(i));
                     s[i] = (sender, ags, un_parsed, full, fullCommandArgument, label_z) -> {
-                        return ags.value(spec);
+                        var value = ags.value(spec);
+                        if (value == null) return getDefault(type);
+                        return value;
                     };
                     continue next;
                 }
@@ -366,6 +366,7 @@ public class DefaultCommand implements ICommand {
         }
         try {
             // System.out.println(Arrays.toString(args));
+            // System.out.println(method);
             method.invoke(self, args);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
