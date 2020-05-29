@@ -353,18 +353,22 @@ public abstract class Reflection {
         ConstructorAccessor = x;
         AccessToolkit.setup();
         MethodHandles.Lookup lk;
+        Exception e0 = null;
         try {
             try {
                 final Field implLookup = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
                 AccessToolkit.setAccessible(implLookup, true);
                 lk = (MethodHandles.Lookup) implLookup.get(null);
             } catch (Exception err) {
+                e0 = err;
                 final Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
                 AccessToolkit.setAccessible(constructor, true);
                 lk = constructor.newInstance(Reflection.class, -1);
             }
         } catch (Exception e) {
-            lk = MethodHandles.lookup();
+            var err = new ExceptionInInitializerError(e0);
+            err.addSuppressed(e);
+            throw err;
         }
         root = lk;
         try {
