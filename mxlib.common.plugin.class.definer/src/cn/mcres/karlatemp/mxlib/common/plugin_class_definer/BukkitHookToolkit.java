@@ -154,7 +154,7 @@ public class BukkitHookToolkit {
         private static final ILogger MLG;
 
         static {
-            if(Boolean.getBoolean("mxlib.disable.definer")){
+            if(!Boolean.getBoolean("mxlib.enable.definer")){
                 throw new ExceptionInInitializerError("Module disabled");
             }
             var ML = new AbstractBaseLogger(new MessageFactoryImpl()) {

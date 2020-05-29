@@ -5,11 +5,9 @@
 
 package cn.mcres.karlatemp.mxlib.tools;
 
-import cn.mcres.karlatemp.mxlib.MXLibBootProvider;
 import cn.mcres.karlatemp.mxlib.cmd.ICommand;
 import cn.mcres.karlatemp.mxlib.cmd.ICommands;
 import cn.mcres.karlatemp.mxlib.internal.ClassLoaderGetter;
-import cn.mcres.karlatemp.mxlib.internal.UFRF;
 import cn.mcres.karlatemp.mxlib.internal.UnsafeInstaller;
 import cn.mcres.karlatemp.mxlib.tools.security.AccessToolkit;
 import cn.mcres.karlatemp.mxlib.util.FilesIterator;
@@ -18,8 +16,6 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
 
 import java.io.*;
 import java.lang.invoke.MethodHandle;
@@ -767,18 +763,24 @@ public class Toolkit {
             }
             ConstructorAccessor = x;
             MethodHandles.Lookup lk;
-            try {
+            {
+                Exception e0 = null;
                 try {
-                    final Field implLookup = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
-                    AccessToolkit.setAccessible(implLookup, true);
-                    lk = (MethodHandles.Lookup) implLookup.get(null);
-                } catch (Exception err) {
-                    final Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
-                    AccessToolkit.setAccessible(constructor, true);
-                    lk = constructor.newInstance(Toolkit.class, -1);
+                    try {
+                        final Field implLookup = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
+                        AccessToolkit.setAccessible(implLookup, true);
+                        lk = (MethodHandles.Lookup) implLookup.get(null);
+                    } catch (Exception err) {
+                        e0 = err;
+                        final Constructor<MethodHandles.Lookup> constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
+                        AccessToolkit.setAccessible(constructor, true);
+                        lk = constructor.newInstance(Toolkit.class, -1);
+                    }
+                } catch (Exception e) {
+                    var err = new ExceptionInInitializerError(e0);
+                    err.addSuppressed(e);
+                    throw err;
                 }
-            } catch (Exception e) {
-                lk = MethodHandles.lookup();
             }
             root = lk;
             ref = UnsafeInstaller.installReflection();
