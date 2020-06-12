@@ -11,7 +11,7 @@ import java.lang.management.ThreadInfo;
 /**
  * 带Bukkit颜色支持的信息工厂
  */
-public class MessageFactoryBukkitCommandSender extends MessageFactoryAnsi {
+public class MessageFactoryBukkitCommandSender extends MessageFactoryChatColor {
     private final IMessageFactory parent;
 
     public MessageFactoryBukkitCommandSender(IMessageFactory parent) {

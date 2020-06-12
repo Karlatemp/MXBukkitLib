@@ -10,74 +10,73 @@ package cn.mcres.karlatemp.mxlib.logging;
 import java.lang.management.LockInfo;
 import java.lang.management.MonitorInfo;
 import java.lang.management.ThreadInfo;
-import java.nio.CharBuffer;
 import java.util.Arrays;
 
 /**
  * 带ANSI支持的日志信息工厂
  */
 @SuppressWarnings("Duplicates")
-public class MessageFactoryAnsi extends MessageFactoryImpl {
+public class MessageFactoryChatColor extends MessageFactoryImpl {
     @Override
     public String getStackTraceElementMessage$return(StackTraceElement stack, String clazz, String zip, String version) {
         StringBuilder sb = new StringBuilder(70);
-        sb.append("\t" + Ansi._6 + "at ");
+        sb.append("\t\u00a76at ");
 
         boolean $$ = false;
         final String classLoaderName = getClassLoaderName(stack);
         if (classLoaderName != null && !classLoaderName.isEmpty()) {
-            sb.append(Ansi._2).append(classLoaderName);
+            sb.append("§2").append(classLoaderName);
             $$ = true;
         }
         final String moduleName = getModuleName(stack);
         if (moduleName != null && !moduleName.isEmpty()) {
-            sb.append(Ansi._1).append(moduleName);
+            sb.append("§1").append(moduleName);
             final String version1 = getModuleVersion(stack);
             if (version1 != null && !version1.isEmpty()) {
-                sb.append(Ansi.RESET + "@" + Ansi._6).append(version1);
+                sb.append("§r@§6").append(version1);
             }
             $$ = true;
         }
         if ($$) {
-            sb.append(Ansi.RESET + "/");
+            sb.append("§r/");
         }
 
 
-        sb.append(Ansi._C).append(clazz)
-                .append(Ansi.RESET + "." + Ansi._E).append(stack.getMethodName()).append(Ansi.RESET + "(");
+        sb.append("\u00a7c").append(clazz)
+                .append("\u00a7r.\u00a7e").append(stack.getMethodName()).append("\u00a7r(");
         if (stack.isNativeMethod()) {
-            sb.append(Ansi._D + "Native Method");
+            sb.append("\u00a7dNative Method");
         } else {
             String fname = stack.getFileName();
             if (fname == null) {
-                sb.append(Ansi._7 + "Unknown Source");
+                sb.append("\u00a77Unknown Source");
             } else {
-                sb.append(Ansi._2).append(fname);
+                sb.append("\u00a72").append(fname);
                 int num = stack.getLineNumber();
                 if (num > -1) {
-                    sb.append(Ansi._F + ":" + Ansi._6).append(num);
+                    sb.append("\u00a7f:\u00a76").append(num);
                 }
             }
         }
-        sb.append(Ansi.RESET + ") [" + Ansi._B);
+        sb.append("\u00a7r) [\u00a7b");
         if (zip == null) {
             sb.append('?');
         } else {
             sb.append(zip);
         }
-        sb.append(Ansi._6 + ":" + Ansi._D);
+        sb.append("\u00a76:\u00a7d");
         if (version == null) {
             sb.append('?');
         } else {
             sb.append(version);
         }
-        sb.append(Ansi.RESET + "]");
+        sb.append("\u00a7r]");
         return sb.toString();
     }
 
     @Override
     public String dump(LockInfo lockInfo) {
-        return Ansi._2 + lockInfo.getClassName() + Ansi._6 + "@" + Ansi._B
+        return "\u00a72" + lockInfo.getClassName() + "\u00a76@\u00a7b"
                 + lockInfo.getIdentityHashCode();
     }
 
@@ -86,22 +85,22 @@ public class MessageFactoryAnsi extends MessageFactoryImpl {
         String p = "";
         switch (st) {
             case BLOCKED:
-                p = Ansi._C;
+                p = "\u00a7c";
                 break;
             case NEW:
-                p = Ansi._6;
+                p = "\u00a76";
                 break;
             case RUNNABLE:
-                p = Ansi._A;
+                p = "\u00a7a";
                 break;
             case TERMINATED:
-                p = Ansi._D;
+                p = "\u00a7d";
                 break;
             case TIMED_WAITING:
-                p = Ansi._7;
+                p = "\u00a77";
                 break;
             case WAITING:
-                p = Ansi._4;
+                p = "\u00a74";
                 break;
         }
         return p + st;
@@ -111,21 +110,21 @@ public class MessageFactoryAnsi extends MessageFactoryImpl {
     public String dump(ThreadInfo inf, boolean fullFrames) {
         final LockInfo lockInfo = inf.getLockInfo();
         final Thread.State threadState = inf.getThreadState();
-        StringBuilder sb = new StringBuilder(Ansi._9 + "Thread Info: " + Ansi._B)
-                .append(inf.getThreadName()).append(Ansi.RESET + "[" + Ansi._B + "id" + Ansi.RESET + "=" + Ansi._5)
-                .append(inf.getThreadId()).append(Ansi.RESET + "] ")
+        StringBuilder sb = new StringBuilder("\u00a79Thread Info: \u00a7b")
+                .append(inf.getThreadName()).append("\u00a7r[\u00a7bid\u00a7r=\u00a75")
+                .append(inf.getThreadId()).append("\u00a7r] ")
                 .append(colored(threadState))
-                .append(Ansi._9 + " BlockCount" + Ansi.RESET + "[" + Ansi._5).append(inf.getBlockedCount())
-                .append(Ansi.RESET + "] BlockTime" + Ansi.RESET + "[" + Ansi._5).append(inf.getBlockedTime()).append(Ansi.RESET + "]");
+                .append("\u00a79 BlockCount\u00a7r[\u00a75").append(inf.getBlockedCount())
+                .append("\u00a7r] BlockTime\u00a7r[\u00a75").append(inf.getBlockedTime()).append("\u00a7r]");
         if (inf.getLockName() != null) {
-            sb.append(Ansi._9 + " lock on " + Ansi._B).append(inf.getLockName());
+            sb.append("\u00a79 lock on \u00a7b").append(inf.getLockName());
         }
         if (inf.getLockOwnerName() != null) {
-            sb.append(Ansi._9 + " owned by " + Ansi._B).append(inf.getLockOwnerName())
-                    .append(Ansi.RESET + "[" + Ansi._B + "id" + Ansi.RESET + "=" + Ansi._5).append(inf.getLockOwnerId())
-                    .append(Ansi.RESET);
+            sb.append("\u00a79 owned by \u00a7b").append(inf.getLockOwnerName())
+                    .append("\u00a7r[\u00a7bid\u00a7r=\u00a75").append(inf.getLockOwnerId())
+                    .append("\u00a7r");
         }
-        sb.append(Ansi._9);
+        sb.append("\u00a79");
         if (inf.isSuspended()) {
             sb.append(" (suspended)");
         }
@@ -170,27 +169,19 @@ public class MessageFactoryAnsi extends MessageFactoryImpl {
 
         LockInfo[] locks = inf.getLockedSynchronizers();
         if (locks.length > 0) {
-            sb.append("\n\t" + Ansi._9 + "Number of locked synchronizers = ").append(locks.length);
+            sb.append("\n\t\u00a79Number of locked synchronizers = \u00a79").append(locks.length);
             sb.append('\n');
             for (LockInfo li : locks) {
                 sb.append("\t- ").append(dump(li));
                 sb.append('\n');
             }
         }
-        int len = sb.length();
-        while (len > 0) {
-            char c = sb.charAt(len - 1);
-            if (c >= ' ') {
-                break;
-            } else len--;
-        }
-        sb.setLength(len);
-        return sb.toString();
+        return sb.toString().trim();
     }
 
     @Override
     public String CIRCULAR_REFERENCE(Throwable throwable) {
-        return "\t" + Ansi._6 + "[CIRCULAR REFERENCE:" + dump(throwable) + Ansi._6 + "]";
+        return "\t\u00a76[CIRCULAR REFERENCE:" + dump(throwable) + "\u00a76]";
     }
 
     @Override
@@ -198,56 +189,39 @@ public class MessageFactoryAnsi extends MessageFactoryImpl {
         String s = thr.getClass().getName();
         String message = thr.getLocalizedMessage();
         //"\u00a7c%s\u00a7b: \u00a7e%s"
-        return (message != null) ? (s + Ansi._B + ": " + Ansi._E + message) : s;
+        return (message != null) ? (s + "\u00a7b: \u00a7e" + message) : s;
     }
 
     @Override
     public String excpre(String pre) {
-        int s = -1, e = -1;
-        CharBuffer buffer = CharBuffer.wrap(pre.toCharArray());
+        char end = 0;
+        int lg = pre.length();
         // \u4E00-\u9FFF
-        int length = 0;
-        while (buffer.hasRemaining()) {
-            char next = buffer.get();
-            if (next == '\033') {
-                if (buffer.hasRemaining()) {
-                    int pos = buffer.position();
-                    if (buffer.get() != '[') {
-                        buffer.position(pos);
-                        continue;
-                    }
-                    s = pos - 1;
-                    while (buffer.hasRemaining()) {
-                        if (buffer.get() == 'm') {
-                            e = buffer.position();
-                            break;
-                        }
-                    }
-                } else {
-                    length++;
+        char[] cs = (pre.toCharArray());
+        fe:
+        for (int i = 0; i < cs.length; i++) {
+            char c = cs[i];
+            switch (c) {
+                case '\u00a7': {
+                    end = cs[++i];
+                    lg -= 2;
+                    continue fe;
                 }
-            } else {
-                length++;
-                if (next >= '\u4E00' && next <= '\u9FFF')
-                    length++;
+            }
+            if (c >= 0x4E00 && c <= 0x9FFF) {
+                lg += 1;
             }
         }
-        boolean hasAnsi = e > s;
-        int begin = length;
-        if (hasAnsi) {
-            length += e - s;
-        }
-        char[] temp = new char[length];
-        Arrays.fill(temp, ' ');
-        if (hasAnsi) {
-            char[] array = buffer.array();
-            System.arraycopy(array, s, temp, begin, begin - length);
-        }
-        return new String(temp);
+        String b;
+        if (end != 0) b = "\u00a7" + end;
+        else b = "";
+        char[] c = new char[lg];
+        Arrays.fill(c, ' ');
+        return new String(c) + b;
     }
 
     @Override
     public String toConsole(String cons) {
-        return cons + Ansi.RESET;
+        return Ansi.ec(cons) + Ansi.RESET;
     }
 }
