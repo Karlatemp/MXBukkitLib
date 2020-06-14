@@ -369,7 +369,7 @@ public class JarEdit {
         {
             String factoryName;
             {
-                String package0 = "cn/mcres/karlatemp/mxlib/Java9ToJava8/" + UUID.randomUUID().toString().replace('-', '_');
+                String package0 = "cn/mcres/karlatemp/mxlib/Java9ToJava8/vx" + UUID.randomUUID().toString().replace('-', '_');
 
                 factoryName = package0 + "/StringFactory"; // Will add mapping here.
             }
