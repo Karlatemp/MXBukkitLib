@@ -128,7 +128,7 @@ public class AccessToolkit {
                 return defineClass(null, b, 0, b.length, null);
             }
         };
-        // JDK Proxy System will help our open package access.
+        // JDK Proxy System will help us open package access.
         var proxy = Proxy.newProxyInstance(loader, new Class[]{Reflection.MethodAccessor}, (proxy_, method, args) -> null);
         ClassReader reader;
         try (var source = AccessToolkit.class.getResourceAsStream("AccessToolkit$Accessor.class")) {
