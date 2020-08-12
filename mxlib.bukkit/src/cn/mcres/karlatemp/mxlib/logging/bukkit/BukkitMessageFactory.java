@@ -27,6 +27,7 @@ public class BukkitMessageFactory extends MessageFactoryAnsi {
         String v = super.getStackTraceElementMessage$version(c, url, stack);
         if (v == null) {
             ClassLoader loader = Toolkit.Reflection.getClassLoader(c);
+            if (loader == null) return null;
             if (loader.getClass().getName().equalsIgnoreCase(
                     "org.bukkit.plugin.java.PluginClassLoader")) {
                 JavaPlugin plugin = (JavaPlugin) get().invoke(loader);
